@@ -7,8 +7,8 @@ import { topics } from "../data/topics";
 
 import WaitingPhase from "../components/phases/WaitingPhase";
 import ChooseTopicPhase from "../components/phases/ChooseTopicPhase";
-import DealCardsPhase from "../components/phases/DealCardsPhase";
 import PlaceCardsPhase from "../components/phases/PlaceCardsPhase";
+import RevealCardsPhase from "../components/phases/RevealCardsPhase";
 
 const Room = () => {
   const navigate = useNavigate();
@@ -149,12 +149,12 @@ const Room = () => {
     );
   }
 
-  if (phase === "dealCards") {
-    return <DealCardsPhase />;
-  }
-
   if (phase === "placeCards") {
     return <PlaceCardsPhase roomId={roomId!} nickname={nickname} />;
+  }
+
+  if (phase === "revealCards") {
+    return <RevealCardsPhase roomId={roomId!} nickname={nickname} />;
   }
 
   return <div>不明なフェーズ: {phase}</div>;
