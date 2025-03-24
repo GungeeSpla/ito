@@ -14,9 +14,9 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
   const [players, setPlayers] = useState<Record<string, boolean>>({});
   const [hasPlaced, setHasPlaced] = useState(false);
   const [insertIndex, setInsertIndex] = useState<number>(0);
+  const [isHost, setIsHost] = useState(false);
 
   useEffect(() => {
-    // 自分のカード取得
     const cardRef = ref(db, `rooms/${roomId}/cards/${nickname}`);
     get(cardRef).then((snap) => {
       if (snap.exists()) {
@@ -26,17 +26,15 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
       }
     });
 
-    // 伏せたカードの順番
     const orderRef = ref(db, `rooms/${roomId}/cardOrder`);
     onValue(orderRef, (snap) => {
       const data = snap.val();
       if (Array.isArray(data)) {
         setPlacedCards(data);
-        setInsertIndex(data.length); // デフォルトで一番右
+        setInsertIndex(data.length); // デフォルトは一番右
       }
     });
 
-    // プレイヤー情報（オブジェクト形式）
     const playersRef = ref(db, `rooms/${roomId}/players`);
     onValue(playersRef, (snap) => {
       const data = snap.val();
@@ -44,9 +42,15 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
         setPlayers(data);
       }
     });
+
+    const hostRef = ref(db, `rooms/${roomId}/host`);
+    get(hostRef).then((snap) => {
+      if (snap.exists() && snap.val() === nickname) {
+        setIsHost(true);
+      }
+    });
   }, [roomId, nickname]);
 
-  // カードを置く処理（トランザクションで競合防止）
   const handlePlaceCard = async () => {
     if (placedCards.includes(nickname)) return;
 
@@ -60,20 +64,15 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
     setHasPlaced(true);
   };
 
-  // 全員置いたら次フェーズへ（revealCards）
-  useEffect(() => {
-    const playerCount = Object.keys(players).length;
-    if (playerCount > 0 && placedCards.length === playerCount) {
-      const phaseRef = ref(db, `rooms/${roomId}/phase`);
-      const updatedRef = ref(db, `rooms/${roomId}/lastUpdated`);
+  const proceedToReveal = async () => {
+    const phaseRef = ref(db, `rooms/${roomId}/phase`);
+    const updatedRef = ref(db, `rooms/${roomId}/lastUpdated`);
+    await set(phaseRef, "revealCards");
+    await set(updatedRef, Date.now());
+  };
 
-      set(phaseRef, "revealCards")
-        .then(() => set(updatedRef, Date.now()))
-        .catch((error) => {
-          console.error("フェーズ更新に失敗しました:", error);
-        });
-    }
-  }, [placedCards, players, roomId]);
+  const allPlaced = Object.keys(players).length > 0 &&
+    placedCards.length === Object.keys(players).length;
 
   return (
     <div>
@@ -100,8 +99,8 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
                 {i === 0
                   ? "← 一番左（0のすぐ右）"
                   : i === placedCards.length
-                  ? "→ 一番右"
-                  : `${i} 番目に置く`}
+                    ? "→ 一番右"
+                    : `${i} 番目に置く`}
               </option>
             ))}
           </select>
@@ -112,6 +111,26 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
       )}
 
       {hasPlaced && <p>カードを置きました！他の人の操作を待ってね。</p>}
+
+      <div className="cards-container" style={{ marginTop: "20px" }}>
+        <div className="card">
+          <p>基準</p>
+          <strong>0</strong>
+        </div>
+
+        {placedCards.map((name, i) => (
+          <div key={i} className="card hidden">
+            <p>{name}</p>
+            <strong>?</strong>
+          </div>
+        ))}
+      </div>
+
+      {isHost && allPlaced && (
+        <div style={{ marginTop: "20px" }}>
+          <button onClick={proceedToReveal}>全員出し終わったのでめくりフェーズへ！</button>
+        </div>
+      )}
     </div>
   );
 };
