@@ -12,6 +12,8 @@ import DealCardsPhase from "../components/phases/DealCardsPhase";
 import PlaceCardsPhase from "../components/phases/PlaceCardsPhase";
 import RevealCardsPhase from "../components/phases/RevealCardsPhase";
 
+import { useDealCards } from "../hooks/useDealCards";
+
 const Room = () => {
   const navigate = useNavigate();
   const { roomId } = useParams<{ roomId: string }>();
@@ -76,22 +78,7 @@ const Room = () => {
   }, [roomId, nickname, navigate]);
 
   // カード配布（dealCards フェーズ）
-  useEffect(() => {
-    if (phase === "dealCards" && isHost && Object.keys(players).length > 0) {
-      const availableNumbers = Array.from({ length: 100 }, (_, i) => i + 1)
-        .sort(() => 0.5 - Math.random())
-        .slice(0, Object.keys(players).length);
-
-      const cards = Object.keys(players).reduce((acc, player, idx) => {
-        acc[player] = { value: availableNumbers[idx], revealed: false };
-        return acc;
-      }, {} as Record<string, { value: number; revealed: boolean }>);
-
-      const roomRef = ref(db, `rooms/${roomId}`);
-      set(child(roomRef, "cards"), cards);
-      set(child(roomRef, "phase"), "placeCards");
-    }
-  }, [phase, isHost, players, roomId]);
+  useDealCards({ phase, isHost, players, roomId: roomId! });
 
   const addPlayer = () => {
     if (!newNickname.trim()) return alert("ニックネームを入力してね！");
