@@ -4,9 +4,11 @@ import { ref, get, set, onValue, child } from "firebase/database";
 import { db } from "../firebase";
 import { Topic } from "../types/Topic";
 import { topics } from "../data/topics";
+import { deleteOldRooms } from "../utils/deleteOldRooms";
 
 import WaitingPhase from "../components/phases/WaitingPhase";
 import ChooseTopicPhase from "../components/phases/ChooseTopicPhase";
+import DealCardsPhase from "../components/phases/DealCardsPhase";
 import PlaceCardsPhase from "../components/phases/PlaceCardsPhase";
 import RevealCardsPhase from "../components/phases/RevealCardsPhase";
 
@@ -27,6 +29,8 @@ const Room = () => {
   const alreadyJoined = players.includes(nickname);
 
   useEffect(() => {
+    deleteOldRooms();
+    
     if (!roomId) {
       navigate("/");
       return;
@@ -147,6 +151,10 @@ const Room = () => {
         chooseTopic={chooseTopic}
       />
     );
+  }
+
+  if (phase === "dealCards") {
+    return <DealCardsPhase roomId={roomId!} nickname={nickname} />;
   }
 
   if (phase === "placeCards") {

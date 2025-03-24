@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ref, get, set, onValue } from "firebase/database";
 import { db } from "../../firebase";
+import "../Cards.scss";
 
 interface Props {
   roomId: string;
@@ -53,7 +54,9 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
   useEffect(() => {
     if (players.length > 0 && placedCards.length === players.length) {
       const phaseRef = ref(db, `rooms/${roomId}/phase`);
+      const updatedRef = ref(db, `rooms/${roomId}/lastUpdated`);
       set(phaseRef, "revealCards");
+      set(updatedRef, Date.now());
     }
   }, [placedCards, players, roomId]);
 
@@ -61,7 +64,10 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
     <div>
       <h2>カードを伏せて置こう！</h2>
       {myCard !== null ? (
-        <p>あなたのカード番号：<strong>{myCard}</strong></p>
+        <div className="card">
+          <p>あなたのカード番号：</p>
+          <strong>{myCard}</strong>
+        </div>
       ) : (
         <p>カード取得中...</p>
       )}
