@@ -13,10 +13,9 @@ export const deleteOldRooms = async () => {
   const promises: Promise<void>[] = [];
 
   Object.entries(rooms).forEach(([roomId, roomData]: any) => {
-    const updated = roomData.lastUpdated ?? 0;
-    const isOld = now - updated > oneDay;
+    const updated = roomData.lastUpdated;
 
-    if (isOld) {
+    if (updated && now - updated > oneDay) {
       console.log(`🧹 削除対象: ${roomId}`);
       promises.push(remove(ref(db, `rooms/${roomId}`)));
     }

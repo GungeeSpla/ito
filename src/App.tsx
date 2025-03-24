@@ -20,16 +20,19 @@ function App() {
 
     const roomId = generateRoomId();
 
-    // ① Firebaseにルームを作成（ホストをプレイヤーとして含める）
+    // 🔄 Firebaseにルームを作成（プレイヤーをオブジェクトで管理）
     await set(ref(db, `rooms/${roomId}`), {
       host: nickname,
-      players: [nickname],
+      players: {
+        [nickname]: true,
+      },
+      phase: "waiting",
     });
 
-    // ② ニックネームを localStorage に保存（Room.tsx 側で取り出す）
+    // 🧠 ローカルにニックネーム保存
     localStorage.setItem("nickname", nickname);
 
-    // ③ ルームページへ遷移（state ではなく URL だけ渡す）
+    // 🚪ルームへ遷移
     navigate(`/room/${roomId}`);
   };
 

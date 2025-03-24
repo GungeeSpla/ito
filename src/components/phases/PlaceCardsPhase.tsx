@@ -11,7 +11,7 @@ interface Props {
 const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
   const [myCard, setMyCard] = useState<number | null>(null);
   const [placedCards, setPlacedCards] = useState<string[]>([]);
-  const [players, setPlayers] = useState<string[]>([]);
+  const [players, setPlayers] = useState<Record<string, boolean>>({});
   const [hasPlaced, setHasPlaced] = useState(false);
   const [insertIndex, setInsertIndex] = useState<number>(0);
 
@@ -37,22 +37,26 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
     const playersRef = ref(db, `rooms/${roomId}/players`);
     onValue(playersRef, (snap) => {
       const data = snap.val();
-      if (Array.isArray(data)) setPlayers(data);
+      if (typeof data === "object" && data !== null) {
+        setPlayers(data);
+      }
     });
   }, [roomId, nickname]);
 
   const handlePlaceCard = async () => {
     if (placedCards.includes(nickname)) return;
 
-    const cardRef = ref(db, `rooms/${roomId}/cardOrder`);
     const newOrder = [...placedCards];
     newOrder.splice(insertIndex, 0, nickname);
+
+    const cardRef = ref(db, `rooms/${roomId}/cardOrder`);
     await set(cardRef, newOrder);
     setHasPlaced(true);
   };
 
   useEffect(() => {
-    if (players.length > 0 && placedCards.length === players.length) {
+    const playerCount = Object.keys(players).length;
+    if (playerCount > 0 && placedCards.length === playerCount) {
       const phaseRef = ref(db, `rooms/${roomId}/phase`);
       const updatedRef = ref(db, `rooms/${roomId}/lastUpdated`);
       set(phaseRef, "revealCards");

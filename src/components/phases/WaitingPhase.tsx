@@ -2,9 +2,9 @@ import React from "react";
 
 interface WaitingPhaseProps {
   roomId: string;
-  players: string[];
+  players: Record<string, boolean>;
   nickname: string;
-  isHost: boolean;
+  host: string;
   alreadyJoined: boolean;
   newNickname: string;
   setNewNickname: (name: string) => void;
@@ -18,7 +18,7 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
   roomId,
   players,
   nickname,
-  isHost,
+  host,
   alreadyJoined,
   newNickname,
   setNewNickname,
@@ -32,11 +32,11 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
       <h1>ルームID: {roomId}</h1>
       <h2>参加者一覧:</h2>
       <ul>
-        {players.map((player, i) => (
-          <li key={i}>
+        {Object.keys(players).map((player) => (
+          <li key={player}>
             {player}
             {player === nickname && "（あなた）"}
-            {player === players[0] && <span style={{ color: "red" }}>（ホスト）</span>}
+            {player === host && <span style={{ color: "red" }}>（ホスト）</span>}
           </li>
         ))}
       </ul>
@@ -55,7 +55,7 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
         <p>あなたはこのルームに参加しています</p>
       )}
 
-      {isHost && (
+      {nickname === host && (
         <>
           <label>お題セットを選んでね：</label>
           <select
@@ -66,7 +66,11 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
             <option value="rainbow">レインボー</option>
             <option value="classic">クラシック</option>
           </select>
-          {players.length > 1 && <button onClick={startGame}>ゲーム開始</button>}
+          {Object.keys(players).length > 1 && (
+            <button onClick={startGame} style={{ marginLeft: "10px" }}>
+              ゲーム開始
+            </button>
+          )}
         </>
       )}
     </div>

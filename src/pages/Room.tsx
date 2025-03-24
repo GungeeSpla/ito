@@ -18,19 +18,20 @@ const Room = () => {
   const storedNickname = localStorage.getItem("nickname") || "";
   const [nickname, setNickname] = useState(storedNickname);
   const [newNickname, setNewNickname] = useState("");
-  const [players, setPlayers] = useState<string[]>([]);
-  const [isHost, setIsHost] = useState(false);
+  const [players, setPlayers] = useState<Record<string, boolean>>({});
+  const [host, setHost] = useState("");
   const [loading, setLoading] = useState(true);
   const [phase, setPhase] = useState("waiting");
   const [topicOptions, setTopicOptions] = useState<Topic[]>([]);
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
   const [selectedSet, setSelectedSet] = useState<"normal" | "rainbow" | "classic">("normal");
 
-  const alreadyJoined = players.includes(nickname);
+  const alreadyJoined = !!players[nickname];
+  const isHost = nickname === host;
 
   useEffect(() => {
     deleteOldRooms();
-    
+
     if (!roomId) {
       navigate("/");
       return;
@@ -45,7 +46,7 @@ const Room = () => {
       }
 
       const room = snap.val();
-      setIsHost(room.host === nickname);
+      setHost(room.host || "");
       setPhase(room.phase || "waiting");
     });
 
@@ -57,7 +58,10 @@ const Room = () => {
     });
     const unsub4 = onValue(child(roomRef, "players"), (snap) => {
       const data = snap.val();
-      if (Array.isArray(data)) setPlayers(data);
+      if (data) setPlayers(data);
+    });
+    const unsub5 = onValue(child(roomRef, "host"), (snap) => {
+      if (snap.exists()) setHost(snap.val());
     });
 
     setLoading(false);
@@ -67,20 +71,21 @@ const Room = () => {
       unsub2();
       unsub3();
       unsub4();
+      unsub5();
     };
   }, [roomId, nickname, navigate]);
 
-  // 🔽 カードを配る処理（フェーズ: dealCards）
+  // カード配布（dealCards フェーズ）
   useEffect(() => {
-    if (phase === "dealCards" && isHost && players.length > 0) {
+    if (phase === "dealCards" && isHost && Object.keys(players).length > 0) {
       const availableNumbers = Array.from({ length: 100 }, (_, i) => i + 1)
         .sort(() => 0.5 - Math.random())
-        .slice(0, players.length);
+        .slice(0, Object.keys(players).length);
 
-      const cards = players.reduce((acc, player, idx) => {
-        acc[player] = availableNumbers[idx];
+      const cards = Object.keys(players).reduce((acc, player, idx) => {
+        acc[player] = { value: availableNumbers[idx], revealed: false };
         return acc;
-      }, {} as Record<string, number>);
+      }, {} as Record<string, { value: number; revealed: boolean }>);
 
       const roomRef = ref(db, `rooms/${roomId}`);
       set(child(roomRef, "cards"), cards);
@@ -90,13 +95,17 @@ const Room = () => {
 
   const addPlayer = () => {
     if (!newNickname.trim()) return alert("ニックネームを入力してね！");
-    if (players.includes(newNickname)) return alert("この名前は使われています！");
+    if (players[newNickname]) return alert("この名前は使われています！");
 
-    const updatedPlayers = [...players, newNickname];
+    const updatedPlayers = {
+      ...players,
+      [newNickname]: true,
+    };
+
     const roomRef = ref(db, `rooms/${roomId}`);
 
     set(roomRef, {
-      host: players[0] || newNickname,
+      host: host || newNickname,
       players: updatedPlayers,
       phase: "waiting",
     }).then(() => {
@@ -131,7 +140,7 @@ const Room = () => {
         roomId={roomId!}
         players={players}
         nickname={nickname}
-        isHost={isHost}
+        host={host}
         alreadyJoined={alreadyJoined}
         newNickname={newNickname}
         setNewNickname={setNewNickname}

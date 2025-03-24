@@ -62,22 +62,31 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
     setResult(isSorted ? "success" : "fail");
   }, [cardOrder, cards]);
 
+  // カードをめくる
   const revealCard = async (name: string) => {
     const cardRef = ref(db, `rooms/${roomId}/cards/${name}`);
     const snap = await get(cardRef);
     if (snap.exists()) {
       const prev = snap.val();
-      await set(cardRef, { ...prev, revealed: true });
+      const value = typeof prev === "object" ? prev.value : prev;
+      await set(cardRef, { value, revealed: true });
     }
   };
 
+  // 次のゲームへ
   const nextGame = async () => {
     const roomRef = ref(db, `rooms/${roomId}`);
+    const players = Object.keys(cards);
+
     await set(roomRef, {
       host: nickname,
-      players: Object.keys(cards),
+      players: players.reduce((obj, name) => {
+        obj[name] = true;
+        return obj;
+      }, {} as Record<string, boolean>),
       phase: "waiting",
     });
+
     await set(ref(db, `rooms/${roomId}/lastUpdated`), Date.now());
   };
 
