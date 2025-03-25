@@ -1,13 +1,31 @@
 import React from "react";
-import { Outlet } from "react-router-dom";
-import { ExternalLink } from "lucide-react";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { ExternalLink, Home } from "lucide-react";
 
 const Layout: React.FC = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleHomeClick = () => {
+    const isInRoom = location.pathname.startsWith("/room");
+    if (isInRoom) {
+      const confirmLeave = window.confirm("本当にトップに戻りますか？ルームから退出します。");
+      if (!confirmLeave) return;
+    }
+    navigate("/");
+  };
+
   return (
     <div className="w-screen h-screen flex flex-col overflow-hidden">
       {/* ヘッダー */}
-      <header className="bg-gray-950 shadow-md text-center py-4">
-        <h1 className="text-2xl font-bold text-white">ito レインボー ブラウザ版（ファンメイド）</h1>
+      <header className="bg-gray-950 shadow-md py-4 px-4 flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-white text-center w-full">ito レインボー ブラウザ版（ファンメイド）</h1>
+        <Home
+          onClick={handleHomeClick}
+          className="absolute right-4 top-4 text-white hover:text-blue-400 cursor-pointer transition"
+          size={24}
+          aria-label="ホームへ戻る"
+        />
       </header>
 
       {/* メインコンテンツ（余白なしで最大限表示） */}
@@ -38,8 +56,7 @@ const Layout: React.FC = () => {
         </a>
         。
       </footer>
-
-    </div>
+    </div >
   );
 };
 

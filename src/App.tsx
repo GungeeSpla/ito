@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { db } from "./firebase";
 import { ref, set } from "firebase/database";
-import { generateRoomId } from "./utils/generateRoomId";
+import { generateUniqueRoomId } from "./utils/generateRoomId";
 
 function App() {
   const navigate = useNavigate();
@@ -16,7 +16,7 @@ function App() {
       return;
     }
 
-    const roomId = generateRoomId();
+    const roomId = await generateUniqueRoomId();
 
     await set(ref(db, `rooms/${roomId}`), {
       host: nickname,

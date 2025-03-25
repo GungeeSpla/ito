@@ -45,9 +45,10 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
   const handleCopyUrl = () => {
     navigator.clipboard.writeText(window.location.href).then(() => {
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setTimeout(() => setCopied(false), 2000); // フェードアウト中もDOMはある！
     });
   };
+
 
   const isHost = nickname === host;
 
@@ -68,20 +69,23 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
           </button>
           <div
             className={cn(
-              'absolute top-2 right-2 bg-black bg-opacity-75 text-sm text-white px-3 py-1 rounded animate-fade-in duration-500',
-              'before:absolute before:top-1/2 before:left-[-15px] before:-translate-y-1/2 before:border-8 before:border-transparent before:border-r-black',
-              copied ? 'opacity-100' : 'opacity-0 scale-95 pointer-events-none'
+              'absolute top-2 right-2 text-sm text-white px-3 py-1 rounded bg-black bg-opacity-75',
+              'before:absolute before:top-1/2 before:left-[-15px] before:-translate-y-1/2',
+              'before:border-8 before:border-transparent before:border-r-black',
+              'transition-opacity duration-500',
+              copied ? 'opacity-100' : 'opacity-0 pointer-events-none'
             )}
           >
             コピーしました！
           </div>
+
         </div>
 
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-2">
             <span className="bg-gray-700 text-white text-xs px-2 py-1 rounded">参加者一覧</span>
           </div>
-          <ul className="space-y-1 text-center">
+          <ul className="space-y-1">
             {Object.keys(players).map((player) => (
               <li key={player} className="text-sm">
                 {player}
