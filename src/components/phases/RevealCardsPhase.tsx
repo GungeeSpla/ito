@@ -94,7 +94,7 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
     <div>
       <h2>カードをめくろう！</h2>
 
-      <div className="cards-container">
+      <div className="cards-container absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2">
         {/* 基準カード（0） */}
         <div className="card">
           <p>基準</p>
@@ -103,7 +103,7 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
 
         {/* プレイヤーのカード */}
         {cardOrder.map((name, i) => (
-          <div key={i} className={`card ${!cards[name]?.revealed ? "hidden" : ""}`}>
+          <div key={i} className="card">
             <p>{name}</p>
             {cards[name]?.revealed ? (
               <strong>{cards[name]?.value ?? "?"}</strong>

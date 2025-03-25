@@ -107,13 +107,10 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
     <div>
       <h2>カードを伏せて置こう！</h2>
 
-      {myCard !== null ? (
-        <div className="card">
-          <p>あなたのカード番号：</p>
+      {myCard !== null && !hasPlaced && (
+        <div className="card fixed bottom-10 left-1/2 -translate-x-1/2 my-card">
           <strong>{myCard}</strong>
         </div>
-      ) : (
-        <p>カード取得中...</p>
       )}
 
       {hasPlaced ? (
@@ -144,14 +141,14 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
         </div>
       )}
 
-      <div className="cards-container" style={{ marginTop: "20px" }}>
+      <div className="cards-container absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2">
         <div className="card">
           <p>基準</p>
           <strong>0</strong>
         </div>
 
         {cardOrder.map((name, i) => (
-          <div key={i} className="card hidden">
+          <div key={i} className="card">
             <p>{name}</p>
             <strong>?</strong>
           </div>
