@@ -5,12 +5,13 @@ import { ref, set } from "firebase/database";
 
 const generateRoomId = () => {
   const timestamp = new Date().getTime();
-  return "room-" + timestamp;
+  return timestamp;
 };
 
 function App() {
   const navigate = useNavigate();
   const [nickname, setNickname] = useState("");
+  const [isFading, setIsFading] = useState(false);
 
   const createRoom = async () => {
     if (!nickname.trim()) {
@@ -20,7 +21,6 @@ function App() {
 
     const roomId = generateRoomId();
 
-    // 🔄 Firebaseにルームを作成（プレイヤーをオブジェクトで管理）
     await set(ref(db, `rooms/${roomId}`), {
       host: nickname,
       players: {
@@ -29,23 +29,49 @@ function App() {
       phase: "waiting",
     });
 
-    // 🧠 ローカルにニックネーム保存
     localStorage.setItem("nickname", nickname);
 
-    // 🚪ルームへ遷移
-    navigate(`/room/${roomId}`);
+    // フェードアウトしてから画面遷移
+    setIsFading(true);
+    setTimeout(() => {
+      navigate(`/room/${roomId}`);
+    }, 300); // CSSのdurationと合わせる
   };
 
   return (
-    <div>
-      <h1>ito Online</h1>
-      <input
-        type="text"
-        placeholder="ニックネームを入力"
-        value={nickname}
-        onChange={(e) => setNickname(e.target.value)}
-      />
-      <button onClick={createRoom}>ルームを作成</button>
+    <div
+      className={`min-h-[70vh] flex items-center justify-center text-white transition-opacity duration-300 ${
+        isFading ? "opacity-0" : "opacity-100"
+      }`}
+    >
+      <div className="bg-gray-700 p-6 rounded-xl shadow-md w-80 text-center animate-fade-in">
+        <h1 className="text-2xl font-bold mb-4">
+          ニックネームを入力して、ルームを作成してください。
+        </h1>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            createRoom();
+          }}
+        >
+          <input
+            type="text"
+            placeholder="ニックネームを入力"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+            className="w-full p-2 border border-gray-600 bg-gray-600 text-white rounded mb-4 text-center placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+          />
+          <button
+            type="submit"
+            disabled={!nickname.trim()}
+            className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-500
+              focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200
+              disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            ルームを作成
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
