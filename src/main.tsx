@@ -1,17 +1,20 @@
-import './index.css';
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import App from "./App";
 import Room from "./pages/Room";
+import Layout from "./components/Layout";
+import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <Router>
+    <BrowserRouter>
       <Routes>
-        <Route path="/" element={<App />} />
-        <Route path="/room/:roomId" element={<Room />} />
+        <Route element={<Layout />}>
+          <Route path="/" element={<App />} />
+          <Route path="/room/:roomId" element={<Room />} />
+        </Route>
       </Routes>
-    </Router>
+    </BrowserRouter>
   </React.StrictMode>
 );

@@ -33,7 +33,7 @@ function App() {
     localStorage.setItem("nickname", nickname);
 
     // 🚪ルームへ遷移
-    navigate(`/room/${roomId}`);
+    navigate(`/room/${roomId}`);W
   };
 
   return (
