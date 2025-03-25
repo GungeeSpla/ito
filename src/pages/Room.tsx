@@ -6,18 +6,30 @@ import { Topic } from "../types/Topic";
 import { topics } from "../data/topics";
 import { deleteOldRooms } from "../utils/deleteOldRooms";
 
+// 各フェーズごとの画面コンポーネント
 import WaitingPhase from "../components/phases/WaitingPhase";
 import ChooseTopicPhase from "../components/phases/ChooseTopicPhase";
 import DealCardsPhase from "../components/phases/DealCardsPhase";
 import PlaceCardsPhase from "../components/phases/PlaceCardsPhase";
 import RevealCardsPhase from "../components/phases/RevealCardsPhase";
 
+// フェーズ内のカード配布処理（カスタムフック）
 import { useDealCards } from "../hooks/useDealCards";
 
+// --------------------------------------------
+// ルーム画面（/room/:roomId）
+// 各ゲームフェーズを切り替えながら進行を管理
+// --------------------------------------------
 const Room = () => {
   const navigate = useNavigate();
   const { roomId } = useParams<{ roomId: string }>();
+
+  // ローカルストレージからニックネームを取得
   const storedNickname = localStorage.getItem("nickname") || "";
+
+  // -----------------------------
+  // 状態管理
+  // -----------------------------
   const [nickname, setNickname] = useState(storedNickname);
   const [newNickname, setNewNickname] = useState("");
   const [players, setPlayers] = useState<Record<string, boolean>>({});
@@ -32,8 +44,11 @@ const Room = () => {
   const alreadyJoined = !!players[nickname];
   const isHost = nickname === host;
 
+  // -----------------------------
+  // 初期化＆リアルタイム監視（DBの値が変わるたびに再描画）
+  // -----------------------------
   useEffect(() => {
-    deleteOldRooms();
+    deleteOldRooms(); // 古いルームの自動削除（メンテ用）
 
     if (!roomId) {
       navigate("/");
@@ -41,6 +56,8 @@ const Room = () => {
     }
 
     const roomRef = ref(db, `rooms/${roomId}`);
+
+    // 初回読み取り：ルームが存在するかチェック
     get(roomRef).then((snap) => {
       if (!snap.exists()) {
         alert("ルームが存在しません！");
@@ -53,6 +70,7 @@ const Room = () => {
       setPhase(room.phase || "waiting");
     });
 
+    // 各項目をリアルタイムで購読（onValue = WebSocket的な役割）
     const unsub1 = onValue(child(roomRef, "phase"), (snap) => setPhase(snap.val() || "waiting"));
     const unsub2 = onValue(child(roomRef, "topic"), (snap) => setSelectedTopic(snap.val() || null));
     const unsub3 = onValue(child(roomRef, "topicOptions"), (snap) => {
@@ -69,6 +87,7 @@ const Room = () => {
 
     setLoading(false);
 
+    // クリーンアップ
     return () => {
       unsub1();
       unsub2();
@@ -78,9 +97,14 @@ const Room = () => {
     };
   }, [roomId, nickname, navigate]);
 
-  // カード配布（dealCards フェーズ）
+  // -----------------------------
+  // フェーズ: dealCards のときカードを配る
+  // -----------------------------
   useDealCards({ phase, isHost, players, roomId: roomId!, level });
 
+  // -----------------------------
+  // プレイヤー参加処理（ニックネームを登録）
+  // -----------------------------
   const addPlayer = () => {
     if (!newNickname.trim()) return alert("ニックネームを入力してね！");
     if (players[newNickname]) return alert("この名前は使われています！");
@@ -102,9 +126,13 @@ const Room = () => {
     });
   };
 
+  // -----------------------------
+  // ゲーム開始（ホストのみ可能）
+  // -----------------------------
   const startGame = () => {
     if (!isHost) return;
 
+    // お題セットからランダム3つ選ぶ
     const randomTopics = topics
       .filter((t) => t.set === selectedSet)
       .sort(() => 0.5 - Math.random())
@@ -114,22 +142,31 @@ const Room = () => {
       topicOptions: randomTopics,
       phase: "chooseTopic",
       level: level,
-      players: players, // ← これ必須！！
-      host: host,       // ← host も保持した方が安全！
+      players: players, // ← プレイヤー情報を明示的に保存
+      host: host,       // ← hostも明示しておくと安心
     };
 
     set(ref(db, `rooms/${roomId}`), updates);
   };
 
-
+  // -----------------------------
+  // ホストが1つのお題を選択（次フェーズへ）
+  // -----------------------------
   const chooseTopic = (topic: Topic) => {
     if (!isHost) return;
+
     set(ref(db, `rooms/${roomId}/topic`), topic);
     set(ref(db, `rooms/${roomId}/phase`), "dealCards");
   };
 
+  // -----------------------------
+  // ロード中はプレースホルダーを表示
+  // -----------------------------
   if (loading) return <div>読み込み中...</div>;
 
+  // -----------------------------
+  // 各フェーズごとに表示を切り替え
+  // -----------------------------
   if (phase === "waiting") {
     return (
       <WaitingPhase
@@ -171,6 +208,7 @@ const Room = () => {
     return <RevealCardsPhase roomId={roomId!} nickname={nickname} />;
   }
 
+  // 未定義のフェーズ用フォールバック
   return <div>不明なフェーズ: {phase}</div>;
 };
 

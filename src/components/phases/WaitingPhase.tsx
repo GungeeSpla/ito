@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Crown } from "lucide-react";
-import cn from 'classnames';
+import { Crown } from "lucide-react"; // 👑 ホスト表示用アイコン
+import cn from 'classnames'; // class名を条件付きで合成するユーティリティ
 
+// -----------------------------
+// Props 型定義
+// -----------------------------
 interface WaitingPhaseProps {
   roomId: string;
   players: Record<string, boolean>;
@@ -18,6 +21,9 @@ interface WaitingPhaseProps {
   startGame: () => void;
 }
 
+// -----------------------------
+// メインコンポーネント
+// -----------------------------
 const WaitingPhase: React.FC<WaitingPhaseProps> = ({
   roomId,
   players,
@@ -33,33 +39,44 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
   setLevel,
   startGame,
 }) => {
-  const [copied, setCopied] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [copied, setCopied] = useState(false); // URLコピー完了の表示用
+  const inputRef = useRef<HTMLInputElement>(null); // ニックネーム入力にフォーカスする用
 
+  // -----------------------------
+  // 初回マウント時にローカルのニックネームを自動復元
+  // -----------------------------
   useEffect(() => {
     const savedName = localStorage.getItem("nickname");
     if (savedName) setNewNickname(savedName);
     inputRef.current?.focus();
   }, []);
 
+  // -----------------------------
+  // 現在のページURLをクリップボードにコピー
+  // -----------------------------
   const handleCopyUrl = () => {
     navigator.clipboard.writeText(window.location.href).then(() => {
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000); // フェードアウト中もDOMはある！
+      setTimeout(() => setCopied(false), 2000); // 2秒後にフェードアウト
     });
   };
 
+  const isHost = nickname === host; // ホスト判定
 
-  const isHost = nickname === host;
-
+  // -----------------------------
+  // UI描画
+  // -----------------------------
   return (
     <div className="min-h-[80vh] flex items-center justify-center bg-gray-900 text-white px-4">
       <div className="bg-gray-800 p-6 rounded-xl shadow-md w-full max-w-md animate-fade-in relative">
+
+        {/* ルームID表示 */}
         <div className="text-sm text-gray-400 text-center mb-4 flex justify-center items-center gap-2">
           <span className="bg-gray-700 text-white text-xs px-1.5 py-1 rounded">ルームID</span>
           <span className="font-mono">{roomId}</span>
         </div>
 
+        {/* URLコピーUI */}
         <div className="mb-4 text-center relative">
           <button
             onClick={handleCopyUrl}
@@ -67,6 +84,8 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
           >
             ルームURLをコピー
           </button>
+
+          {/* コピー完了の吹き出し */}
           <div
             className={cn(
               'absolute top-2 right-2 text-sm text-white px-3 py-1 rounded bg-black bg-opacity-75',
@@ -78,9 +97,9 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
           >
             コピーしました！
           </div>
-
         </div>
 
+        {/* プレイヤー一覧 */}
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-2">
             <span className="bg-gray-700 text-white text-xs px-2 py-1 rounded">参加者一覧</span>
@@ -98,6 +117,7 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
           </ul>
         </div>
 
+        {/* 参加フォーム or メッセージ */}
         {!alreadyJoined ? (
           <form
             onSubmit={(e) => {
@@ -133,8 +153,10 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
           </p>
         )}
 
+        {/* ホスト用設定UI */}
         {isHost && (
           <div className="space-y-4">
+            {/* お題セット選択 */}
             <div>
               <label className="block mb-1">お題セット</label>
               <select
@@ -149,6 +171,7 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
               </select>
             </div>
 
+            {/* レベル選択 */}
             <div>
               <label className="block mb-1">レベル</label>
               <select
@@ -165,6 +188,7 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
               </select>
             </div>
 
+            {/* ゲーム開始ボタン */}
             <button
               onClick={startGame}
               disabled={Object.keys(players).length <= 1}

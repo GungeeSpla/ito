@@ -1,13 +1,51 @@
 <!doctype html>
 <html lang="ja">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ito レインボー ブラウザ版（ファンメイド）</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+
+<head>
+  <!-- 文字コード指定：必須 -->
+  <meta charset="UTF-8" />
+
+  <!-- レスポンシブ対応：スマホでも崩れないように -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- タイトル（検索エンジン＆タブ表示） -->
+  <title>ito レインボー ブラウザ版（ファンメイド）</title>
+
+  <!-- ファビコン：オリジナルのアイコン画像に差し替えると◎ -->
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+
+  <!-- 検索エンジン対策（SEO） -->
+  <meta name="description" content="『ito レインボー』の非公式ファンメイド・ブラウザ版。お題に沿って協力しながら数字カードを昇順に並べよう！" />
+  <meta name="keywords" content="ito,itoレインボー,ネット,オンライン,ボードゲーム,ブラウザゲーム,ファンメイド" />
+  <meta name="author" content="gungeex" />
+
+  <!-- SNSシェア対策（OGP） -->
+  <meta property="og:title" content="ito レインボー ブラウザ版（ファンメイド）" />
+  <meta property="og:description" content="お題に沿って協力しながら数字カードを昇順に並べよう！" />
+  <meta property="og:image" content="/ogp.png" />
+  <meta property="og:url" content="https://your-site.example.com" />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="ja_JP" />
+
+  <!-- Twitterカード用（任意だけどおすすめ） -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@gungeex" />
+
+  <!-- カラー設定（モバイルブラウザのテーマ色など） -->
+  <meta name="theme-color" content="#1f2937" />
+
+  <!-- iOS対応：ホーム画面追加用 -->
+  <link rel="apple-touch-icon" href="/icon-192.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+
+</head>
+
+<body>
+  <!-- React アプリのマウントポイント -->
+  <div id="root"></div>
+
+  <!-- メインのJSファイル -->
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
 </html>
