@@ -11,6 +11,8 @@ interface WaitingPhaseProps {
   addPlayer: () => void;
   selectedSet: string;
   setSelectedSet: (set: string) => void;
+  level: number; // ★追加
+  setLevel: (level: number) => void; // ★追加
   startGame: () => void;
 }
 
@@ -25,6 +27,8 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
   addPlayer,
   selectedSet,
   setSelectedSet,
+  level,
+  setLevel,
   startGame,
 }) => {
   return (
@@ -57,17 +61,34 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
 
       {nickname === host && (
         <>
-          <label>お題セットを選んでね：</label>
-          <select
-            value={selectedSet}
-            onChange={(e) => setSelectedSet(e.target.value)}
-          >
-            <option value="normal">通常</option>
-            <option value="rainbow">レインボー</option>
-            <option value="classic">クラシック</option>
-          </select>
+          <div style={{ marginTop: "20px" }}>
+            <label>お題セットを選んでね：</label>
+            <select
+              value={selectedSet}
+              onChange={(e) => setSelectedSet(e.target.value)}
+            >
+              <option value="normal">通常</option>
+              <option value="rainbow">レインボー</option>
+              <option value="classic">クラシック</option>
+            </select>
+          </div>
+
+          <div style={{ marginTop: "10px" }}>
+            <label>レベルを選んでね：</label>
+            <select
+              value={level}
+              onChange={(e) => setLevel(Number(e.target.value))}
+            >
+              {[1, 2, 3, 4, 5].map((lvl) => (
+                <option key={lvl} value={lvl}>
+                  レベル {lvl}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {Object.keys(players).length > 1 && (
-            <button onClick={startGame} style={{ marginLeft: "10px" }}>
+            <button onClick={startGame} style={{ marginTop: "20px" }}>
               ゲーム開始
             </button>
           )}

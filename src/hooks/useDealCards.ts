@@ -1,6 +1,5 @@
-// src/hooks/useDealCards.ts
 import { useEffect } from "react";
-import { ref, set, child } from "firebase/database";
+import { ref, set, child, get } from "firebase/database";
 import { db } from "../firebase";
 
 interface UseDealCardsProps {
@@ -8,27 +7,51 @@ interface UseDealCardsProps {
   isHost: boolean;
   players: Record<string, boolean>;
   roomId: string;
+  level: number;
 }
 
-export const useDealCards = ({ phase, isHost, players, roomId }: UseDealCardsProps) => {
+export const useDealCards = ({ phase, isHost, players, roomId, level }: UseDealCardsProps) => {
   useEffect(() => {
-    if (phase === "dealCards" && isHost && Object.keys(players).length > 0) {
+    const deal = async () => {
       const playerNames = Object.keys(players);
-
-      // 数字をシャッフルしてプレイヤー数ぶん切り出す
-      const availableNumbers = Array.from({ length: 100 }, (_, i) => i + 1)
+      const totalCards = playerNames.length + (level - 1);
+      
+      const numberPool = Array.from({ length: 100 }, (_, i) => i + 1);
+      const shuffledNumbers = numberPool
         .sort(() => 0.5 - Math.random())
-        .slice(0, playerNames.length);
+        .slice(0, totalCards);
 
-      const cards: Record<string, { value: number; revealed: boolean }> = {};
-      playerNames.forEach((name, idx) => {
-        cards[name] = { value: availableNumbers[idx], revealed: false };
+      if (shuffledNumbers.length < totalCards) {
+        console.error("カードが足りません！");
+        return;
+      }
+
+      const shuffledPlayers = [...playerNames].sort(() => 0.5 - Math.random());
+      const bonusReceivers = shuffledPlayers.slice(0, level - 1);
+
+      const cards: Record<string, { value: number; revealed: boolean }[]> = {};
+      let cardIndex = 0;
+
+      playerNames.forEach((name) => {
+        const numCards = bonusReceivers.includes(name) ? 2 : 1;
+        cards[name] = [];
+
+        for (let i = 0; i < numCards; i++) {
+          cards[name].push({
+            value: shuffledNumbers[cardIndex++],
+            revealed: false,
+          });
+        }
       });
 
       const roomRef = ref(db, `rooms/${roomId}`);
-      set(child(roomRef, "cards"), cards);
-      set(child(roomRef, "phase"), "placeCards");
-      set(child(roomRef, "lastUpdated"), Date.now());
+      await set(child(roomRef, "cards"), cards);
+      await set(child(roomRef, "phase"), "placeCards");
+      await set(child(roomRef, "lastUpdated"), Date.now());
+    };
+
+    if (phase === "dealCards" && isHost && Object.keys(players).length > 0) {
+      deal();
     }
-  }, [phase, isHost, players, roomId]);
+  }, [phase, isHost, players, roomId, level]);
 };

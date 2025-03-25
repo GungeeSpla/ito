@@ -1,33 +1,32 @@
 import React, { useEffect, useState } from "react";
 import { ref, get, set, onValue, runTransaction } from "firebase/database";
 import { db } from "../../firebase";
-import "../Cards.scss";
 
 interface Props {
   roomId: string;
   nickname: string;
 }
 
+interface CardEntry {
+  name: string;
+  card: number;
+}
+
 const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
-  const [myCard, setMyCard] = useState<number | null>(null);
-  const [cardOrder, setCardOrder] = useState<string[]>([]);
+  const [myCards, setMyCards] = useState<number[]>([]);
+  const [activeCard, setActiveCard] = useState<{ source: 'hand' | 'field'; value: number } | null>(null);
+  const [cardOrder, setCardOrder] = useState<CardEntry[]>([]);
   const [players, setPlayers] = useState<Record<string, boolean>>({});
-  const [insertIndex, setInsertIndex] = useState<number>(0);
   const [isHost, setIsHost] = useState(false);
-
-  const hasPlaced = cardOrder.includes(nickname);
-
-  useEffect(() => {
-    setInsertIndex(cardOrder.length);
-  }, [cardOrder]);
+  const [level, setLevel] = useState<number>(1);
 
   useEffect(() => {
     const cardRef = ref(db, `rooms/${roomId}/cards/${nickname}`);
     get(cardRef).then((snap) => {
       if (snap.exists()) {
         const data = snap.val();
-        const value = typeof data === "number" ? data : data.value;
-        setMyCard(value);
+        const values = Array.isArray(data) ? data.map((d) => d.value) : [data.value];
+        setMyCards(values);
       }
     });
 
@@ -35,7 +34,7 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
     onValue(orderRef, (snap) => {
       const data = snap.val();
       if (Array.isArray(data)) {
-        setCardOrder([...data]); // 再レンダーのために新しい配列で渡す
+        setCardOrder([...data]);
       } else {
         setCardOrder([]);
       }
@@ -55,41 +54,37 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
         setIsHost(true);
       }
     });
+
+    const levelRef = ref(db, `rooms/${roomId}/level`);
+    onValue(levelRef, (snap) => {
+      if (snap.exists()) {
+        setLevel(snap.val());
+      }
+    });
   }, [roomId, nickname]);
 
   const handlePlaceCard = async () => {
-    if (hasPlaced) return;
-
+    if (!activeCard || activeCard.source !== 'hand') return;
     const orderRef = ref(db, `rooms/${roomId}/cardOrder`);
     await runTransaction(orderRef, (currentOrder) => {
       const newOrder = currentOrder ? [...currentOrder] : [];
-      if (!newOrder.includes(nickname)) {
-        newOrder.splice(insertIndex, 0, nickname);
+      if (!newOrder.some((c: CardEntry) => c.name === nickname && c.card === activeCard.value)) {
+        newOrder.push({ name: nickname, card: activeCard.value });
       }
       return newOrder;
     });
-
-    // 再取得して即反映（保険）
-    const latestSnap = await get(ref(db, `rooms/${roomId}/cardOrder`));
-    const latest = latestSnap.val();
-    if (Array.isArray(latest)) {
-      setCardOrder([...latest]);
-    }
+    setMyCards(prev => prev.filter(c => c !== activeCard.value));
+    setActiveCard(null);
   };
 
-  const handleUndoPlace = async () => {
+  const handleRemoveCard = async () => {
+    if (!activeCard || activeCard.source !== 'field') return;
     const orderRef = ref(db, `rooms/${roomId}/cardOrder`);
     await runTransaction(orderRef, (currentOrder) => {
-      if (!Array.isArray(currentOrder)) return [];
-      return currentOrder.filter((name) => name !== nickname);
+      return currentOrder.filter((c: CardEntry) => !(c.name === nickname && c.card === activeCard.value));
     });
-
-    // 再取得して即反映（保険）
-    const latestSnap = await get(ref(db, `rooms/${roomId}/cardOrder`));
-    const latest = latestSnap.val();
-    if (Array.isArray(latest)) {
-      setCardOrder([...latest]);
-    }
+    setMyCards(prev => [...prev, activeCard.value]);
+    setActiveCard(null);
   };
 
   const proceedToReveal = async () => {
@@ -98,66 +93,80 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
     await set(phaseRef, "revealCards");
     await set(updatedRef, Date.now());
   };
-
-  const allPlaced =
-    Object.keys(players).length > 0 &&
-    cardOrder.length === Object.keys(players).length;
+  
+  console.log("cardOrder.length: " + cardOrder.length);
+  console.log("Object.keys(players).length: " + Object.keys(players).length);
+  console.log("(level - 1): " + (level - 1));
+  const allPlaced = cardOrder.length >= (Object.keys(players).length + (level - 1));
 
   return (
     <div>
-      <h2>カードを伏せて置こう！</h2>
+      <h2 className="text-xl font-bold mb-4">カードを伏せて置こう！</h2>
 
-      {myCard !== null && !hasPlaced && (
-        <div className="card fixed bottom-10 left-1/2 -translate-x-1/2 my-card">
-          <strong>{myCard}</strong>
+      <div>
+        <h3 className="text-lg font-semibold">あなたの手札</h3>
+        <div className="flex flex-wrap gap-2 my-2">
+          {myCards.map((value, i) => (
+            <div
+              key={i}
+              className={`cursor-pointer w-20 h-28 flex items-center justify-center border rounded-md text-xl font-bold bg-white text-black shadow-sm transition transform hover:scale-105 ${
+                activeCard?.source === 'hand' && activeCard.value === value ? "ring-4 ring-blue-500 scale-110" : ""
+              }`}
+              onClick={() => setActiveCard({ source: 'hand', value })}
+            >
+              {value}
+            </div>
+          ))}
         </div>
-      )}
+      </div>
 
-      {hasPlaced ? (
-        <div>
-          <p>カードを置きました！</p>
-          <button onClick={handleUndoPlace}>カードを引っ込める</button>
-        </div>
-      ) : (
-        <div>
-          <label>どこに置く？（0の右から）:</label>
-          <select
-            value={insertIndex}
-            onChange={(e) => setInsertIndex(Number(e.target.value))}
-          >
-            {Array.from({ length: cardOrder.length + 1 }, (_, i) => (
-              <option key={i} value={i}>
-                {i === 0
-                  ? "← 一番左（0のすぐ右）"
-                  : i === cardOrder.length
-                    ? "→ 一番右"
-                    : `${i} 番目に置く`}
-              </option>
-            ))}
-          </select>
-          <button onClick={handlePlaceCard} style={{ marginLeft: "10px" }}>
-            ここに置く！
-          </button>
-        </div>
-      )}
+      <div className="mt-4 space-x-2">
+        <button
+          onClick={handlePlaceCard}
+          disabled={!activeCard || activeCard.source !== 'hand'}
+          className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-40"
+        >
+          このカードを出す
+        </button>
+        <button
+          onClick={handleRemoveCard}
+          disabled={!activeCard || activeCard.source !== 'field'}
+          className="px-4 py-2 bg-red-500 text-white rounded disabled:opacity-40"
+        >
+          このカードを引っ込める
+        </button>
+      </div>
 
-      <div className="cards-container absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2">
-        <div className="card">
-          <p>基準</p>
-          <strong>0</strong>
-        </div>
-
-        {cardOrder.map((name, i) => (
-          <div key={i} className="card">
-            <p>{name}</p>
-            <strong>?</strong>
+      <div className="mt-6">
+        <h3 className="text-lg font-semibold">場のカード</h3>
+        <div className="flex flex-wrap gap-2 mt-2">
+          <div className="w-20 h-28 flex flex-col items-center justify-center border rounded-md bg-gray-200 text-center text-black">
+            <p className="text-sm">基準</p>
+            <strong className="text-xl">0</strong>
           </div>
-        ))}
+          {cardOrder.map((entry, i) => (
+            <div
+              key={i}
+              className={`w-20 h-28 flex flex-col items-center justify-center border rounded-md bg-gray-100 text-black cursor-pointer transition transform hover:scale-105 ${
+                activeCard?.source === 'field' && activeCard.value === entry.card && entry.name === nickname ? "ring-4 ring-blue-500 scale-110" : ""
+              }`}
+              onClick={() => {
+                if (entry.name === nickname) setActiveCard({ source: 'field', value: entry.card });
+              }}
+            >
+              <p className="text-sm">{entry.name}</p>
+              <strong className="text-xl">?</strong>
+            </div>
+          ))}
+        </div>
       </div>
 
       {isHost && allPlaced && (
-        <div style={{ marginTop: "20px" }}>
-          <button onClick={proceedToReveal}>
+        <div className="mt-6">
+          <button
+            onClick={proceedToReveal}
+            className="px-4 py-2 bg-green-600 text-white rounded"
+          >
             全員出し終わったのでめくりフェーズへ！
           </button>
         </div>

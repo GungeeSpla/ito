@@ -27,6 +27,7 @@ const Room = () => {
   const [topicOptions, setTopicOptions] = useState<Topic[]>([]);
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
   const [selectedSet, setSelectedSet] = useState<"normal" | "rainbow" | "classic">("normal");
+  const [level, setLevel] = useState<number>(1);
 
   const alreadyJoined = !!players[nickname];
   const isHost = nickname === host;
@@ -78,7 +79,7 @@ const Room = () => {
   }, [roomId, nickname, navigate]);
 
   // カード配布（dealCards フェーズ）
-  useDealCards({ phase, isHost, players, roomId: roomId! });
+  useDealCards({ phase, isHost, players, roomId: roomId!, level });
 
   const addPlayer = () => {
     if (!newNickname.trim()) return alert("ニックネームを入力してね！");
@@ -109,9 +110,17 @@ const Room = () => {
       .sort(() => 0.5 - Math.random())
       .slice(0, 3);
 
-    set(ref(db, `rooms/${roomId}/topicOptions`), randomTopics);
-    set(ref(db, `rooms/${roomId}/phase`), "chooseTopic");
+    const updates = {
+      topicOptions: randomTopics,
+      phase: "chooseTopic",
+      level: level,
+      players: players, // ← これ必須！！
+      host: host,       // ← host も保持した方が安全！
+    };
+
+    set(ref(db, `rooms/${roomId}`), updates);
   };
+
 
   const chooseTopic = (topic: Topic) => {
     if (!isHost) return;
@@ -134,6 +143,7 @@ const Room = () => {
         addPlayer={addPlayer}
         selectedSet={selectedSet}
         setSelectedSet={(s) => setSelectedSet(s as any)}
+        setLevel={setLevel}
         startGame={startGame}
       />
     );
