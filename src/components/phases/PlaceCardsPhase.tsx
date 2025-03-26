@@ -245,6 +245,21 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
           )}
         </div>
       </div>
+
+      {/* ホストだけに表示される中断ボタン */}
+      {isHost && (
+        <div className="fixed bottom-4 right-4 z-20">
+          <button
+            onClick={async () => {
+              await set(ref(db, `rooms/${roomId}/phase`), "waiting");
+              await set(ref(db, `rooms/${roomId}/lastUpdated`), Date.now());
+            }}
+            className="px-3 py-1.5 bg-red-600 text-white text-sm rounded shadow hover:bg-red-500 transition"
+          >
+            ゲームを中断する
+          </button>
+        </div>
+      )}
     </div>
   );
 };
