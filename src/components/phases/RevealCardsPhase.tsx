@@ -101,53 +101,53 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
   // -----------------------------
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">カードをめくろう！</h2>
+      <h2 className="text-xl font-bold mb-4 text-center">カードをめくろう！</h2>
 
-      {/* 成功・失敗の表示 */}
       {status === "success" && (
-        <div className="mb-4 text-green-400 font-bold text-lg">✅ 成功！</div>
+        <div className="mb-4 text-green-400 font-bold text-2xl text-center">✅ 成功！</div>
       )}
       {status === "fail" && (
-        <div className="mb-4 text-red-400 font-bold text-lg">❌ 失敗！</div>
+        <div className="mb-4 text-red-400 font-bold text-2xl text-center">❌ 失敗！</div>
       )}
 
-      <div className="flex flex-wrap gap-2">
-        {/* 基準カード */}
-        <Card value={0} name="基準" />
+      <div className="relative min-h-[60vh]">
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-wrap gap-2 items-start">
 
-        {/* プレイヤーのカード */}
-        {cardOrder.map((entry, index) => {
-          const isRevealed = revealedCards.includes(entry.card);
+          {/* 基準カード */}
+          <Card value={0} name="基準" />
 
-          return (
-            <Card
-              key={index}
-              value={isRevealed ? entry.card : "?"}
-              name={entry.name}
-              revealed={isRevealed}
-              onClick={() => {
-                if (!isRevealed) {
-                  // めくられていなければDBに追加
-                  const revealedRef = ref(db, `rooms/${roomId}/revealedCards`);
-                  set(revealedRef, [...revealedCards, entry.card]);
-                }
-              }}
-            />
-          );
-        })}
-      </div>
+          {/* プレイヤーのカード（Reveal） */}
+          {cardOrder.map((entry, index) => {
+            const isRevealed = revealedCards.includes(entry.card);
 
-      {/* ホストのみ操作可能なボタン群 */}
-      {isHost && (
-        <div className="mt-4 space-x-2">
-          <button
-            onClick={resetGame}
-            className="px-4 py-2 bg-red-500 text-white rounded"
-          >
-            ゲームを終了する
-          </button>
+            return (
+              <Card
+                key={index}
+                value={isRevealed ? entry.card : "?"}
+                name={entry.name}
+                revealed={isRevealed}
+                onClick={() => {
+                  if (!isRevealed) {
+                    const revealedRef = ref(db, `rooms/${roomId}/revealedCards`);
+                    set(revealedRef, [...revealedCards, entry.card]);
+                  }
+                }}
+              />
+            );
+          })}
+
+          {isHost && (
+            <div className="absolute left-1/2 top-[calc(50%+80px)] -translate-x-1/2 mt-4">
+              <button
+                onClick={resetGame}
+                className="px-4 py-2 w-fit whitespace-nowrap bg-green-600 text-white rounded shadow-lg"
+              >
+                ロビーに戻る
+              </button>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };
