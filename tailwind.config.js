@@ -15,6 +15,9 @@ export default {
           '100%': { opacity: 1, transform: 'scale(1)' },
         },
       },
+      scale: {
+        200: "2",
+      },
     },
   },
   plugins: [],

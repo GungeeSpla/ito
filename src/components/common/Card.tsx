@@ -37,7 +37,7 @@ const Card: React.FC<CardProps> = ({
       {name && <p className="text-sm">{name}</p>}
 
       {/* 数字 or "?" */}
-      <strong className="text-xl">{value}</strong>
+      <strong className="text-5xl">{value}</strong>
     </div>
   );
 };

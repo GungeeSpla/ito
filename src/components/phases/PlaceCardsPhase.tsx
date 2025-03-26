@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { ref, get, set, onValue, runTransaction } from "firebase/database";
 import { db } from "../../firebase";
 import Card from "../common/Card";
+import { AnimatePresence, motion } from "framer-motion"; // ← 追加
 
 // -----------------------------
 // 型定義
@@ -20,18 +21,17 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
   // -----------------------------
   // ステート定義
   // -----------------------------
-  const [myCards, setMyCards] = useState<number[]>([]); // 自分の手札
-  const [activeCard, setActiveCard] = useState<{ source: 'hand' | 'field'; value: number } | null>(null); // アクティブ状態のカード
-  const [cardOrder, setCardOrder] = useState<CardEntry[]>([]); // 場に出されたカード
-  const [players, setPlayers] = useState<Record<string, boolean>>({}); // プレイヤー一覧
-  const [isHost, setIsHost] = useState(false); // ホスト判定
-  const [level, setLevel] = useState<number>(1); // 現在のレベル
+  const [myCards, setMyCards] = useState<number[]>([]);
+  const [activeCard, setActiveCard] = useState<{ source: 'hand' | 'field'; value: number } | null>(null);
+  const [cardOrder, setCardOrder] = useState<CardEntry[]>([]);
+  const [players, setPlayers] = useState<Record<string, boolean>>({});
+  const [isHost, setIsHost] = useState(false);
+  const [level, setLevel] = useState<number>(1);
 
   // -----------------------------
   // Firebaseデータ取得＆購読（初期化時）
   // -----------------------------
   useEffect(() => {
-    // 自分の手札を取得
     const cardRef = ref(db, `rooms/${roomId}/cards/${nickname}`);
     get(cardRef).then((snap) => {
       if (snap.exists()) {
@@ -41,7 +41,6 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
       }
     });
 
-    // 出されたカードの順序を購読
     const orderRef = ref(db, `rooms/${roomId}/cardOrder`);
     onValue(orderRef, (snap) => {
       const data = snap.val();
@@ -52,7 +51,6 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
       }
     });
 
-    // 参加プレイヤー情報を購読
     const playersRef = ref(db, `rooms/${roomId}/players`);
     onValue(playersRef, (snap) => {
       const data = snap.val();
@@ -61,7 +59,6 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
       }
     });
 
-    // ホストかどうか判定
     const hostRef = ref(db, `rooms/${roomId}/host`);
     get(hostRef).then((snap) => {
       if (snap.exists() && snap.val() === nickname) {
@@ -69,7 +66,6 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
       }
     });
 
-    // レベル情報を購読
     const levelRef = ref(db, `rooms/${roomId}/level`);
     onValue(levelRef, (snap) => {
       if (snap.exists()) {
@@ -81,22 +77,17 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
   // -----------------------------
   // カードを場に出す処理
   // -----------------------------
-  const handlePlaceCard = async () => {
-    if (!activeCard || activeCard.source !== 'hand') return;
+  const handleInsertCard = async (insertIndex: number) => {
+    if (!activeCard || activeCard.source !== "hand") return;
 
     const orderRef = ref(db, `rooms/${roomId}/cardOrder`);
     await runTransaction(orderRef, (currentOrder) => {
-      const newOrder = currentOrder ? [...currentOrder] : [];
-
-      // 同じカードがすでに場にあるかチェック
-      if (!newOrder.some((c: CardEntry) => c.name === nickname && c.card === activeCard.value)) {
-        newOrder.push({ name: nickname, card: activeCard.value });
-      }
-
-      return newOrder;
+      const newOrder = Array.isArray(currentOrder) ? [...currentOrder] : [];
+      const filtered = newOrder.filter((c: CardEntry) => !(c.name === nickname && c.card === activeCard.value));
+      filtered.splice(insertIndex, 0, { name: nickname, card: activeCard.value });
+      return filtered;
     });
 
-    // 手札からカードを削除
     setMyCards(prev => prev.filter(c => c !== activeCard.value));
     setActiveCard(null);
   };
@@ -104,17 +95,13 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
   // -----------------------------
   // カードを場から引っ込める処理
   // -----------------------------
-  const handleRemoveCard = async () => {
-    if (!activeCard || activeCard.source !== 'field') return;
-
+  const handleRemoveCard = async (cardToRemove: number) => {
     const orderRef = ref(db, `rooms/${roomId}/cardOrder`);
     await runTransaction(orderRef, (currentOrder) => {
-      return currentOrder.filter((c: CardEntry) => !(c.name === nickname && c.card === activeCard.value));
+      return currentOrder.filter((c: CardEntry) => !(c.name === nickname && c.card === cardToRemove));
     });
 
-    // 手札にカードを戻す
-    setMyCards(prev => [...prev, activeCard.value]);
-    setActiveCard(null);
+    setMyCards(prev => [...prev, cardToRemove]);
   };
 
   // -----------------------------
@@ -140,9 +127,8 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
       <h2 className="text-xl font-bold mb-4">カードを伏せて置こう！</h2>
 
       {/* 自分の手札 */}
-      <div>
-        <h3 className="text-lg font-semibold">あなたの手札</h3>
-        <div className="flex flex-wrap gap-2 my-2">
+      <div className="fixed bottom-0 w-full bg-gradient-to-t from-gray-900 to-transparent pt-8 pb-4 z-10">
+        <div className="flex flex-wrap gap-2 justify-center scale-200 translate-y-10 transform" style={{ transformOrigin: "bottom" }}>
           {myCards.map((value) => (
             <Card
               key={value}
@@ -154,46 +140,61 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
         </div>
       </div>
 
-      {/* アクションボタン（出す / 引っ込める） */}
-      <div className="mt-4 space-x-2">
-        <button
-          onClick={handlePlaceCard}
-          disabled={!activeCard || activeCard.source !== 'hand'}
-          className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-40"
-        >
-          このカードを出す
-        </button>
-        <button
-          onClick={handleRemoveCard}
-          disabled={!activeCard || activeCard.source !== 'field'}
-          className="px-4 py-2 bg-red-500 text-white rounded disabled:opacity-40"
-        >
-          このカードを引っ込める
-        </button>
-      </div>
-
       {/* 場のカード表示 */}
-      <div className="mt-6">
-        <h3 className="text-lg font-semibold">場のカード</h3>
-        <div className="flex flex-wrap gap-2 mt-2">
-          <Card value={0} name="基準" />
-          {cardOrder.map((entry, i) => (
-            <div
-              key={i}
-              className={`w-20 h-28 flex flex-col items-center justify-center border rounded-md bg-gray-100 text-black cursor-pointer transition transform hover:scale-105
-              ${activeCard?.source === 'field' && activeCard.value === entry.card && entry.name === nickname
-                  ? "ring-4 ring-blue-500 scale-110"
-                  : ""}`}
-              onClick={() => {
-                if (entry.name === nickname) {
-                  setActiveCard({ source: 'field', value: entry.card });
-                }
-              }}
-            >
-              <p className="text-sm">{entry.name}</p>
-              <strong className="text-xl">?</strong>
+      <div className="relative min-h-[60vh]">
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-wrap gap-2 items-start">
+          <div className="flex flex-wrap gap-2 mt-2 items-start">
+            <div className="flex gap-2 items-center">
+              <Card value={0} name="基準" />
+              {activeCard && activeCard.source === "hand" && (
+                <motion.button
+                  layout
+                  className="text-xs bg-blue-600 text-white px-1 py-3 rounded hover:bg-blue-500 transition writing-vertical"
+                  onClick={() => handleInsertCard(0)}
+                >
+                  ここに出す
+                </motion.button>
+
+              )}
             </div>
-          ))}
+
+            <AnimatePresence initial={false}>
+              {cardOrder.map((entry, index) => {
+                const isMine = entry.name === nickname;
+                return (
+                  <motion.div
+                    key={`${entry.name}-${entry.card}`}
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex items-center gap-2"
+                  >
+                    <Card
+                      value="?"
+                      name={entry.name}
+                      onClick={
+                        isMine
+                          ? () => handleRemoveCard(entry.card)
+                          : undefined
+                      }
+                    />
+                    {activeCard && activeCard.source === "hand" && (
+                      <motion.button
+                        layout
+                        className="text-xs bg-blue-600 text-white px-1 py-3 rounded hover:bg-blue-500 transition writing-vertical"
+                        onClick={() => handleInsertCard(index + 1)}
+                      >
+                        ここに出す
+                      </motion.button>
+
+                    )}
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
 
