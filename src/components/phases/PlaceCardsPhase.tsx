@@ -99,6 +99,15 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
 
     setMyCards(prev => prev.filter(c => c !== activeCard.value));
     setActiveCard(null);
+
+    setMyCards(prev => {
+      const updated = prev.filter(c => c !== activeCard.value);
+
+      const cardRef = ref(db, `rooms/${roomId}/cards/${nickname}`);
+      set(cardRef, updated.map(value => ({ value })));
+
+      return updated;
+    });
   };
 
   // -----------------------------
