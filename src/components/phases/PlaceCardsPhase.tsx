@@ -102,10 +102,8 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
 
     setMyCards(prev => {
       const updated = prev.filter(c => c !== activeCard.value);
-
       const cardRef = ref(db, `rooms/${roomId}/cards/${nickname}`);
       set(cardRef, updated.map(value => ({ value })));
-
       return updated;
     });
   };
@@ -119,7 +117,12 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
       return currentOrder.filter((c: CardEntry) => !(c.name === nickname && c.card === cardToRemove));
     });
 
-    setMyCards(prev => [...prev, cardToRemove]);
+    setMyCards((prev) => {
+      const updated = [...prev, cardToRemove];
+      const cardRef = ref(db, `rooms/${roomId}/cards/${nickname}`);
+      set(cardRef, updated.map((value) => ({ value })));
+      return updated;
+    });
   };
 
   // -----------------------------
@@ -142,15 +145,20 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
   // -----------------------------
   return (
     <div>
-      <h2 className="text-xl font-bold mb-4 text-center">カードを伏せて置こう！</h2>
-
       {/* お題情報の表示 */}
       {topic && (
-        <div className="text-center mb-4">
-          <h3 className="text-lg font-semibold mb-1">{topic.title}</h3>
-          <p className="text-sm text-gray-400">
-            1：{topic.min}　〜　100：{topic.max}
-          </p>
+        <div className="text-center mb-4 mt-4">
+          {/* お題タイトル */}
+          <h3 className="text-lg font-semibold mb-2">お題：{topic.title}</h3>
+
+          {/* スケール範囲の視覚表示 */}
+          <div className="my-4 max-w-md mx-auto">
+            <div className="grid grid-cols-2 text-xs text-gray-400">
+              <div className="text-left">1 {topic.min}</div>
+              <div className="text-right">{topic.max} 100</div>
+            </div>
+            <div className="h-[2px] bg-gray-600 mt-1"></div>
+          </div>
         </div>
       )}
 
