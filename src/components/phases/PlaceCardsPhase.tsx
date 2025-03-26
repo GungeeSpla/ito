@@ -27,6 +27,8 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
   const [players, setPlayers] = useState<Record<string, boolean>>({});
   const [isHost, setIsHost] = useState(false);
   const [level, setLevel] = useState<number>(1);
+  const [topic, setTopic] = useState<{ title: string; min: string; max: string } | null>(null);
+
 
   // -----------------------------
   // Firebaseデータ取得＆購読（初期化時）
@@ -70,6 +72,13 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
     onValue(levelRef, (snap) => {
       if (snap.exists()) {
         setLevel(snap.val());
+      }
+    });
+
+    const topicRef = ref(db, `rooms/${roomId}/topic`);
+    onValue(topicRef, (snap) => {
+      if (snap.exists()) {
+        setTopic(snap.val());
       }
     });
   }, [roomId, nickname]);
@@ -124,7 +133,17 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
   // -----------------------------
   return (
     <div>
-      <h2 className="text-xl font-bold mb-4">カードを伏せて置こう！</h2>
+      <h2 className="text-xl font-bold mb-4 text-center">カードを伏せて置こう！</h2>
+
+      {/* お題情報の表示 */}
+      {topic && (
+        <div className="text-center mb-4">
+          <h3 className="text-lg font-semibold mb-1">{topic.title}</h3>
+          <p className="text-sm text-gray-400">
+            1：{topic.min}　〜　100：{topic.max}
+          </p>
+        </div>
+      )}
 
       {/* 自分の手札 */}
       <div className="fixed bottom-0 w-full bg-gradient-to-t from-gray-900 to-transparent pt-8 pb-4 z-10">
@@ -195,20 +214,20 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
               })}
             </AnimatePresence>
           </div>
+
+          {/* 🆕 「めくりへ」ボタンを場の中央下に表示 */}
+          {isHost && allPlaced && (
+            <div className="absolute left-1/2 top-[calc(50%+80px)] -translate-x-1/2 mt-4">
+              <button
+                onClick={proceedToReveal}
+                className="px-4 py-2 w-fit whitespace-nowrap bg-green-600 text-white rounded shadow-lg"
+              >
+                めくりフェーズへ！
+              </button>
+            </div>
+          )}
         </div>
       </div>
-
-      {/* ホスト専用：全員出し終わったら進行ボタン表示 */}
-      {isHost && allPlaced && (
-        <div className="mt-6">
-          <button
-            onClick={proceedToReveal}
-            className="px-4 py-2 bg-green-600 text-white rounded"
-          >
-            全員出し終わったのでめくりフェーズへ！
-          </button>
-        </div>
-      )}
     </div>
   );
 };
