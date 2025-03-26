@@ -20,10 +20,10 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
   // -----------------------------
   // ステート管理
   // -----------------------------
-  const [cardOrder, setCardOrder] = useState<CardEntry[]>([]); // 全カードの順序
-  const [revealedCards, setRevealedCards] = useState<number[]>([]); // めくられたカード番号
-  const [isHost, setIsHost] = useState(false); // ホストかどうか
-  const [status, setStatus] = useState<"success" | "fail" | null>(null); // 成功/失敗の状態
+  const [cardOrder, setCardOrder] = useState<CardEntry[]>([]);
+  const [revealedCards, setRevealedCards] = useState<number[]>([]);
+  const [isHost, setIsHost] = useState(false);
+  const [status, setStatus] = useState<"success" | "fail" | null>(null);
 
   // -----------------------------
   // カード順序を取得・監視
@@ -36,7 +36,6 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
         setCardOrder(data);
       }
     });
-
     return () => unsub();
   }, [roomId]);
 
@@ -50,7 +49,6 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
         setIsHost(true);
       }
     });
-
     return () => unsub();
   }, [roomId, nickname]);
 
@@ -65,7 +63,6 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
         setRevealedCards(data);
       }
     });
-
     return () => unsub();
   }, [roomId]);
 
@@ -100,23 +97,25 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
   // UI描画
   // -----------------------------
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4 text-center">カードをめくろう！</h2>
+    <div className="relative min-h-screen bg-gray-900 text-white">
+      {/* タイトルとステータス */}
+      <div className="text-center pt-6">
+        <h2 className="text-xl font-bold mb-2">カードをめくろう！</h2>
+        {status === "success" && (
+          <div className="mb-4 text-green-400 font-bold text-2xl">✅ 成功！</div>
+        )}
+        {status === "fail" && (
+          <div className="mb-4 text-red-400 font-bold text-2xl">❌ 失敗！</div>
+        )}
+      </div>
 
-      {status === "success" && (
-        <div className="mb-4 text-green-400 font-bold text-2xl text-center">✅ 成功！</div>
-      )}
-      {status === "fail" && (
-        <div className="mb-4 text-red-400 font-bold text-2xl text-center">❌ 失敗！</div>
-      )}
-
-      <div className="relative min-h-[60vh]">
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-wrap gap-2 items-start">
-
+      {/* カードを中央に固定 */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+        <div className="flex flex-wrap gap-2 justify-center items-start">
           {/* 基準カード */}
           <Card value={0} name="基準" />
 
-          {/* プレイヤーのカード（Reveal） */}
+          {/* プレイヤーカード */}
           {cardOrder.map((entry, index) => {
             const isRevealed = revealedCards.includes(entry.card);
 
@@ -135,18 +134,19 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
               />
             );
           })}
-
-          {isHost && (
-            <div className="absolute left-1/2 top-[calc(50%+80px)] -translate-x-1/2 mt-4">
-              <button
-                onClick={resetGame}
-                className="px-4 py-2 w-fit whitespace-nowrap bg-green-600 text-white rounded shadow-lg"
-              >
-                ロビーに戻る
-              </button>
-            </div>
-          )}
         </div>
+
+        {/* ロビーに戻るボタン */}
+        {isHost && (
+          <div className="mt-6 text-center">
+            <button
+              onClick={resetGame}
+              className="px-4 py-2 w-fit whitespace-nowrap bg-green-600 text-white rounded shadow-lg"
+            >
+              ロビーに戻る
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
