@@ -23,6 +23,7 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
   const [cardOrder, setCardOrder] = useState<CardEntry[]>([]); // 全カードの順序
   const [revealedCards, setRevealedCards] = useState<number[]>([]); // めくられたカード番号
   const [isHost, setIsHost] = useState(false); // ホストかどうか
+  const [status, setStatus] = useState<"success" | "fail" | null>(null); // 成功/失敗の状態
 
   // -----------------------------
   // カード順序を取得・監視
@@ -69,6 +70,25 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
   }, [roomId]);
 
   // -----------------------------
+  // クリア判定ロジック
+  // -----------------------------
+  useEffect(() => {
+    const revealedSequence = cardOrder
+      .map((entry) => entry.card)
+      .filter((card) => revealedCards.includes(card));
+
+    if (revealedSequence.length < 2) return;
+
+    const isSorted = revealedSequence.every((val, i, arr) => i === 0 || arr[i - 1] <= val);
+
+    if (!isSorted) {
+      setStatus("fail");
+    } else if (revealedSequence.length === cardOrder.length) {
+      setStatus("success");
+    }
+  }, [revealedCards, cardOrder]);
+
+  // -----------------------------
   // ゲームをリセットする（ホストのみ）
   // -----------------------------
   const resetGame = async () => {
@@ -82,6 +102,14 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
   return (
     <div className="p-4">
       <h2 className="text-xl font-bold mb-4">カードをめくろう！</h2>
+
+      {/* 成功・失敗の表示 */}
+      {status === "success" && (
+        <div className="mb-4 text-green-400 font-bold text-lg">✅ 成功！</div>
+      )}
+      {status === "fail" && (
+        <div className="mb-4 text-red-400 font-bold text-lg">❌ 失敗！</div>
+      )}
 
       <div className="flex flex-wrap gap-2">
         {/* 基準カード */}
