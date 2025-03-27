@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Howl } from "howler";
 import { ref, get, set, onValue, runTransaction } from "firebase/database";
 import { db } from "../../firebase";
@@ -32,6 +32,7 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
   const [isHost, setIsHost] = useState(false);
   const [level, setLevel] = useState<number>(1);
   const [topic, setTopic] = useState<{ title: string; min: string; max: string } | null>(null);
+  const prevCardCountRef = useRef(0);
 
   // -----------------------------
   // Firebase購読系（初期化時）
@@ -49,7 +50,12 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
     const orderRef = ref(db, `rooms/${roomId}/cardOrder`);
     onValue(orderRef, (snap) => {
       const data = snap.val();
-      setCardOrder(Array.isArray(data) ? [...data] : []);
+      const newOrder = Array.isArray(data) ? [...data] : [];
+      if (newOrder.length > prevCardCountRef.current) {
+        placeSound.play();
+      }
+      prevCardCountRef.current = newOrder.length;
+      setCardOrder(newOrder);
     });
 
     const playersRef = ref(db, `rooms/${roomId}/players`);
@@ -117,9 +123,6 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
     });
   };
 
-  // -----------------------------
-  // ホスト：めくりフェーズへ進行
-  // -----------------------------
   const proceedToReveal = async () => {
     const phaseRef = ref(db, `rooms/${roomId}/phase`);
     const updatedRef = ref(db, `rooms/${roomId}/lastUpdated`);
@@ -129,9 +132,6 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
 
   const allPlaced = cardOrder.length >= Object.keys(players).length + (level - 1);
 
-  // -----------------------------
-  // UI描画
-  // -----------------------------
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -139,7 +139,7 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
       transition={{ duration: 0.6 }}
       className="relative min-h-screen bg-gray-900 text-white"
     >
-      {/* お題表示（上部に絶対配置） */}
+      {/* お題表示 */}
       {topic && (
         <div className="absolute top-4 w-full text-center px-4">
           <h3 className="text-lg font-semibold mb-2">お題：{topic.title}</h3>
@@ -153,7 +153,7 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
         </div>
       )}
 
-      {/* 場のカード（中央に絶対配置） */}
+      {/* 場のカード */}
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-wrap gap-2 items-start">
         <div className="flex gap-2 items-center">
           <Card value={0} name="基準" />
@@ -200,7 +200,6 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
           })}
         </AnimatePresence>
 
-        {/* めくりへ進行ボタン（中央下に固定） */}
         {isHost && allPlaced && (
           <div className="absolute left-1/2 top-[calc(100%+40px)] -translate-x-1/2">
             <button
@@ -213,7 +212,7 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
         )}
       </div>
 
-      {/* 自分の手札（下固定） */}
+      {/* 自分の手札 */}
       <div className="fixed bottom-0 w-full bg-gradient-to-t from-gray-900 to-transparent pt-8 pb-4 z-10">
         <div
           className="flex flex-wrap gap-2 justify-center scale-200 translate-y-10 transform"
@@ -230,7 +229,7 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
         </div>
       </div>
 
-      {/* 中断ボタン（右下固定） */}
+      {/* 中断ボタン */}
       {isHost && (
         <div className="fixed bottom-4 right-4 z-20">
           <button

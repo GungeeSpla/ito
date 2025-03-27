@@ -136,7 +136,7 @@ export const topics: Topic[] = [
   { title: "お嬢様になって考えよう 優秀な執事", min: "ポンコツ", max: "優秀", set: "rainbow" },
   { title: "人からごちそうされたい食べ物", min: "嬉しくない", max: "嬉しい", set: "rainbow" },
   { title: "桃太郎の場面（お話のどのあたりか）", min: "むかしむかし", max: "めでたしめでたし", set: "rainbow" },
-  { title: "能力者になって考えよう ハデに使えそうな脳力", min: "地味", max: "ハデ", set: "rainbow" },
+  { title: "能力者になって考えよう ハデに使えそうな能力", min: "地味", max: "ハデ", set: "rainbow" },
   { title: "海の生き物の人気", min: "人気ない", max: "人気ある", set: "rainbow" },
   { title: "冷蔵庫の中にあったらテンションが上がるもの", min: "上がらない", max: "上がる", set: "rainbow" },
   { title: "高校生になって考えよう 授業中、起きたら大変なこと", min: "大変じゃない", max: "大変", set: "rainbow" },
