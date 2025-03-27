@@ -70,12 +70,6 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
     <div className="min-h-[80vh] flex items-center justify-center bg-gray-900 text-white px-4">
       <div className="bg-gray-800 p-6 rounded-xl shadow-md w-full max-w-md animate-fade-in relative">
 
-        {/* ルームID表示 */}
-        <div className="text-sm text-gray-400 text-center mb-4 flex justify-center items-center gap-2">
-          <span className="bg-gray-700 text-white text-xs px-1.5 py-1 rounded">ルームID</span>
-          <span className="font-mono">{roomId}</span>
-        </div>
-
         {/* URLコピーUI */}
         <div className="mb-4 text-center relative">
           <button
