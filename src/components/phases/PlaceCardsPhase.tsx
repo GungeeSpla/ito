@@ -1,8 +1,15 @@
 import React, { useEffect, useState } from "react";
+import { Howl } from "howler";
 import { ref, get, set, onValue, runTransaction } from "firebase/database";
 import { db } from "../../firebase";
 import Card from "../common/Card";
 import { AnimatePresence, motion } from "framer-motion";
+
+// 効果音：カードを出す音
+const placeSound = new Howl({
+  src: ["/sounds/card-place.mp3"],
+  volume: 0.5,
+});
 
 // -----------------------------
 // 型定義

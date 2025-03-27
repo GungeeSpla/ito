@@ -1,4 +1,11 @@
 import React from "react";
+import { Howl } from "howler";
+
+// 効果音：カードを配る音
+const dealSound = new Howl({
+  src: ["/sounds/card-deal.mp3"],
+  volume: 0.5,
+});
 
 interface Props {
   roomId: string;
@@ -6,6 +13,8 @@ interface Props {
 }
 
 const DealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
+  dealSound.play()
+  
   return (
     <div>
       {/* <h2>カードを配っています…</h2> */}

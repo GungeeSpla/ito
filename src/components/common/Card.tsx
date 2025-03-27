@@ -25,7 +25,10 @@ const Card: React.FC<CardProps> = ({
   onClick
 }) => {
   return (
-    <div className="w-20 h-28 [perspective:1000px]" onClick={onClick}>
+    <div
+      className="w-20 h-28 [perspective:1000px] cursor-pointer hover:scale-105 hover:shadow-xl transition-transform duration-200"
+      onClick={onClick}
+    >
       <div
         className={`
           relative w-full h-full transition-transform duration-500

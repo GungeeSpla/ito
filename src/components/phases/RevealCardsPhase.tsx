@@ -1,7 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { Howl } from "howler";
 import { ref, onValue, set } from "firebase/database";
 import { db } from "../../firebase";
 import Card from "../common/Card";
+
+// 効果音：カードをめくる音
+const flipSound = new Howl({
+  src: ["/sounds/card-flip.mp3"],
+  volume: 0.5,
+});
 
 // -----------------------------
 // 型定義
@@ -24,6 +31,9 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
   const [revealedCards, setRevealedCards] = useState<number[]>([]);
   const [isHost, setIsHost] = useState(false);
   const [status, setStatus] = useState<"success" | "fail" | null>(null);
+
+  // 前回のめくられたカード状態を記憶（効果音判定用）
+  const prevRevealedRef = useRef<number[]>([]);
 
   // -----------------------------
   // カード順序を取得・監視
@@ -65,6 +75,20 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
     });
     return () => unsub();
   }, [roomId]);
+
+  // -----------------------------
+  // 効果音を再生（revealedCards の更新を検知）
+  // -----------------------------
+  useEffect(() => {
+    const prev = prevRevealedRef.current;
+    const newlyRevealed = revealedCards.filter((card) => !prev.includes(card));
+
+    if (newlyRevealed.length > 0) {
+      flipSound.play();
+    }
+
+    prevRevealedRef.current = revealedCards;
+  }, [revealedCards]);
 
   // -----------------------------
   // クリア判定ロジック
