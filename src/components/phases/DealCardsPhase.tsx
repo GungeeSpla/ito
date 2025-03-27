@@ -8,8 +8,8 @@ interface Props {
 const DealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
   return (
     <div>
-      <h2>カードを配っています…</h2>
-      <p>ホストがカードを配るのを待ってね！</p>
+      {/* <h2>カードを配っています…</h2> */}
+      {/* <p>ホストがカードを配るのを待ってね！</p> */}
     </div>
   );
 };

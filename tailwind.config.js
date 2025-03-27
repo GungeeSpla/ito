@@ -18,6 +18,10 @@ export default {
       scale: {
         200: "2",
       },
+      rotate: {
+        'y-180': '180deg',
+      },
+      transform: ['hover', 'focus'],
     },
   },
   plugins: [],
