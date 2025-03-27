@@ -12,12 +12,10 @@ interface CardProps {
 }
 
 // -----------------------------
-// カード表示コンポーネント
+// カード表示コンポーネント（表と裏の両面を作成）
 // -----------------------------
-// - めくられていない場合は背景を灰色に
-// - アクティブ状態なら青枠で強調
-// - 名前が指定されていれば上部に表示
-// - めくれるときに3D回転で演出を付ける
+// - `.card-inner` を回転させてめくる
+// - `.card-front` と `.card-back` を重ねて配置
 // -----------------------------
 const Card: React.FC<CardProps> = ({
   value,
@@ -27,23 +25,42 @@ const Card: React.FC<CardProps> = ({
   onClick
 }) => {
   return (
-    <div
-      className={`w-20 h-28 flex flex-col justify-center items-center border rounded text-black
-        ${revealed ? "bg-white" : "bg-gray-200"}           // めくれているかで背景変更
-        ${isActive ? "border-4 border-blue-500" : "border-gray-300"}  // 選択中の見た目
-        cursor-pointer text-lg font-bold transition-transform duration-500`}
-      onClick={onClick}
-      // ▼ 3D回転アニメーションのためのインラインスタイル
-      style={{
-        transform: `rotateY(${revealed ? 0 : 180}deg)`,
-        transformStyle: "preserve-3d"
-      }}
-    >
-      {/* 所有者の名前（任意） */}
-      {name && <p className="text-sm">{name}</p>}
+    <div className="w-20 h-28 [perspective:1000px]" onClick={onClick}>
+      <div
+        className={`
+          relative w-full h-full transition-transform duration-500
+          ${revealed ? "rotate-y-0" : "rotate-y-180"}
+        `}
+        style={{
+          transform: `rotateY(${revealed ? 0 : 180}deg)`,
+          transformStyle: "preserve-3d",
+        }}
+      >
+        {/* 表面 */}
+        <div
+          className={`absolute w-full h-full rounded border 
+            ${isActive ? "border-4 border-blue-500" : "border border-gray-300"}
+            bg-white text-black flex flex-col justify-center items-center
+            backface-hidden`}
+          style={{ backfaceVisibility: "hidden" }}
+        >
+          {name && <p className="text-sm">{name}</p>}
+          <strong className="text-5xl">{value}</strong>
+        </div>
 
-      {/* 数字 or "?" */}
-      <strong className="text-5xl">{value}</strong>
+        {/* 裏面 */}
+        <div
+          className="absolute w-full h-full rounded border border-gray-300
+            bg-gray-400 flex justify-center items-center
+            backface-hidden rotate-y-180"
+          style={{
+            backfaceVisibility: "hidden",
+            transform: "rotateY(180deg)",
+          }}
+        >
+          <p className="text-3xl">？</p>
+        </div>
+      </div>
     </div>
   );
 };
