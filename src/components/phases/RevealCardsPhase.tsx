@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Howl } from "howler";
+import VolumeControl from "../common/VolumeControl";
+import { playSE } from "../../utils/audio";
 import { ref, onValue, set } from "firebase/database";
 import { db } from "../../firebase";
 import Card from "../common/Card";
@@ -172,7 +173,8 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
           </div>
         )}
       </div>
-    </div>
+        <VolumeControl />
+</div>
   );
 };
 
