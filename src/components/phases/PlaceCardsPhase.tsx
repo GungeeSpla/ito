@@ -184,6 +184,7 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
                 <Card
                   value="?"
                   name={entry.name}
+                  revealed={false}
                   onClick={isMine ? () => handleRemoveCard(entry.card) : undefined}
                 />
                 {activeCard?.source === "hand" && (

@@ -4,20 +4,37 @@ import React, { useEffect } from "react";
 // Props型：カード1枚の情報
 // -----------------------------
 interface CardProps {
-  value: number | "?";            // 表示される数字（または "?" で非公開）
-  name?: string;                  // 所有者の名前（Revealフェーズなどで表示）
-  revealed?: boolean;             // めくられているかどうか（背景色切り替え）
-  isActive?: boolean;             // 選択中のカードかどうか（強調表示）
-  onClick?: () => void;           // カードがクリックされたときのイベント
-  onFlipComplete?: (value: number) => void; // めくりアニメ完了通知コールバック
+  value: number | "?";
+  name?: string;
+  revealed?: boolean;
+  isActive?: boolean;
+  onClick?: () => void;
+  onFlipComplete?: (value: number) => void;
 }
 
 // -----------------------------
-// カード表示コンポーネント（表と裏の両面を作成）
+// プレイヤー名から背景色クラスを決定するユーティリティ
 // -----------------------------
-// - `.card-inner` を回転させてめくる
-// - `.card-front` と `.card-back` を重ねて配置
-// -----------------------------
+const getPlayerColorClass = (name: string | undefined): string => {
+  if (!name) return "bg-gray-400";
+  const colors = [
+    "bg-red-400",
+    "bg-blue-400",
+    "bg-green-400",
+    "bg-yellow-400",
+    "bg-purple-400",
+    "bg-pink-400",
+    "bg-teal-400",
+    "bg-orange-400",
+  ];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % colors.length;
+  return colors[index];
+};
+
 const Card: React.FC<CardProps> = ({
   value,
   name,
@@ -26,20 +43,20 @@ const Card: React.FC<CardProps> = ({
   onClick,
   onFlipComplete
 }) => {
-  // 🔁 めくったときにアニメーション終了後のコールバックを呼ぶ
   useEffect(() => {
     if (revealed && typeof value === "number" && onFlipComplete) {
       const timer = setTimeout(() => {
         onFlipComplete(value);
-      }, 500); // ↩️ transition duration に合わせる（500ms）
-
+      }, 500);
       return () => clearTimeout(timer);
     }
   }, [revealed, value, onFlipComplete]);
 
+  const playerClass = name ? `player-${name}` : "";
+
   return (
     <div
-      className="w-20 h-28 [perspective:1000px] cursor-pointer hover:scale-105 hover:shadow-xl transition-transform duration-200"
+      className={`w-20 h-28 [perspective:1000px] cursor-pointer hover:scale-105 hover:shadow-xl transition-transform duration-200 ${playerClass}`}
       onClick={onClick}
     >
       <div
@@ -66,14 +83,17 @@ const Card: React.FC<CardProps> = ({
 
         {/* 裏面 */}
         <div
-          className="absolute w-full h-full rounded border border-gray-300
-            bg-gray-400 flex justify-center items-center
-            backface-hidden rotate-y-180"
+          className={`
+            absolute w-full h-full rounded border border-gray-300
+            text-black flex flex-col justify-center items-center
+            backface-hidden rotate-y-180 ${getPlayerColorClass(name)}
+          `}
           style={{
             backfaceVisibility: "hidden",
             transform: "rotateY(180deg)",
           }}
         >
+          {name && <p className="text-xs mb-1">{name}</p>}
           <p className="text-3xl">？</p>
         </div>
       </div>
