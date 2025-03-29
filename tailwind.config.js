@@ -9,6 +9,7 @@ export default {
       animation: {
         'fade-in': 'fadeIn 0.4s ease-out',
         'emoji-float': 'emojiFloat ease-out forwards',
+        'fail-fall': 'failFall linear forwards',
       },
       keyframes: {
         fadeIn: {
@@ -18,6 +19,10 @@ export default {
         emojiFloat: {
           '0%': { transform: 'translateY(0)', opacity: 1 },
           '100%': { transform: 'translateY(-120vh)', opacity: 0 },
+        },
+        failFall: {
+          '0%': { transform: 'translateY(-10vh)', opacity: 1 },
+          '100%': { transform: 'translateY(110vh)', opacity: 0 },
         },
       },
       scale: {
