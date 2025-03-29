@@ -137,7 +137,7 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}
-      className="relative min-h-screen bg-gray-900 text-white"
+      className="relative min-h-screen text-white"
     >
       {/* お題表示 */}
       {topic && (
@@ -182,9 +182,10 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
                 className="flex items-center gap-2"
               >
                 <Card
-                  value="?"
+                  value={entry.card}
                   name={entry.name}
                   revealed={false}
+                  isMine={entry.name === nickname}
                   onClick={isMine ? () => handleRemoveCard(entry.card) : undefined}
                 />
                 {activeCard?.source === "hand" && (

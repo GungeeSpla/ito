@@ -139,7 +139,7 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
   };
 
   return (
-    <div className="relative min-h-screen bg-gray-900 text-white">
+    <div className="relative min-h-screen text-white">
       {/* タイトルとステータス */}
       <div className="text-center pt-6">
         <h2 className="text-xl font-bold mb-2">カードをめくろう！</h2>

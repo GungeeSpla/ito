@@ -59,7 +59,7 @@ const ChooseTopicPhase: React.FC<Props> = ({ topicOptions, isHost, chooseTopic }
   }, [roomId, selectedTitle, chooseTopic]);
 
   return (
-    <div className="min-h-[70vh] flex items-center justify-center bg-gray-900 text-white px-4">
+    <div className="min-h-[70vh] flex items-center justify-center text-white px-4">
       <div className="max-w-3xl w-full">
         <motion.h2
           className="text-xl font-bold text-center mb-6"

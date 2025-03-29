@@ -8,6 +8,7 @@ interface CardProps {
   name?: string;
   revealed?: boolean;
   isActive?: boolean;
+  isMine?: boolean;
   onClick?: () => void;
   onFlipComplete?: (value: number) => void;
 }
@@ -40,6 +41,7 @@ const Card: React.FC<CardProps> = ({
   name,
   revealed = true,
   isActive = false,
+  isMine = false,
   onClick,
   onFlipComplete
 }) => {
@@ -56,7 +58,11 @@ const Card: React.FC<CardProps> = ({
 
   return (
     <div
-      className={`w-20 h-28 [perspective:1000px] cursor-pointer hover:scale-105 hover:shadow-xl transition-transform duration-200 ${playerClass}`}
+      className={`
+        ito-card w-28 h-36 relative [perspective:1000px] cursor-pointer 
+        transition hover:scale-105 duration-200 
+        ${playerClass}
+      `}
       onClick={onClick}
     >
       <div
@@ -92,9 +98,17 @@ const Card: React.FC<CardProps> = ({
             backfaceVisibility: "hidden",
             transform: "rotateY(180deg)",
           }}
+          title={isMine && typeof value === "number" ? `${value}` : ""}
         >
           {name && <p className="text-xs mb-1">{name}</p>}
           <p className="text-3xl">？</p>
+
+          {/* 🟨 チップ（自分のカード＆裏向き時のみ） */}
+          {isMine && !revealed && typeof value === "number" && (
+            <div className="absolute bottom-full mb-1 text-xs bg-black text-white px-2 py-0.5 rounded shadow opacity-0 hover:opacity-100 transition-opacity">
+              {value}
+            </div>
+          )}
         </div>
       </div>
     </div>

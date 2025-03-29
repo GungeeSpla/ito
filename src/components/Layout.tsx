@@ -4,7 +4,7 @@ import { ExternalLink, Home } from "lucide-react"; // アイコン
 import { useEffect, useState } from "react";
 import { ref, onValue } from "firebase/database";
 import { db } from "../firebase";
-import VolumeControl from "./VolumeControl" 
+import VolumeControl from "./VolumeControl"
 
 // ------------------------------------------------
 // アプリ全体の共通レイアウトコンポーネント
@@ -28,7 +28,7 @@ const Layout: React.FC = () => {
     });
     return () => unsub();
   }, [location]);
-   // ページ遷移ナビゲーション関数
+  // ページ遷移ナビゲーション関数
 
   // ホームアイコンが押されたときの処理
   const handleHomeClick = () => {
@@ -62,11 +62,11 @@ const Layout: React.FC = () => {
       </header> : null}
 
       {/* ------------------ メインコンテンツ ------------------ */}
-      <main className="bg-gray-900 flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto">
         {/* 現在のページの中身を差し込む */}
         <Outlet />
       </main>
-      
+
       <VolumeControl />
 
       {/* ------------------ フッター ------------------ */}
