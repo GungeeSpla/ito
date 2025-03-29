@@ -7,7 +7,7 @@ import Card from "../common/Card";
 // 効果音：カードをめくる音
 const flipSound = new Howl({
   src: ["/sounds/card-flip.mp3"],
-  volume: 0.5,
+  volume: 1,
 });
 
 // -----------------------------

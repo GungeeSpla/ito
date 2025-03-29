@@ -8,7 +8,7 @@ import { AnimatePresence, motion } from "framer-motion";
 // 効果音：カードを出す音
 const placeSound = new Howl({
   src: ["/sounds/card-place.mp3"],
-  volume: 0.5,
+  volume: 1,
 });
 
 // -----------------------------

@@ -1,6 +1,7 @@
 import React from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom"; // ページ遷移とルーティング用
 import { ExternalLink, Home } from "lucide-react"; // アイコン
+import VolumeControl from "./VolumeControl" 
 
 // ------------------------------------------------
 // アプリ全体の共通レイアウトコンポーネント
@@ -47,6 +48,8 @@ const Layout: React.FC = () => {
         {/* 現在のページの中身を差し込む */}
         <Outlet />
       </main>
+      
+      <VolumeControl />
 
       {/* ------------------ フッター ------------------ */}
       <footer className="bg-gray-950 text-center py-2 text-sm text-white">
