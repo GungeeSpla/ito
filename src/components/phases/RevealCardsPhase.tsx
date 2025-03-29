@@ -40,6 +40,7 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
   const [isHost, setIsHost] = useState(false);
   const [status, setStatus] = useState<"success" | "fail" | null>(null);
+  const [isComplete, setIsComplete] = useState(false);
 
   const prevRevealedRef = useRef<number[]>([]);
 
@@ -117,8 +118,10 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
 
       if (!isSorted) {
         setStatus("fail");
+        setIsComplete(true);
       } else if (revealedSequence.length === cardOrder.length) {
         setStatus("success");
+        setIsComplete(true);
       }
     }
   }, [flippedCards, revealedCards, cardOrder]);
@@ -177,7 +180,7 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
         </div>
 
         {/* ロビーに戻るボタン */}
-        {isHost && (
+        {isHost && isComplete && (
           <div className="absolute left-1/2 top-[calc(100%+40px)] -translate-x-1/2">
             <button
               onClick={resetGame}
