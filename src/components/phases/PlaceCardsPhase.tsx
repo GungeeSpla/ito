@@ -231,7 +231,7 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
 
       {/* 中断ボタン */}
       {isHost && (
-        <div className="fixed bottom-4 right-4 z-20">
+        <div className="fixed top-4 right-4 z-50">
           <button
             onClick={async () => {
               await set(ref(db, `rooms/${roomId}/phase`), "waiting");

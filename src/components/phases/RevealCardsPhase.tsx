@@ -49,7 +49,7 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
       successSound.play();
     }
   }, [status]);
-  
+
   // 失敗時の効果音
   useEffect(() => {
     if (status === "fail") {
@@ -178,7 +178,7 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
 
         {/* ロビーに戻るボタン */}
         {isHost && (
-          <div className="mt-6 text-center">
+          <div className="absolute left-1/2 top-[calc(100%+40px)] -translate-x-1/2">
             <button
               onClick={resetGame}
               className="px-4 py-2 w-fit whitespace-nowrap bg-green-600 text-white rounded shadow-lg"
