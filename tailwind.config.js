@@ -8,11 +8,16 @@ export default {
     extend: {
       animation: {
         'fade-in': 'fadeIn 0.4s ease-out',
+        'emoji-float': 'emojiFloat ease-out forwards',
       },
       keyframes: {
         fadeIn: {
           '0%': { opacity: 0, transform: 'scale(0.95)' },
           '100%': { opacity: 1, transform: 'scale(1)' },
+        },
+        emojiFloat: {
+          '0%': { transform: 'translateY(0)', opacity: 1 },
+          '100%': { transform: 'translateY(-120vh)', opacity: 0 },
         },
       },
       scale: {
@@ -25,4 +30,4 @@ export default {
     },
   },
   plugins: [],
-}
+};

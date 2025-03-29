@@ -1,14 +1,15 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 // -----------------------------
 // Props型：カード1枚の情報
 // -----------------------------
 interface CardProps {
-  value: number | "?";           // 表示される数字（または "?" で非公開）
-  name?: string;                 // 所有者の名前（Revealフェーズなどで表示）
-  revealed?: boolean;           // めくられているかどうか（背景色切り替え）
-  isActive?: boolean;           // 選択中のカードかどうか（強調表示）
-  onClick?: () => void;         // カードがクリックされたときのイベント
+  value: number | "?";            // 表示される数字（または "?" で非公開）
+  name?: string;                  // 所有者の名前（Revealフェーズなどで表示）
+  revealed?: boolean;             // めくられているかどうか（背景色切り替え）
+  isActive?: boolean;             // 選択中のカードかどうか（強調表示）
+  onClick?: () => void;           // カードがクリックされたときのイベント
+  onFlipComplete?: (value: number) => void; // めくりアニメ完了通知コールバック
 }
 
 // -----------------------------
@@ -22,8 +23,20 @@ const Card: React.FC<CardProps> = ({
   name,
   revealed = true,
   isActive = false,
-  onClick
+  onClick,
+  onFlipComplete
 }) => {
+  // 🔁 めくったときにアニメーション終了後のコールバックを呼ぶ
+  useEffect(() => {
+    if (revealed && typeof value === "number" && onFlipComplete) {
+      const timer = setTimeout(() => {
+        onFlipComplete(value);
+      }, 500); // ↩️ transition duration に合わせる（500ms）
+
+      return () => clearTimeout(timer);
+    }
+  }, [revealed, value, onFlipComplete]);
+
   return (
     <div
       className="w-20 h-28 [perspective:1000px] cursor-pointer hover:scale-105 hover:shadow-xl transition-transform duration-200"

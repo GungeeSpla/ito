@@ -3,10 +3,17 @@ import { Howl } from "howler";
 import { ref, onValue, set } from "firebase/database";
 import { db } from "../../firebase";
 import Card from "../common/Card";
+import EmojiBurst from "../common/EmojiBurst";
 
 // 効果音：カードをめくる音
 const flipSound = new Howl({
   src: ["/sounds/card-flip.mp3"],
+  volume: 1,
+});
+
+// 効果音：成功した
+const successSound = new Howl({
+  src: ["/sounds/success.mp3"],
   volume: 1,
 });
 
@@ -34,6 +41,15 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
 
   // 前回のめくられたカード状態を記憶（効果音判定用）
   const prevRevealedRef = useRef<number[]>([]);
+
+  // -----------------------------
+  // 成功したとき
+  // -----------------------------
+  useEffect(() => {
+    if (status === "success") {
+      successSound.play()
+    }
+  }, [status]);
 
   // -----------------------------
   // カード順序を取得・監視
@@ -172,6 +188,9 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
           </div>
         )}
       </div>
+
+      {/* ✅ 成功演出！ */}
+      {status === "success" && <EmojiBurst />}
     </div>
   );
 };
