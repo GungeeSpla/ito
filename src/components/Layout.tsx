@@ -1,6 +1,9 @@
 import React from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom"; // ページ遷移とルーティング用
 import { ExternalLink, Home } from "lucide-react"; // アイコン
+import { useEffect, useState } from "react";
+import { ref, onValue } from "firebase/database";
+import { db } from "../firebase";
 import VolumeControl from "./VolumeControl" 
 
 // ------------------------------------------------
@@ -10,7 +13,22 @@ import VolumeControl from "./VolumeControl"
 // ------------------------------------------------
 const Layout: React.FC = () => {
   const location = useLocation();   // 現在のURLパスを取得
-  const navigate = useNavigate();   // ページ遷移ナビゲーション関数
+  const navigate = useNavigate();
+  const [phase, setPhase] = useState<string | null>(null);
+
+  // Firebaseから現在のフェーズを取得・監視
+  useEffect(() => {
+    const roomId = location.pathname.split("/").pop();
+    if (!roomId || !location.pathname.startsWith("/room")) return;
+    const phaseRef = ref(db, `rooms/${roomId}/phase`);
+    const unsub = onValue(phaseRef, (snap) => {
+      if (snap.exists()) {
+        setPhase(snap.val());
+      }
+    });
+    return () => unsub();
+  }, [location]);
+   // ページ遷移ナビゲーション関数
 
   // ホームアイコンが押されたときの処理
   const handleHomeClick = () => {
@@ -28,7 +46,7 @@ const Layout: React.FC = () => {
   return (
     <div className="w-screen h-screen flex flex-col overflow-hidden">
       {/* ------------------ ヘッダー ------------------ */}
-      <header className="bg-gray-950 shadow-md py-4 px-4 flex justify-between items-center">
+      {phase === "waiting" || phase === null ? <header className="bg-gray-950 shadow-md py-4 px-4 flex justify-between items-center">
         {/* 中央タイトル */}
         <h1 className="text-2xl font-bold text-white text-center w-full">
           ito レインボー ブラウザ版（ファンメイド）
@@ -41,7 +59,7 @@ const Layout: React.FC = () => {
           size={24}
           aria-label="ホームへ戻る"
         />
-      </header>
+      </header> : null}
 
       {/* ------------------ メインコンテンツ ------------------ */}
       <main className="bg-gray-900 flex-1 overflow-auto">
@@ -52,7 +70,7 @@ const Layout: React.FC = () => {
       <VolumeControl />
 
       {/* ------------------ フッター ------------------ */}
-      <footer className="bg-gray-950 text-center py-2 text-sm text-white">
+      {phase === "waiting" || phase === null ? <footer className="bg-gray-950 text-center py-2 text-sm text-white">
         『
         <a
           href="https://arclightgames.jp/product/705rainbow/"
@@ -75,7 +93,7 @@ const Layout: React.FC = () => {
           こちら <ExternalLink size={12} />
         </a>
         。
-      </footer>
+      </footer> : null}
     </div>
   );
 };
