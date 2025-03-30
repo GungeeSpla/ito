@@ -62,10 +62,10 @@ function App() {
   // -----------------------------
   return (
     <div
-      className={`min-h-[70vh] flex items-center justify-center bg-gray-900 text-white transition-opacity duration-300
+      className={`min-h-[70vh] flex items-center justify-center transition-opacity duration-300
         ${isFading ? "opacity-0" : "opacity-100"}`}
     >
-      <div className="bg-gray-800 p-6 rounded-xl shadow-md w-80 text-center animate-fade-in">
+      <div className="bg-white/70 backdrop-blur-sm text-black p-6 rounded-xl shadow-md w-80 text-center animate-fade-in">
         <h1 className="text-xl font-bold mb-4">
           ニックネームを入力して、ルームを作成してください。
         </h1>
@@ -83,7 +83,7 @@ function App() {
             placeholder="ここにニックネームを入力"
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
-            className="w-full p-2 border border-gray-600 bg-gray-600 text-white rounded mb-4 text-center
+            className="w-full p-2 border border-gray-600 bg-white text-black rounded mb-4 text-center
               placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
           />
           <button

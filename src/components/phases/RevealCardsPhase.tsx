@@ -142,7 +142,7 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
     <div className="relative min-h-screen text-white">
       {/* タイトルとステータス */}
       <div className="text-center pt-6">
-        <h2 className="text-xl font-bold mb-2">カードをめくろう！</h2>
+        <h2 className="text-3xl font-bold text-shadow-md mt-6 mb-4">カードをめくろう！</h2>
         {status === "success" && (
           <div className="mb-4 text-green-400 font-bold text-2xl">✅ 成功！</div>
         )}
@@ -155,7 +155,7 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
         <div className="flex flex-wrap gap-2 justify-center items-start">
           {/* 基準カード */}
-          <Card value={0} name="基準" />
+          <Card value={0} name="" />
 
           {/* プレイヤーカード */}
           {cardOrder.map((entry, index) => {
@@ -166,6 +166,7 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
                 key={index}
                 value={isRevealed ? entry.card : "?"}
                 name={entry.name}
+                mode="reveal"
                 revealed={isRevealed}
                 onClick={() => {
                   if (!isRevealed) {

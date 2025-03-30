@@ -29,7 +29,7 @@ export default function VolumeControl() {
 
   return (
     <div className="fixed bottom-4 right-4 z-50 flex items-center space-x-2 bg-white/70 backdrop-blur-md p-2 rounded-xl shadow-md">
-      <button onClick={toggleMute}>
+      <button className="bg-white text-black" onClick={toggleMute}>
         {volume === 0 ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
       </button>
       <input

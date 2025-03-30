@@ -1,8 +1,13 @@
 /** @type {import('tailwindcss').Config} */
+const textshadow = require('tailwindcss-textshadow');
+
 export default {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  safelist: [
+    'text-shadow',
   ],
   theme: {
     extend: {
@@ -25,6 +30,11 @@ export default {
           '100%': { transform: 'translateY(110vh)', opacity: 0 },
         },
       },
+      textShadow: {
+        sm: '0.2em 0.2em 0.4em rgba(0, 0, 0, 0.8)',
+        md: '0.2em 0.2em 0.4em rgba(0, 0, 0, 0.8)',
+        lg: '0.4em 0.4em 0.8em rgba(0, 0, 0, 0.8)',
+      },
       scale: {
         200: "2",
       },
@@ -34,5 +44,5 @@ export default {
       transform: ['hover', 'focus'],
     },
   },
-  plugins: [],
+  plugins: [textshadow],
 };

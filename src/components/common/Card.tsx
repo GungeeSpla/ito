@@ -9,6 +9,7 @@ interface CardProps {
   revealed?: boolean;
   isActive?: boolean;
   isMine?: boolean;
+  mode?: "place" | "reveal";
   onClick?: () => void;
   onFlipComplete?: (value: number) => void;
 }
@@ -39,6 +40,7 @@ const getPlayerColorClass = (name: string | undefined): string => {
 const Card: React.FC<CardProps> = ({
   value,
   name,
+  mode,
   revealed = true,
   isActive = false,
   isMine = false,
@@ -84,7 +86,9 @@ const Card: React.FC<CardProps> = ({
           style={{ backfaceVisibility: "hidden" }}
         >
           {name && <p className="text-sm">{name}</p>}
-          <strong className="text-5xl">{value}</strong>
+          {(mode === "reveal" || value === 0) && (
+            <strong className="text-5xl">{value}</strong>
+          )}
         </div>
 
         {/* 裏面 */}
@@ -102,13 +106,6 @@ const Card: React.FC<CardProps> = ({
         >
           {name && <p className="text-xs mb-1">{name}</p>}
           <p className="text-3xl">？</p>
-
-          {/* 🟨 チップ（自分のカード＆裏向き時のみ） */}
-          {isMine && !revealed && typeof value === "number" && (
-            <div className="absolute bottom-full mb-1 text-xs bg-black text-white px-2 py-0.5 rounded shadow opacity-0 hover:opacity-100 transition-opacity">
-              {value}
-            </div>
-          )}
         </div>
       </div>
     </div>
