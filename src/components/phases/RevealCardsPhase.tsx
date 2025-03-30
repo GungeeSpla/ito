@@ -1,19 +1,29 @@
 import React, { useEffect, useRef, useState } from "react";
-import VolumeControl from "../common/VolumeControl";
-import { playSE } from "../../utils/audio";
+import { Howl } from "howler";
 import { ref, onValue, set } from "firebase/database";
 import { db } from "../../firebase";
 import Card from "../common/Card";
+import EmojiBurst from "../common/EmojiBurst";
+import FailBurst from "../common/FailBurst";
 
 // 効果音：カードをめくる音
 const flipSound = new Howl({
   src: ["/sounds/card-flip.mp3"],
-  volume: 0.5,
+  volume: 1,
 });
 
-// -----------------------------
-// 型定義
-// -----------------------------
+// 効果音：成功した
+const successSound = new Howl({
+  src: ["/sounds/success.mp3"],
+  volume: 1,
+});
+
+// 効果音：成功した
+const failSound = new Howl({
+  src: ["/sounds/fail.mp3"],
+  volume: 1,
+});
+
 interface CardEntry {
   name: string;
   card: number;
@@ -25,20 +35,29 @@ interface Props {
 }
 
 const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
-  // -----------------------------
-  // ステート管理
-  // -----------------------------
   const [cardOrder, setCardOrder] = useState<CardEntry[]>([]);
   const [revealedCards, setRevealedCards] = useState<number[]>([]);
+  const [flippedCards, setFlippedCards] = useState<number[]>([]);
   const [isHost, setIsHost] = useState(false);
   const [status, setStatus] = useState<"success" | "fail" | null>(null);
+  const [isComplete, setIsComplete] = useState(false);
 
-  // 前回のめくられたカード状態を記憶（効果音判定用）
   const prevRevealedRef = useRef<number[]>([]);
 
-  // -----------------------------
-  // カード順序を取得・監視
-  // -----------------------------
+  // ✅ 成功時の効果音（1回だけ）
+  useEffect(() => {
+    if (status === "success") {
+      successSound.play();
+    }
+  }, [status]);
+
+  // 失敗時の効果音
+  useEffect(() => {
+    if (status === "fail") {
+      failSound.play();
+    }
+  }, [status]);
+
   useEffect(() => {
     const orderRef = ref(db, `rooms/${roomId}/cardOrder`);
     const unsub = onValue(orderRef, (snap) => {
@@ -50,9 +69,6 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
     return () => unsub();
   }, [roomId]);
 
-  // -----------------------------
-  // ホスト判定を取得
-  // -----------------------------
   useEffect(() => {
     const hostRef = ref(db, `rooms/${roomId}/host`);
     const unsub = onValue(hostRef, (snap) => {
@@ -63,9 +79,6 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
     return () => unsub();
   }, [roomId, nickname]);
 
-  // -----------------------------
-  // めくられたカード一覧を監視
-  // -----------------------------
   useEffect(() => {
     const revealedRef = ref(db, `rooms/${roomId}/revealedCards`);
     const unsub = onValue(revealedRef, (snap) => {
@@ -77,9 +90,7 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
     return () => unsub();
   }, [roomId]);
 
-  // -----------------------------
-  // 効果音を再生（revealedCards の更新を検知）
-  // -----------------------------
+  // 🎵 カードが新しくめくられたときに音を鳴らす
   useEffect(() => {
     const prev = prevRevealedRef.current;
     const newlyRevealed = revealedCards.filter((card) => !prev.includes(card));
@@ -91,41 +102,47 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
     prevRevealedRef.current = revealedCards;
   }, [revealedCards]);
 
-  // -----------------------------
-  // クリア判定ロジック
-  // -----------------------------
+  // ✅ アニメーション完了後に判定を実行
   useEffect(() => {
     const revealedSequence = cardOrder
       .map((entry) => entry.card)
       .filter((card) => revealedCards.includes(card));
 
-    if (revealedSequence.length < 2) return;
+    if (
+      revealedSequence.length >= 2 &&
+      flippedCards.length === revealedSequence.length
+    ) {
+      const isSorted = revealedSequence.every(
+        (val, i, arr) => i === 0 || arr[i - 1] <= val
+      );
 
-    const isSorted = revealedSequence.every((val, i, arr) => i === 0 || arr[i - 1] <= val);
-
-    if (!isSorted) {
-      setStatus("fail");
-    } else if (revealedSequence.length === cardOrder.length) {
-      setStatus("success");
+      if (!isSorted) {
+        setStatus("fail");
+        setIsComplete(true);
+      } else if (revealedSequence.length === cardOrder.length) {
+        setStatus("success");
+        setIsComplete(true);
+      }
     }
-  }, [revealedCards, cardOrder]);
+  }, [flippedCards, revealedCards, cardOrder]);
 
-  // -----------------------------
-  // ゲームをリセットする（ホストのみ）
-  // -----------------------------
+  // 🔁 カードからアニメーション完了通知を受け取る
+  const handleFlipComplete = (cardValue: number) => {
+    setFlippedCards((prev) =>
+      prev.includes(cardValue) ? prev : [...prev, cardValue]
+    );
+  };
+
   const resetGame = async () => {
     await set(ref(db, `rooms/${roomId}/phase`), "waiting");
     await set(ref(db, `rooms/${roomId}/lastUpdated`), Date.now());
   };
 
-  // -----------------------------
-  // UI描画
-  // -----------------------------
   return (
-    <div className="relative min-h-screen bg-gray-900 text-white">
+    <div className="relative min-h-screen text-white">
       {/* タイトルとステータス */}
       <div className="text-center pt-6">
-        <h2 className="text-xl font-bold mb-2">カードをめくろう！</h2>
+        <h2 className="text-3xl font-bold text-shadow-md mt-6 mb-4">カードをめくろう！</h2>
         {status === "success" && (
           <div className="mb-4 text-green-400 font-bold text-2xl">✅ 成功！</div>
         )}
@@ -134,11 +151,11 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
         )}
       </div>
 
-      {/* カードを中央に固定 */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+      {/* カード配置 */}
+      <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex gap-2 justify-center px-4">
         <div className="flex flex-wrap gap-2 justify-center items-start">
           {/* 基準カード */}
-          <Card value={0} name="基準" />
+          <Card value={0} name="" />
 
           {/* プレイヤーカード */}
           {cardOrder.map((entry, index) => {
@@ -149,6 +166,7 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
                 key={index}
                 value={isRevealed ? entry.card : "?"}
                 name={entry.name}
+                mode="reveal"
                 revealed={isRevealed}
                 onClick={() => {
                   if (!isRevealed) {
@@ -156,14 +174,15 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
                     set(revealedRef, [...revealedCards, entry.card]);
                   }
                 }}
+                onFlipComplete={handleFlipComplete}
               />
             );
           })}
         </div>
 
         {/* ロビーに戻るボタン */}
-        {isHost && (
-          <div className="mt-6 text-center">
+        {isHost && isComplete && (
+          <div className="absolute left-1/2 top-[calc(100%+40px)] -translate-x-1/2">
             <button
               onClick={resetGame}
               className="px-4 py-2 w-fit whitespace-nowrap bg-green-600 text-white rounded shadow-lg"
@@ -173,8 +192,13 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
           </div>
         )}
       </div>
-        <VolumeControl />
-</div>
+
+      {/* ✅ 成功演出 */}
+      {status === "success" && <EmojiBurst />}
+
+      {/* ❌ 失敗演出 */}
+      {status === "fail" && <FailBurst />}
+    </div>
   );
 };
 

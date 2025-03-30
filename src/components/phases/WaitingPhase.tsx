@@ -67,8 +67,8 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
   // UI描画
   // -----------------------------
   return (
-    <div className="min-h-[80vh] flex items-center justify-center bg-gray-900 text-white px-4">
-      <div className="bg-gray-800 p-6 rounded-xl shadow-md w-full max-w-md animate-fade-in relative">
+    <div className="min-h-[80vh] flex items-center justify-center  text-white px-4">
+      <div className="bg-white/70 backdrop-blur-sm text-black p-6 rounded-xl shadow-md w-full max-w-md animate-fade-in relative">
 
         {/* URLコピーUI */}
         <div className="mb-4 text-center relative">
@@ -96,14 +96,14 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
         {/* プレイヤー一覧 */}
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-2">
-            <span className="bg-gray-700 text-white text-xs px-2 py-1 rounded">参加者一覧</span>
+            <span className="bg-white text-black text-xs px-2 py-1 rounded">参加者一覧</span>
           </div>
           <ul className="space-y-1">
             {Object.keys(players).map((player) => (
               <li key={player} className="text-sm">
                 {player}
-                {player === host && <Crown size={16} className="inline text-yellow-400 ml-1 relative -top-0.5" />}
-                <span className="text-gray-400 text-xs">
+                {player === host && <Crown size={16} className="inline text-yellow-700 ml-1 relative -top-0.5" />}
+                <span className="text-black text-xs">
                   {player === nickname && "（You）"}
                 </span>
               </li>
@@ -120,7 +120,7 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
             }}
             className="mb-4"
           >
-            <p className="mb-4 text-center text-gray-400">
+            <p className="mb-4 text-center text-black">
               ニックネームを入力して、ルームに参加してください。
             </p>
             <input
@@ -129,7 +129,7 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
               value={newNickname}
               onChange={(e) => setNewNickname(e.target.value)}
               placeholder="ニックネームを入力"
-              className="w-full p-2 border border-gray-700 bg-gray-700 text-white rounded
+              className="w-full p-2 border border-gray-700 bg-white text-black rounded
                 mb-2 text-center placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
             />
             <button
@@ -142,7 +142,7 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
             </button>
           </form>
         ) : (
-          <p className="mb-4 text-center text-gray-400">
+          <p className="mb-4 text-center text-black">
             {isHost ? "ゲストを招待して、ゲームを開始してください。" : "ホストのゲーム開始を待っています。"}
           </p>
         )}
@@ -156,12 +156,13 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
               <select
                 value={selectedSet}
                 onChange={(e) => setSelectedSet(e.target.value)}
-                className="w-full p-2 bg-gray-700 text-white rounded
+                className="w-full p-2 bg-white text-black rounded
                   focus:outline-none focus:ring-2 focus:ring-blue-400"
               >
                 <option value="rainbow">レインボー</option>
                 <option value="normal">通常</option>
                 <option value="classic">クラシック</option>
+                <option value="salmon">サーモンラン</option>
               </select>
             </div>
 
@@ -171,7 +172,7 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
               <select
                 value={level}
                 onChange={(e) => setLevel(Number(e.target.value))}
-                className="w-full p-2 bg-gray-700 text-white rounded focus:outline-none focus:ring-2
+                className="w-full p-2 bg-white text-black rounded focus:outline-none focus:ring-2
                   focus:ring-blue-400"
               >
                 {[1, 2, 3, 4, 5].map((lvl) => (
@@ -188,7 +189,7 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
               disabled={Object.keys(players).length <= 1}
               className="w-full py-2 rounded transition
               bg-green-600 text-white hover:bg-green-500
-              disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed"
+              disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed"
             >
               ゲーム開始
             </button>

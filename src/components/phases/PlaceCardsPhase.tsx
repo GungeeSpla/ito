@@ -9,7 +9,7 @@ import { AnimatePresence, motion } from "framer-motion";
 // 効果音：カードを出す音
 const placeSound = new Howl({
   src: ["/sounds/card-place.mp3"],
-  volume: 0.5,
+  volume: 1,
 });
 
 // -----------------------------
@@ -138,26 +138,26 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}
-      className="relative min-h-screen bg-gray-900 text-white"
+      className="relative min-h-screen text-white"
     >
       {/* お題表示 */}
       {topic && (
-        <div className="absolute top-4 w-full text-center px-4">
-          <h3 className="text-lg font-semibold mb-2">お題：{topic.title}</h3>
+        <div className="absolute top-0 w-full text-center px-4">
+          <h2 className="text-3xl font-bold text-shadow-md mt-6 mb-4">お題：{topic.title}</h2>
           <div className="max-w-md mx-auto">
-            <div className="grid grid-cols-2 text-xs text-gray-400">
-              <div className="text-left">1 {topic.min}</div>
-              <div className="text-right">{topic.max} 100</div>
+            <div className="grid grid-cols-2 font-bold text-white ">
+              <div className="text-left text-shadow-sm">1 {topic.min}</div>
+              <div className="text-right text-shadow-sm">{topic.max} 100</div>
             </div>
-            <div className="h-[2px] bg-gray-600 mt-1"></div>
+            <div className="box-shadow-md h-[2px] bg-white mt-1"></div>
           </div>
         </div>
       )}
 
       {/* 場のカード */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-wrap gap-2 items-start">
-        <div className="flex gap-2 items-center">
-          <Card value={0} name="基準" />
+      <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex gap-2 justify-center px-4">
+        <div className="flex flex-wrap gap-2 justify-center items-start">
+          <Card value={0} name="" />
           {activeCard?.source === "hand" && (
             <motion.button
               layout
@@ -183,8 +183,11 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
                 className="flex items-center gap-2"
               >
                 <Card
-                  value="?"
+                  value={entry.card}
                   name={entry.name}
+                  revealed={false}
+                  isMine={entry.name === nickname}
+                  mode="place"
                   onClick={isMine ? () => handleRemoveCard(entry.card) : undefined}
                 />
                 {activeCard?.source === "hand" && (
@@ -223,6 +226,7 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
             <Card
               key={value}
               value={value}
+              mode="reveal"
               isActive={activeCard?.value === value}
               onClick={() => setActiveCard({ source: 'hand', value })}
             />
@@ -232,7 +236,7 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
 
       {/* 中断ボタン */}
       {isHost && (
-        <div className="fixed bottom-4 right-4 z-20">
+        <div className="fixed top-4 right-4 z-50">
           <button
             onClick={async () => {
               await set(ref(db, `rooms/${roomId}/phase`), "waiting");
