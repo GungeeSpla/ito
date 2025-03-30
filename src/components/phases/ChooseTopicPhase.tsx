@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Topic } from "../../types/Topic";
 import { motion, AnimatePresence } from "framer-motion";
-import { ref, onValue, set } from "firebase/database";
+import { ref, onValue, set, update } from "firebase/database";
 import { db } from "../../firebase";
 
 interface Props {
@@ -12,44 +12,103 @@ interface Props {
 
 const ChooseTopicPhase: React.FC<Props> = ({ topicOptions, isHost, chooseTopic }) => {
   const [selectedTitle, setSelectedTitle] = useState<string | null>(null);
+  const [votes, setVotes] = useState<Record<string, string>>({});
   const [customTitle, setCustomTitle] = useState("");
   const [customMin, setCustomMin] = useState("");
   const [customMax, setCustomMax] = useState("");
+  const [players, setPlayers] = useState<Record<string, boolean>>({});
+  const [tiebreakMethod, setTiebreakMethod] = useState<"random" | "host">("host");
 
+  const nickname = localStorage.getItem("nickname") || "";
   const roomId = window.location.pathname.split("/").pop();
-
-  const handleClick = async (title: string) => {
-    if (!isHost || selectedTitle) return;
-    setSelectedTitle(title);
-    if (roomId) {
-      await set(ref(db, `rooms/${roomId}/selectedTopic`), topicOptions.find(t => t.title === title));
-    }
-  };
-
-  const handleCustomSubmit = async () => {
-    if (!isHost || selectedTitle || !customTitle) return;
-    setSelectedTitle(customTitle);
-    if (roomId) {
-      const newTopic = {
-        title: customTitle,
-        min: customMin || "",
-        max: customMax || "",
-      };
-      await set(ref(db, `rooms/${roomId}/selectedTopic`), newTopic);
-    }
-  };
 
   useEffect(() => {
     if (!roomId) return;
+
+    const votesRef = ref(db, `rooms/${roomId}/votes`);
+    const playersRef = ref(db, `rooms/${roomId}/players`);
     const topicRef = ref(db, `rooms/${roomId}/selectedTopic`);
-    return onValue(topicRef, (snap) => {
+    const methodRef = ref(db, `rooms/${roomId}/tiebreakMethod`);
+
+    onValue(votesRef, (snap) => {
+      const data = snap.val();
+      if (data) setVotes(data);
+    });
+
+    onValue(playersRef, (snap) => {
+      const data = snap.val();
+      if (data) setPlayers(data);
+    });
+
+    onValue(topicRef, (snap) => {
       const topic = snap.val();
       if (topic && !selectedTitle) {
         setSelectedTitle(topic.title);
         chooseTopic(topic);
       }
     });
+
+    onValue(methodRef, (snap) => {
+      const value = snap.val();
+      if (value === "random" || value === "host") setTiebreakMethod(value);
+    });
   }, [roomId, selectedTitle, chooseTopic]);
+
+  const handleVote = async (title: string) => {
+    if (!roomId || selectedTitle) return;
+    await update(ref(db, `rooms/${roomId}/votes`), {
+      [nickname]: title,
+    });
+  };
+
+  const handleForceChoose = async (title: string) => {
+    if (!isHost || !roomId) return;
+    const topic = topicOptions.find((t) => t.title === title);
+    if (topic) {
+      await set(ref(db, `rooms/${roomId}/selectedTopic`), topic);
+    }
+  };
+
+  const handleCustomSubmit = async () => {
+    if (!isHost || selectedTitle || !customTitle || !roomId) return;
+    const newTopic = {
+      title: customTitle,
+      min: customMin || "",
+      max: customMax || "",
+    };
+    await set(ref(db, `rooms/${roomId}/selectedTopic`), newTopic);
+  };
+
+  const handleTiebreakChange = async (value: "random" | "host") => {
+    setTiebreakMethod(value);
+    if (isHost && roomId) {
+      await set(ref(db, `rooms/${roomId}/tiebreakMethod`), value);
+    }
+  };
+
+  useEffect(() => {
+    if (!roomId || selectedTitle) return;
+    const totalVotes = Object.values(votes);
+    if (Object.keys(players).length > 0 && totalVotes.length === Object.keys(players).length) {
+      const count: Record<string, number> = {};
+      totalVotes.forEach((title) => {
+        count[title] = (count[title] || 0) + 1;
+      });
+      const sorted = Object.entries(count).sort((a, b) => b[1] - a[1]);
+      const topVotes = sorted.filter(([_, v]) => v === sorted[0][1]);
+      let chosenTitle = topVotes[0][0];
+
+      if (topVotes.length > 1 && tiebreakMethod === "random") {
+        const random = topVotes[Math.floor(Math.random() * topVotes.length)][0];
+        chosenTitle = random;
+      }
+
+      const topic = topicOptions.find((t) => t.title === chosenTitle);
+      if (topic) {
+        set(ref(db, `rooms/${roomId}/selectedTopic`), topic);
+      }
+    }
+  }, [votes, players, topicOptions, selectedTitle, tiebreakMethod, roomId]);
 
   return (
     <div className="min-h-[70vh] flex items-center justify-center text-blac px-4">
@@ -66,23 +125,15 @@ const ChooseTopicPhase: React.FC<Props> = ({ topicOptions, isHost, chooseTopic }
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <AnimatePresence>
             {topicOptions.map((t) => {
-              const isSelected = selectedTitle === t.title;
+              const voteCount = Object.values(votes).filter((v) => v === t.title).length;
               return (
                 <motion.div
                   key={t.title}
                   initial={{ opacity: 0, scale: 0.95 }}
-                  animate={
-                    selectedTitle
-                      ? isSelected
-                        ? { opacity: 0, scale: 1.2 }
-                        : { opacity: 0, scale: 0.95 }
-                      : { opacity: 1, scale: 1 }
-                  }
+                  animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.4 }}
-                  className={`pb-8 relative bg-white text-black rounded-xl p-4 shadow-md text-center transition border border-gray-300
-                    ${isHost ? "hover:bg-gray-100 hover:border-blue-400 hover:scale-[1.02] cursor-pointer" : "opacity-100 cursor-not-allowed"}`}
-                  onClick={() => handleClick(t.title)}
+                  className={`pb-8 relative bg-white text-black rounded-xl p-4 shadow-md text-center transition border border-gray-300`}
                 >
                   <h3 className="text-lg font-semibold mb-2">{t.title}</h3>
                   <div className="my-4">
@@ -92,10 +143,20 @@ const ChooseTopicPhase: React.FC<Props> = ({ topicOptions, isHost, chooseTopic }
                     </div>
                     <div className="h-[2px] bg-gray-400 mt-1"></div>
                   </div>
+                  <p className="text-sm text-gray-600 mb-2">票: {voteCount}</p>
+                  <button
+                    className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-500"
+                    onClick={() => handleVote(t.title)}
+                  >
+                    これに投票する
+                  </button>
                   {isHost && (
-                    <p className="absolute w-full left-0 text-center bottom-2 text-gray-500 text-xs">
-                      クリックして選択
-                    </p>
+                    <button
+                      className="ml-2 text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-500"
+                      onClick={() => handleForceChoose(t.title)}
+                    >
+                      これに決定する
+                    </button>
                   )}
                 </motion.div>
               );
@@ -150,9 +211,21 @@ const ChooseTopicPhase: React.FC<Props> = ({ topicOptions, isHost, chooseTopic }
           transition={{ delay: 0.2 }}
         >
           {isHost
-            ? "みんなで話し合ったあと、あなたが選択してください。"
-            : "みんなで話し合ったあと、ホストに選択してもらいます。"}
+            ? "みんなで話し合ったあと、あなたも投票してください。"
+            : "みんなで話し合ったあと、投票してください。"}
         </motion.p>
+
+        <div className="mt-4 text-white text-shadow-md text-center">
+          <label className="mr-2">同票時の決定方法：</label>
+          <select
+            value={tiebreakMethod}
+            onChange={(e) => handleTiebreakChange(e.target.value as "random" | "host")}
+            className="border border-gray-300 rounded px-2 py-1 text-black bg-white"
+          >
+            <option value="host">ホストが決定</option>
+            <option value="random">ランダムに決定</option>
+          </select>
+        </div>
       </div>
     </div>
   );
