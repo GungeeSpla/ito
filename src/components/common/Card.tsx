@@ -61,7 +61,7 @@ const Card: React.FC<CardProps> = ({
   return (
     <div
       className={`
-        ito-card w-28 h-36 relative [perspective:1000px] cursor-pointer 
+        ito-card w-36 h-48 relative [perspective:1000px] cursor-pointer 
         transition hover:scale-105 duration-200 
         ${playerClass}
       `}
@@ -79,7 +79,9 @@ const Card: React.FC<CardProps> = ({
       >
         {/* 表面 */}
         <div
-          className={`absolute w-full h-full rounded border 
+          className={`
+            ito-card-fore
+            absolute w-full h-full rounded border 
             ${isActive ? "border-4 border-blue-500" : "border border-gray-300"}
             bg-white text-black flex flex-col justify-center items-center
             backface-hidden`}
@@ -87,13 +89,14 @@ const Card: React.FC<CardProps> = ({
         >
           {name && <p className="text-sm">{name}</p>}
           {(mode === "reveal" || value === 0) && (
-            <strong className="text-5xl">{value}</strong>
+            <strong className="text-7xl">{value}</strong>
           )}
         </div>
 
         {/* 裏面 */}
         <div
           className={`
+            ito-card-back
             absolute w-full h-full rounded border border-gray-300
             text-black flex flex-col justify-center items-center
             backface-hidden rotate-y-180 ${getPlayerColorClass(name)}
@@ -104,8 +107,8 @@ const Card: React.FC<CardProps> = ({
           }}
           title={isMine && typeof value === "number" ? `${value}` : ""}
         >
-          {name && <p className="text-xs mb-1">{name}</p>}
-          <p className="text-3xl">？</p>
+          {name && (name !== "ガンジー" && name !== "おりまー" && name !== "けんしろ" && name !== "ぽんこつ") && <p className="text-xs mb-1">{name}</p>}
+          {(name !== "ガンジー" && name !== "おりまー" && name !== "けんしろ" && name !== "ぽんこつ") && <p className="text-3xl"></p>}
         </div>
       </div>
     </div>

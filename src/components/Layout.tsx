@@ -67,8 +67,6 @@ const Layout: React.FC = () => {
         <Outlet />
       </main>
 
-      <VolumeControl />
-
       {/* ------------------ フッター ------------------ */}
       {phase === "waiting" || phase === null ? <footer className="bg-white/70 backdrop-blur-sm text-black text-center py-2 ">
         『

@@ -154,13 +154,18 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
       )}
 
       {/* 場のカード */}
-      <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex gap-2 justify-center px-4">
+      <div
+        className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex gap-2 justify-center px-4"
+        style={{top: "calc(50% - 4em)"}}
+      >
         <div className="flex items-center gap-2">
           <Card value={0} name="" />
-          {activeCard?.source === "hand" && (
+          {activeCard?.source === "hand" && !cardOrder.some(c => c.card === activeCard.value) && (
             <motion.button
               layout
-              className="text-xs bg-blue-600 text-white px-1 py-3 rounded hover:bg-blue-500 transition writing-vertical"
+              className="
+                text-xs bg-blue-600 text-white px-1 py-3 rounded 
+                hover:bg-blue-500 transition writing-vertical"
               onClick={() => handleInsertCard(0)}
             >
               ここに出す
@@ -218,7 +223,7 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
       {/* 自分の手札 */}
       <div className="fixed bottom-0 w-full bg-gradient-to-t from-gray-900 to-transparent pt-8 pb-4 z-10">
         <div
-          className="flex flex-wrap gap-2 justify-center scale-200 translate-y-10 transform"
+          className="flex flex-wrap gap-2 justify-center scale-150 translate-y-20 transform"
           style={{ transformOrigin: "bottom" }}
         >
           {myCards.map((value) => (
@@ -247,7 +252,6 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
           </button>
         </div>
       )}
-          <VolumeControl />
 </motion.div>
   );
 };
