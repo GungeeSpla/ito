@@ -5,6 +5,7 @@ import { db } from "../firebase";
 import { Topic } from "../types/Topic";
 import { topics } from "../data/topics";
 import { deleteOldRooms } from "../utils/deleteOldRooms";
+import { selectRandomTopics } from "../utils/selectRandomTopics";
 
 // 各フェーズごとの画面コンポーネント
 import WaitingPhase from "../components/phases/WaitingPhase";
@@ -129,11 +130,14 @@ const Room = () => {
   const startGame = async () => {
     if (!isHost) return;
 
-    // お題セットからランダム3つ選ぶ
-    const randomTopics = topics
-      .filter((t) => t.set === selectedSet)
-      .sort(() => 0.5 - Math.random())
-      .slice(0, 3);
+    const usedTopicsSnap = await get(ref(db, `rooms/${roomId}/usedTitles`));
+    const usedTitlesMap = usedTopicsSnap.exists()
+      ? usedTopicsSnap.val()
+      : {};
+    const usedTitles = usedTopicsSnap.exists()
+      ? Object.keys(usedTopicsSnap.val())
+      : [];
+    const randomTopics = selectRandomTopics(topics, selectedSet, usedTitles);
 
     let currentTiebreakMethod = "host";
     const tiebreakRef = ref(db, `rooms/${roomId}/tiebreakMethod`);
@@ -153,6 +157,7 @@ const Room = () => {
       players: players,
       host: host,
       tiebreakMethod: currentTiebreakMethod || "random",
+      usedTitles: usedTitlesMap || {},
     };
 
     set(ref(db, `rooms/${roomId}`), updates);

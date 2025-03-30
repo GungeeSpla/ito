@@ -67,7 +67,12 @@ const ChooseTopicPhase: React.FC<Props> = ({ topicOptions, isHost, chooseTopic }
     if (!isHost || !roomId) return;
     const topic = topicOptions.find((t) => t.title === title);
     if (topic) {
-      await set(ref(db, `rooms/${roomId}/selectedTopic`), topic);
+      (async () => {
+        await set(ref(db, `rooms/${roomId}/selectedTopic`), topic);
+        await update(ref(db, `rooms/${roomId}/usedTitles`), {
+          [topic.title]: true,
+        });
+      })();
     }
   };
 
@@ -108,7 +113,12 @@ const ChooseTopicPhase: React.FC<Props> = ({ topicOptions, isHost, chooseTopic }
       if (topVotes.length === 1 || tiebreakMethod === "random") {
         const topic = topicOptions.find((t) => t.title === chosenTitle);
         if (topic) {
-          set(ref(db, `rooms/${roomId}/selectedTopic`), topic);
+          (async () => {
+            await set(ref(db, `rooms/${roomId}/selectedTopic`), topic);
+            await update(ref(db, `rooms/${roomId}/usedTitles`), {
+              [topic.title]: true,
+            });
+          })();
         }
       }
     }
