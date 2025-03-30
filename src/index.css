@@ -35,8 +35,22 @@ body {
   min-height: 100vh;
   background-image: url('/images/wood-bg.jpg');
   background-repeat: repeat;
-  background-size: 50em 100vh;
+  background-size: 100vw 50em;
   background-attachment: fixed;
+}
+
+.bg-wrapper {
+  position: relative;
+  min-height: 100vh;
+}
+
+.bg-wrapper::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999; /* お好みで調整 */
+  background: radial-gradient(circle at center, transparent 60%, rgba(0, 0, 0, 0.5) 100%);
 }
 
 h1 {
