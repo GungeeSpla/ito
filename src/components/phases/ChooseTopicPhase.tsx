@@ -17,7 +17,7 @@ const ChooseTopicPhase: React.FC<Props> = ({ topicOptions, isHost, chooseTopic }
   const [customMin, setCustomMin] = useState("");
   const [customMax, setCustomMax] = useState("");
   const [players, setPlayers] = useState<Record<string, boolean>>({});
-  const [tiebreakMethod, setTiebreakMethod] = useState<"random" | "host">("host");
+  const [tiebreakMethod, setTiebreakMethod] = useState<"random" | "host">("random");
 
   const nickname = localStorage.getItem("nickname") || "";
   const roomId = window.location.pathname.split("/").pop();
@@ -50,7 +50,9 @@ const ChooseTopicPhase: React.FC<Props> = ({ topicOptions, isHost, chooseTopic }
 
     onValue(methodRef, (snap) => {
       const value = snap.val();
-      if (value === "random" || value === "host") setTiebreakMethod(value);
+      if (value === "random" || value === "host") {
+        setTiebreakMethod(value);
+      }
     });
   }, [roomId, selectedTitle, chooseTopic]);
 
@@ -103,15 +105,17 @@ const ChooseTopicPhase: React.FC<Props> = ({ topicOptions, isHost, chooseTopic }
         chosenTitle = random;
       }
 
-      const topic = topicOptions.find((t) => t.title === chosenTitle);
-      if (topic) {
-        set(ref(db, `rooms/${roomId}/selectedTopic`), topic);
+      if (topVotes.length === 1 || tiebreakMethod === "random") {
+        const topic = topicOptions.find((t) => t.title === chosenTitle);
+        if (topic) {
+          set(ref(db, `rooms/${roomId}/selectedTopic`), topic);
+        }
       }
     }
   }, [votes, players, topicOptions, selectedTitle, tiebreakMethod, roomId]);
 
   return (
-    <div className="min-h-[70vh] flex items-center justify-center text-blac px-4">
+    <div className="min-h-[70vh] flex items-center justify-center text-white px-4">
       <div className="max-w-3xl w-full">
         <motion.h2
           className="text-xl font-bold text-center mt-6 mb-6 text-shadow-md"
@@ -148,14 +152,14 @@ const ChooseTopicPhase: React.FC<Props> = ({ topicOptions, isHost, chooseTopic }
                     className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-500"
                     onClick={() => handleVote(t.title)}
                   >
-                    これに投票する
+                    これに投票
                   </button>
                   {isHost && (
                     <button
                       className="ml-2 text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-500"
                       onClick={() => handleForceChoose(t.title)}
                     >
-                      これに決定する
+                      これに決定
                     </button>
                   )}
                 </motion.div>
@@ -211,8 +215,8 @@ const ChooseTopicPhase: React.FC<Props> = ({ topicOptions, isHost, chooseTopic }
           transition={{ delay: 0.2 }}
         >
           {isHost
-            ? "みんなで話し合ったあと、あなたも投票してください。"
-            : "みんなで話し合ったあと、投票してください。"}
+            ? "みんなで話し合ったあと、投票してください。（ホストが強制的に選ぶこともできます）"
+            : "みんなで話し合ったあと、投票してください。（ホストが強制的に選ぶこともできます）"}
         </motion.p>
 
         <div className="mt-4 text-white text-shadow-md text-center">
@@ -222,8 +226,8 @@ const ChooseTopicPhase: React.FC<Props> = ({ topicOptions, isHost, chooseTopic }
             onChange={(e) => handleTiebreakChange(e.target.value as "random" | "host")}
             className="border border-gray-300 rounded px-2 py-1 text-black bg-white"
           >
-            <option value="host">ホストが決定</option>
             <option value="random">ランダムに決定</option>
+            <option value="host">ホストが決定</option>
           </select>
         </div>
       </div>

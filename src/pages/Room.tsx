@@ -126,7 +126,7 @@ const Room = () => {
   // -----------------------------
   // ゲーム開始（ホストのみ可能）
   // -----------------------------
-  const startGame = () => {
+  const startGame = async () => {
     if (!isHost) return;
 
     // お題セットからランダム3つ選ぶ
@@ -135,12 +135,24 @@ const Room = () => {
       .sort(() => 0.5 - Math.random())
       .slice(0, 3);
 
+    let currentTiebreakMethod = "host";
+    const tiebreakRef = ref(db, `rooms/${roomId}/tiebreakMethod`);
+    await get(tiebreakRef).then((snap) => {
+      if (snap.exists()) {
+        const value = snap.val();
+        if (value === "host" || value === "random") {
+          currentTiebreakMethod = value;
+        }
+      }
+    });
+
     const updates = {
       topicOptions: randomTopics,
       phase: "chooseTopic",
       level: level,
-      players: players, // ← プレイヤー情報を明示的に保存
-      host: host,       // ← hostも明示しておくと安心
+      players: players,
+      host: host,
+      tiebreakMethod: currentTiebreakMethod || "random",
     };
 
     set(ref(db, `rooms/${roomId}`), updates);
