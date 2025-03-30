@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { ref, set, child, get } from "firebase/database";
+import { ref, set, child } from "firebase/database";
 import { db } from "../firebase";
 
 interface UseDealCardsProps {

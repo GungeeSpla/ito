@@ -12,7 +12,7 @@ interface Props {
   nickname: string;
 }
 
-const DealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
+const DealCardsPhase: React.FC<Props> = () => {
   dealSound.play()
   
   return (

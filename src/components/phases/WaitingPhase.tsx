@@ -25,7 +25,6 @@ interface WaitingPhaseProps {
 // メインコンポーネント
 // -----------------------------
 const WaitingPhase: React.FC<WaitingPhaseProps> = ({
-  roomId,
   players,
   nickname,
   host,

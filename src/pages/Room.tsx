@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ref, get, set, onValue, child } from "firebase/database";
 import { db } from "../firebase";
@@ -37,7 +37,6 @@ const Room = () => {
   const [loading, setLoading] = useState(true);
   const [phase, setPhase] = useState("waiting");
   const [topicOptions, setTopicOptions] = useState<Topic[]>([]);
-  const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
   const [selectedSet, setSelectedSet] = useState<"normal" | "rainbow" | "classic" | "salmon">("rainbow");
   const [level, setLevel] = useState<number>(1);
 
@@ -72,7 +71,6 @@ const Room = () => {
 
     // 各項目をリアルタイムで購読（onValue = WebSocket的な役割）
     const unsub1 = onValue(child(roomRef, "phase"), (snap) => setPhase(snap.val() || "waiting"));
-    const unsub2 = onValue(child(roomRef, "topic"), (snap) => setSelectedTopic(snap.val() || null));
     const unsub3 = onValue(child(roomRef, "topicOptions"), (snap) => {
       const data = snap.val();
       if (Array.isArray(data)) setTopicOptions(data);
@@ -90,7 +88,6 @@ const Room = () => {
     // クリーンアップ
     return () => {
       unsub1();
-      unsub2();
       unsub3();
       unsub4();
       unsub5();
