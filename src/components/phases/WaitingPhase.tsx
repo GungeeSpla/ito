@@ -48,7 +48,7 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
     const savedName = localStorage.getItem("nickname");
     if (savedName) setNewNickname(savedName);
     inputRef.current?.focus();
-  });
+  }, []);
 
   // -----------------------------
   // 現在のページURLをクリップボードにコピー
