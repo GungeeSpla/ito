@@ -8,9 +8,15 @@ interface Props {
   topicOptions: Topic[];
   isHost: boolean;
   chooseTopic: (topic: Topic) => void;
+  onRefreshTopics: () => void;
 }
 
-const ChooseTopicPhase: React.FC<Props> = ({ topicOptions, isHost, chooseTopic }) => {
+const ChooseTopicPhase: React.FC<Props> = ({
+  topicOptions,
+  isHost,
+  chooseTopic,
+  onRefreshTopics,
+}) => {
   const [selectedTitle, setSelectedTitle] = useState<string | null>(null);
   const [votes, setVotes] = useState<Record<string, string>>({});
   const [customTitle, setCustomTitle] = useState("");
@@ -126,6 +132,16 @@ const ChooseTopicPhase: React.FC<Props> = ({ topicOptions, isHost, chooseTopic }
 
   return (
     <div className="min-h-[70vh] flex items-center justify-center text-white px-4">
+      {/* お題再抽選ボタン：ホストだけ表示 */}
+      {isHost && (
+        <button
+          onClick={onRefreshTopics}
+          className="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          お題を再抽選
+        </button>
+      )}
+
       <div className="max-w-3xl w-full">
         <motion.h2
           className="text-xl font-bold text-center mt-6 mb-6 text-shadow-md"

@@ -43,6 +43,15 @@ const Room = () => {
 
   const alreadyJoined = !!players[nickname];
   const isHost = nickname === host;
+  
+  const onRefreshTopics = async () => {
+    const usedTopicsSnap = await get(ref(db, `rooms/${roomId}/usedTitles`));
+    const usedTitles = usedTopicsSnap.exists()
+      ? Object.keys(usedTopicsSnap.val())
+      : [];
+    const randomTopics = selectRandomTopics(topics, selectedSet, usedTitles);
+    setTopicOptions(randomTopics);
+  };
 
   // -----------------------------
   // 初期化＆リアルタイム監視（DBの値が変わるたびに再描画）
@@ -207,6 +216,7 @@ const Room = () => {
         topicOptions={topicOptions}
         isHost={isHost}
         chooseTopic={chooseTopic}
+        onRefreshTopics={onRefreshTopics}
       />
     );
   }
