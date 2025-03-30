@@ -4,6 +4,7 @@ import { ExternalLink, Home } from "lucide-react"; // アイコン
 import { useEffect, useState } from "react";
 import { ref, onValue } from "firebase/database";
 import { db } from "../firebase";
+import { Toaster } from "sonner";
 
 // ------------------------------------------------
 // アプリ全体の共通レイアウトコンポーネント
@@ -91,6 +92,7 @@ const Layout: React.FC = () => {
         </a>
         。
       </footer> : null}
+      <Toaster richColors position="bottom-right" />
     </div>
   );
 };

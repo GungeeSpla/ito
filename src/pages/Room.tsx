@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ref, get, set, onValue, child } from "firebase/database";
+import { ref, get, set, onValue, child, update } from "firebase/database";
 import { db } from "../firebase";
 import { Topic } from "../types/Topic";
 import { topics } from "../data/topics";
 import { deleteOldRooms } from "../utils/deleteOldRooms";
 import { selectRandomTopics } from "../utils/selectRandomTopics";
+import { toast } from "sonner";
 
 // 各フェーズごとの画面コンポーネント
 import WaitingPhase from "../components/phases/WaitingPhase";
@@ -25,6 +26,16 @@ const Room = () => {
   const navigate = useNavigate();
   const { roomId } = useParams<{ roomId: string }>();
 
+  useEffect(() => {
+    if (!roomId) {
+      navigate("/", { replace: true });
+    }
+  }, [roomId, navigate]);
+
+  if (!roomId) return null;
+
+  const safeRoomId = roomId;
+
   // ローカルストレージからニックネームを取得
   const storedNickname = localStorage.getItem("nickname") || "";
 
@@ -40,12 +51,17 @@ const Room = () => {
   const [topicOptions, setTopicOptions] = useState<Topic[]>([]);
   const [selectedSet, setSelectedSet] = useState<"normal" | "rainbow" | "classic" | "salmon">("rainbow");
   const [level, setLevel] = useState<number>(1);
+  let toastTimerId: ReturnType<typeof setTimeout>;
+  const toastOnce = (fn: () => void) => {
+    clearTimeout(toastTimerId);
+    toastTimerId = setTimeout(fn, 10);
+  };
 
   const alreadyJoined = !!players[nickname];
   const isHost = nickname === host;
-  
+
   const onRefreshTopics = async () => {
-    const usedTopicsSnap = await get(ref(db, `rooms/${roomId}/usedTitles`));
+    const usedTopicsSnap = await get(ref(db, `rooms/${safeRoomId}/usedTitles`));
     const usedTitles = usedTopicsSnap.exists()
       ? Object.keys(usedTopicsSnap.val())
       : [];
@@ -59,55 +75,58 @@ const Room = () => {
   useEffect(() => {
     deleteOldRooms(); // 古いルームの自動削除（メンテ用）
 
-    if (!roomId) {
-      navigate("/");
-      return;
-    }
-
-    const roomRef = ref(db, `rooms/${roomId}`);
+    const roomRef = ref(db, `rooms/${safeRoomId}`);
 
     // 初回読み取り：ルームが存在するかチェック
-    get(roomRef).then((snap) => {
-      if (!snap.exists()) {
-        alert("ルームが存在しません！");
-        navigate("/");
-        return;
-      }
-
-      const room = snap.val();
-      setHost(room.host || "");
-      setPhase(room.phase || "waiting");
-    });
+    get(roomRef)
+      .then((snap) => {
+        if (!snap.exists()) {
+          clearTimeout(toastTimerId)
+          toastTimerId = setTimeout(() => {
+            toastOnce(() => toast.error("ルームが存在しません。"))
+          }, 10)
+          navigate("/");
+          return;
+        }
+        const room = snap.val();
+        setHost(room.host || "");
+        setPhase(room.phase || "waiting");
+        setLoading(false);
+        toastOnce(() => toast.success("ルームに参加しました。"))
+      })
+      .catch((err) => {
+        toastOnce(() => toast.error("初期化に失敗しました。"))
+        console.error("初期読み込み失敗", err);
+        setLoading(false);
+      });
 
     // 各項目をリアルタイムで購読（onValue = WebSocket的な役割）
     const unsub1 = onValue(child(roomRef, "phase"), (snap) => setPhase(snap.val() || "waiting"));
-    const unsub3 = onValue(child(roomRef, "topicOptions"), (snap) => {
+    const unsub2 = onValue(child(roomRef, "topicOptions"), (snap) => {
       const data = snap.val();
       if (Array.isArray(data)) setTopicOptions(data);
     });
-    const unsub4 = onValue(child(roomRef, "players"), (snap) => {
+    const unsub3 = onValue(child(roomRef, "players"), (snap) => {
       const data = snap.val();
       if (data) setPlayers(data);
     });
-    const unsub5 = onValue(child(roomRef, "host"), (snap) => {
+    const unsub4 = onValue(child(roomRef, "host"), (snap) => {
       if (snap.exists()) setHost(snap.val());
     });
-
-    setLoading(false);
 
     // クリーンアップ
     return () => {
       unsub1();
+      unsub2();
       unsub3();
       unsub4();
-      unsub5();
     };
-  }, [roomId, nickname, navigate]);
+  }, [roomId, navigate]);
 
   // -----------------------------
   // フェーズ: dealCards のときカードを配る
   // -----------------------------
-  useDealCards({ phase, isHost, players, roomId: roomId!, level });
+  useDealCards({ phase, isHost, players, roomId: safeRoomId, level });
 
   // -----------------------------
   // プレイヤー参加処理（ニックネームを登録）
@@ -121,7 +140,7 @@ const Room = () => {
       [newNickname]: true,
     };
 
-    const roomRef = ref(db, `rooms/${roomId}`);
+    const roomRef = ref(db, `rooms/${safeRoomId}`);
 
     set(roomRef, {
       host: host || newNickname,
@@ -139,17 +158,13 @@ const Room = () => {
   const startGame = async () => {
     if (!isHost) return;
 
-    const usedTopicsSnap = await get(ref(db, `rooms/${roomId}/usedTitles`));
-    const usedTitlesMap = usedTopicsSnap.exists()
-      ? usedTopicsSnap.val()
-      : {};
-    const usedTitles = usedTopicsSnap.exists()
-      ? Object.keys(usedTopicsSnap.val())
-      : [];
+    const usedTopicsSnap = await get(ref(db, `rooms/${safeRoomId}/usedTitles`));
+    const usedData = usedTopicsSnap.exists() ? usedTopicsSnap.val() : {};
+    const usedTitles = Object.keys(usedData);
     const randomTopics = selectRandomTopics(topics, selectedSet, usedTitles);
 
     let currentTiebreakMethod = "host";
-    const tiebreakRef = ref(db, `rooms/${roomId}/tiebreakMethod`);
+    const tiebreakRef = ref(db, `rooms/${safeRoomId}/tiebreakMethod`);
     await get(tiebreakRef).then((snap) => {
       if (snap.exists()) {
         const value = snap.val();
@@ -166,10 +181,10 @@ const Room = () => {
       players: players,
       host: host,
       tiebreakMethod: currentTiebreakMethod || "random",
-      usedTitles: usedTitlesMap || {},
+      usedTitles: usedData,
     };
 
-    set(ref(db, `rooms/${roomId}`), updates);
+    update(ref(db, `rooms/${safeRoomId}`), updates);
   };
 
   // -----------------------------
@@ -178,8 +193,10 @@ const Room = () => {
   const chooseTopic = (topic: Topic) => {
     if (!isHost) return;
 
-    set(ref(db, `rooms/${roomId}/topic`), topic);
-    set(ref(db, `rooms/${roomId}/phase`), "dealCards");
+    update(ref(db, `rooms/${safeRoomId}`), {
+      topic,
+      phase: "dealCards"
+    });
   };
 
   // -----------------------------
@@ -193,7 +210,7 @@ const Room = () => {
   if (phase === "waiting") {
     return (
       <WaitingPhase
-        roomId={roomId!}
+        roomId={safeRoomId}
         players={players}
         nickname={nickname}
         host={host}
@@ -222,15 +239,15 @@ const Room = () => {
   }
 
   if (phase === "dealCards") {
-    return <DealCardsPhase roomId={roomId!} nickname={nickname} />;
+    return <DealCardsPhase roomId={safeRoomId} nickname={nickname} />;
   }
 
   if (phase === "placeCards") {
-    return <PlaceCardsPhase roomId={roomId!} nickname={nickname} />;
+    return <PlaceCardsPhase roomId={safeRoomId} nickname={nickname} />;
   }
 
   if (phase === "revealCards") {
-    return <RevealCardsPhase roomId={roomId!} nickname={nickname} />;
+    return <RevealCardsPhase roomId={safeRoomId} nickname={nickname} />;
   }
 
   // 未定義のフェーズ用フォールバック
