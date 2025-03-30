@@ -15,7 +15,7 @@ interface WaitingPhaseProps {
   setNewNickname: (name: string) => void;
   addPlayer: () => void;
   selectedSet: string;
-  setSelectedSet: (set: string) => void;
+  setSelectedSet: React.Dispatch<React.SetStateAction<"normal" | "rainbow" | "classic" | "salmon">>;
   level: number;
   setLevel: (level: number) => void;
   startGame: () => void;
@@ -48,7 +48,7 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
     const savedName = localStorage.getItem("nickname");
     if (savedName) setNewNickname(savedName);
     inputRef.current?.focus();
-  }, []);
+  });
 
   // -----------------------------
   // 現在のページURLをクリップボードにコピー
@@ -154,7 +154,7 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
               <label className="block mb-1">お題セット</label>
               <select
                 value={selectedSet}
-                onChange={(e) => setSelectedSet(e.target.value)}
+                onChange={(e) => setSelectedSet(e.target.value as "normal" | "rainbow" | "classic" | "salmon")}
                 className="w-full p-2 bg-white text-black rounded
                   focus:outline-none focus:ring-2 focus:ring-blue-400"
               >

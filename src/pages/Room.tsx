@@ -176,7 +176,7 @@ const Room = () => {
         setNewNickname={setNewNickname}
         addPlayer={addPlayer}
         selectedSet={selectedSet}
-        setSelectedSet={(s) => setSelectedSet(s as any)}
+        setSelectedSet={setSelectedSet}
         setLevel={setLevel}
         startGame={startGame}
         level={level}

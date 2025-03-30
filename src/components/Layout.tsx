@@ -4,7 +4,6 @@ import { ExternalLink, Home } from "lucide-react"; // アイコン
 import { useEffect, useState } from "react";
 import { ref, onValue } from "firebase/database";
 import { db } from "../firebase";
-import VolumeControl from "./VolumeControl"
 
 // ------------------------------------------------
 // アプリ全体の共通レイアウトコンポーネント
