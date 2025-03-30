@@ -156,7 +156,7 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
 
       {/* 場のカード */}
       <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex gap-2 justify-center px-4">
-        <div className="flex flex-wrap gap-2 justify-center items-start">
+        <div className="flex items-center gap-2">
           <Card value={0} name="" />
           {activeCard?.source === "hand" && (
             <motion.button

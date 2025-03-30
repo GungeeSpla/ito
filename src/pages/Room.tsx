@@ -38,7 +38,7 @@ const Room = () => {
   const [phase, setPhase] = useState("waiting");
   const [topicOptions, setTopicOptions] = useState<Topic[]>([]);
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
-  const [selectedSet, setSelectedSet] = useState<"normal" | "rainbow" | "classic">("rainbow");
+  const [selectedSet, setSelectedSet] = useState<"normal" | "rainbow" | "classic" | "salmon">("rainbow");
   const [level, setLevel] = useState<number>(1);
 
   const alreadyJoined = !!players[nickname];
