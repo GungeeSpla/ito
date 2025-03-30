@@ -182,6 +182,7 @@ const Room = () => {
         setSelectedSet={(s) => setSelectedSet(s as any)}
         setLevel={setLevel}
         startGame={startGame}
+        level={level}
       />
     );
   }
