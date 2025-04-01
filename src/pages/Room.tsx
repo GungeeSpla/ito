@@ -174,7 +174,7 @@ const Room = () => {
     const usedTitles = Object.keys(usedData);
     const randomTopics = selectRandomTopics(topics, selectedSet, usedTitles);
 
-    let currentTiebreakMethod = "host";
+    let currentTiebreakMethod = "random";
     const tiebreakRef = ref(db, `rooms/${safeRoomId}/tiebreakMethod`);
     await get(tiebreakRef).then((snap) => {
       if (snap.exists()) {
@@ -186,13 +186,19 @@ const Room = () => {
     });
 
     const updates = {
-      topicOptions: randomTopics,
+      cardOrder: [],
+      cards: {},
+      host,
+      level,
       phase: "chooseTopic",
-      level: level,
-      players: players,
-      host: host,
-      tiebreakMethod: currentTiebreakMethod || "random",
+      players,
+      revealedCards: [],
+      selectedTopic: {},
       usedTitles: usedData,
+      tiebreakMethod: currentTiebreakMethod,
+      topic: {},
+      topicOptions: randomTopics,
+      votes: {},
     };
 
     update(ref(db, `rooms/${safeRoomId}`), updates);

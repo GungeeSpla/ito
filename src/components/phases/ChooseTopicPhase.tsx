@@ -182,7 +182,7 @@ const ChooseTopicPhase: React.FC<Props> = ({
                   <p className="text-sm text-gray-900 mb-2">票: {voteCount} {isVoted && <span>（投票済み）</span>}</p>
                   {isHost && (
                     <button
-                      className="ml-2 text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-500"
+                      className="ml-2 text-xs bg-orange-500 text-white px-2 py-1 rounded hover:bg-orange-500 hover:border-orange-300"
                       onClick={() => handleForceChoose(t.title)}
                     >
                       これに決定
