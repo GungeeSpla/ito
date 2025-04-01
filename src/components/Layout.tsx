@@ -30,7 +30,8 @@ const Layout: React.FC = () => {
   // ページ遷移ナビゲーション関数
 
   return (
-    <div className="bg-wrapper w-screen h-screen flex flex-col overflow-hidden">
+    <div className="w-screen h-screen flex flex-col overflow-hidden">
+      <div className="bg-gradient"></div>
       {/* ------------------ ヘッダー ------------------ */}
       {phase === "waiting" || phase === null ? <header className="bg-black/30 text-white text-shadow-md shadow-md py-4 px-4 flex justify-between items-center">
         {/* 中央タイトル */}

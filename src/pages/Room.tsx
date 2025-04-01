@@ -110,10 +110,10 @@ const Room = () => {
       const data = snap.val();
       if (data) {
         setPlayers(data);
-        if (nickname && !data[nickname]) {
-          toast.error("ホストによってルームから退出させられました。");
-          navigate("/");
-        }
+        // if (nickname && !data[nickname]) {
+        //   toast.error("ホストによってルームから退出させられました。");
+        //   navigate("/");
+        // }
       }
     });
     const unsub4 = onValue(child(roomRef, "host"), (snap) => {

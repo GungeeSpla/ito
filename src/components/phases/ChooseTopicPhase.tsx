@@ -132,15 +132,6 @@ const ChooseTopicPhase: React.FC<Props> = ({
 
   return (
     <div className="min-h-[70vh] flex items-center justify-center text-white px-4">
-      {/* お題再抽選ボタン：ホストだけ表示 */}
-      {isHost && (
-        <button
-          onClick={onRefreshTopics}
-          className="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          お題を再抽選
-        </button>
-      )}
 
       <div className="max-w-3xl w-full">
         <motion.h2
@@ -152,10 +143,23 @@ const ChooseTopicPhase: React.FC<Props> = ({
           お題の選択
         </motion.h2>
 
+        {/* お題再抽選ボタン：ホストだけ表示 */}
+        {isHost && (
+          <div className="text-center">
+            <button
+              onClick={onRefreshTopics}
+              className="text-sm mb-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-500"
+            >
+              お題を再抽選
+            </button>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <AnimatePresence>
             {topicOptions.map((t) => {
               const voteCount = Object.values(votes).filter((v) => v === t.title).length;
+              const isVoted = votes[nickname] === t.title;
               return (
                 <motion.div
                   key={t.title}
@@ -163,7 +167,9 @@ const ChooseTopicPhase: React.FC<Props> = ({
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.4 }}
-                  className={`pb-8 relative bg-white text-black rounded-xl p-4 shadow-md text-center transition border border-gray-300`}
+                  onClick={() => handleVote(t.title)}
+                  className={`ito-topic-card ${isVoted ? "bg-blue-100 border-blue-500" : "bg-white border-gray-300"} 
+                    pb-8 relative bg-white text-black rounded-xl p-4 text-center transition border border-gray-300`}
                 >
                   <h3 className="text-lg font-semibold mb-2">{t.title}</h3>
                   <div className="my-4">
@@ -171,15 +177,9 @@ const ChooseTopicPhase: React.FC<Props> = ({
                       <div className="text-left">1 {t.min}</div>
                       <div className="text-right">{t.max} 100</div>
                     </div>
-                    <div className="h-[2px] bg-gray-400 mt-1"></div>
+                    <div className="h-[2px] bg-gray-900 mt-1"></div>
                   </div>
-                  <p className="text-sm text-gray-600 mb-2">票: {voteCount}</p>
-                  <button
-                    className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-500"
-                    onClick={() => handleVote(t.title)}
-                  >
-                    これに投票
-                  </button>
+                  <p className="text-sm text-gray-900 mb-2">票: {voteCount} {isVoted && <span>（投票済み）</span>}</p>
                   {isHost && (
                     <button
                       className="ml-2 text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-500"
