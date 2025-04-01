@@ -20,6 +20,7 @@ interface WaitingPhaseProps {
   setLevel: (level: number) => void;
   startGame: () => void;
   removePlayer: (playerName: string) => void;
+  leaveRoom: () => void;
 }
 
 // -----------------------------
@@ -39,6 +40,7 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
   setLevel,
   startGame,
   removePlayer,
+  leaveRoom,
 }) => {
   const [copied, setCopied] = useState(false); // URLコピー完了の表示用
   const inputRef = useRef<HTMLInputElement>(null); // ニックネーム入力にフォーカスする用
@@ -123,6 +125,17 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
             ))}
           </ul>
         </div>
+
+        {alreadyJoined && (
+          <div className="text-center mt-3 mb-4">
+            <button
+              onClick={leaveRoom}
+              className="text-xs bg-red-600 hover:bg-red-500 text-white font-medium py-2 px-4 rounded"
+            >
+              ルームから退出する
+            </button>
+          </div>
+        )}
 
         {/* 参加フォーム or メッセージ */}
         {!alreadyJoined ? (

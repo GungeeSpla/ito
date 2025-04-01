@@ -112,7 +112,6 @@ const Room = () => {
         setPlayers(data);
         if (nickname && !data[nickname]) {
           toast.error("ホストによってルームから退出させられました。");
-          localStorage.removeItem("nickname");
           navigate("/");
         }
       }
@@ -222,6 +221,19 @@ const Room = () => {
   };
 
   // -----------------------------
+  // 部屋を退出する
+  // -----------------------------
+  const leaveRoom = () => {
+    if (!nickname || !safeRoomId) return;
+  
+    const playerRef = ref(db, `rooms/${safeRoomId}/players/${nickname}`);
+    remove(playerRef).then(() => {
+      toast.info("ルームを退出しました。");
+      navigate("/");
+    });
+  };
+
+  // -----------------------------
   // ロード中はプレースホルダーを表示
   // -----------------------------
   if (loading) return (
@@ -250,6 +262,7 @@ const Room = () => {
         startGame={startGame}
         level={level}
         removePlayer={removePlayer}
+        leaveRoom={leaveRoom}
       />
     );
   }
