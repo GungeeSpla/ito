@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* --------------------------------------------
+  グローバルスタイル：共通レイアウトや色設定
+-------------------------------------------- */
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -9,6 +12,7 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
+  /* ダークテーマ前提の文字色 */
   background-color: #242424;
 
   font-synthesis: none;
@@ -17,6 +21,9 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* --------------------------------------------
+  aタグの見た目
+-------------------------------------------- */
 a {
   font-weight: 500;
   color: #646cff;
@@ -27,6 +34,9 @@ a:hover {
   color: #535bf2;
 }
 
+/* --------------------------------------------
+  サイト全体の背景設定（木目）
+-------------------------------------------- */
 body {
   margin: 0;
   display: flex;
@@ -37,8 +47,12 @@ body {
   background-repeat: repeat;
   background-size: 100vw 50em;
   background-attachment: fixed;
+  /* スクロールしても背景固定 */
 }
 
+/* --------------------------------------------
+  背景の上にぼやっとした暗さを追加（高級感）
+-------------------------------------------- */
 .bg-wrapper {
   position: relative;
   min-height: 100vh;
@@ -49,15 +63,23 @@ body {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 9999; /* お好みで調整 */
+  z-index: 9999;
+
+  /* 中央は透明、外側に向かって暗くするグラデーション */
   background: radial-gradient(circle at center, transparent 60%, rgba(0, 0, 0, 0.5) 100%);
 }
 
+/* --------------------------------------------
+  タイトルの大きさなど
+-------------------------------------------- */
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
 }
 
+/* --------------------------------------------
+  ボタンの共通スタイル
+-------------------------------------------- */
 button {
   border-radius: 8px;
   border: 1px solid transparent;
@@ -79,6 +101,9 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+/* --------------------------------------------
+  ライトモードに切り替わった場合のスタイル
+-------------------------------------------- */
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
@@ -94,11 +119,17 @@ button:focus-visible {
   }
 }
 
+/* --------------------------------------------
+  縦書き用ユーティリティ
+-------------------------------------------- */
 .writing-vertical {
   writing-mode: vertical-rl;
   text-orientation: upright;
 }
 
+/* --------------------------------------------
+  itoカードのベーススタイル
+-------------------------------------------- */
 .ito-card {
   box-shadow: 0.2em 0.2em 0.2em rgba(0, 0, 0, 0.5);
 }
@@ -111,6 +142,9 @@ button:focus-visible {
   box-shadow: 0.2em 0.2em 0.4em rgba(0, 0, 0, 0.8);
 }
 
+/* --------------------------------------------
+  itoカードの裏面スタイル
+-------------------------------------------- */
 .ito-card-back {
   background-repeat: no-repeat;
   background-position: center center;
@@ -119,6 +153,7 @@ button:focus-visible {
   border: 0.3em solid white;
 }
 
+/* プレイヤーごとのカード裏面（背景色＋アイコン） */
 .player-ガンジー .ito-card-back {
   background-color: #0f8846;
   background-image: url('/images/icon-gungee.png');
@@ -137,4 +172,33 @@ button:focus-visible {
 .player-けんしろ .ito-card-back {
   background-color: #07539f;
   background-image: url('/images/icon-kenshiro.png');
+}
+
+/* --------------------------------------------
+  Tailwindのカスタムユーティリティ：読み込み中アニメーション
+-------------------------------------------- */
+@layer utilities {
+  @keyframes dots {
+    0% {
+      content: "";
+    }
+
+    33% {
+      content: ".";
+    }
+
+    66% {
+      content: "..";
+    }
+
+    100% {
+      content: "...";
+    }
+  }
+
+  .animate-pulse-dots::after {
+    display: inline-block;
+    content: "";
+    animation: dots 1.5s steps(3, end) infinite;
+  }
 }

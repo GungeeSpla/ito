@@ -224,7 +224,11 @@ const Room = () => {
   // -----------------------------
   // ロード中はプレースホルダーを表示
   // -----------------------------
-  if (loading) return <div>読み込み中...</div>;
+  if (loading) return (
+    <div className="flex items-center justify-center h-screen text-white">
+      <span className="text-xl font-semibold animate-pulse-dots">読み込み中</span>
+    </div>
+  );
 
   // -----------------------------
   // 各フェーズごとに表示を切り替え
