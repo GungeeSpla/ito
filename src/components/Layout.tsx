@@ -1,5 +1,5 @@
 import React from "react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom"; // ページ遷移とルーティング用
+import { Outlet, useLocation } from "react-router-dom"; // ページ遷移とルーティング用
 import { ExternalLink } from "lucide-react"; // アイコン
 import { useEffect, useState } from "react";
 import { ref, onValue } from "firebase/database";
@@ -13,7 +13,6 @@ import { Toaster } from "sonner";
 // ------------------------------------------------
 const Layout: React.FC = () => {
   const location = useLocation();   // 現在のURLパスを取得
-  const navigate = useNavigate();
   const [phase, setPhase] = useState<string | null>(null);
 
   // Firebaseから現在のフェーズを取得・監視

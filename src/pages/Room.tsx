@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ref, get, set, onValue, child, update } from "firebase/database";
+import { ref, get, set, remove, onValue, child, update } from "firebase/database";
 import { db } from "../firebase";
 import { Topic } from "../types/Topic";
 import { topics } from "../data/topics";
@@ -108,7 +108,14 @@ const Room = () => {
     });
     const unsub3 = onValue(child(roomRef, "players"), (snap) => {
       const data = snap.val();
-      if (data) setPlayers(data);
+      if (data) {
+        setPlayers(data);
+        if (nickname && !data[nickname]) {
+          toast.error("ホストによってルームから退出させられました。");
+          localStorage.removeItem("nickname");
+          navigate("/");
+        }
+      }
     });
     const unsub4 = onValue(child(roomRef, "host"), (snap) => {
       if (snap.exists()) setHost(snap.val());
@@ -132,9 +139,14 @@ const Room = () => {
   // プレイヤー参加処理（ニックネームを登録）
   // -----------------------------
   const addPlayer = () => {
-    if (!newNickname.trim()) return alert("ニックネームを入力してね！");
-    if (players[newNickname]) return alert("この名前は使われています！");
-
+    if (!newNickname.trim()) {
+      toast.warning("ニックネームを入力してください。")
+      return
+    }
+    if (players[newNickname]) {
+      toast.warning("この名前はすでに使われています。")
+      return
+    }
     const updatedPlayers = {
       ...players,
       [newNickname]: true,
@@ -188,7 +200,7 @@ const Room = () => {
   };
 
   // -----------------------------
-  // ホストが1つのお題を選択（次フェーズへ）
+  // お題を選択して次のフェーズへ（ホストのみ可能）
   // -----------------------------
   const chooseTopic = (topic: Topic) => {
     if (!isHost) return;
@@ -197,6 +209,16 @@ const Room = () => {
       topic,
       phase: "dealCards"
     });
+  };
+
+  // -----------------------------
+  // プレイヤー追放（ホストのみ可能）
+  // -----------------------------
+  const removePlayer = (playerName: string) => {
+    if (!isHost) return;
+
+    const playerRef = ref(db, `rooms/${safeRoomId}/players/${playerName}`);
+    remove(playerRef)
   };
 
   // -----------------------------
@@ -223,6 +245,7 @@ const Room = () => {
         setLevel={setLevel}
         startGame={startGame}
         level={level}
+        removePlayer={removePlayer}
       />
     );
   }

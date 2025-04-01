@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Crown } from "lucide-react"; // 👑 ホスト表示用アイコン
-import cn from 'classnames'; // class名を条件付きで合成するユーティリティ
+import { Crown } from "lucide-react";
+import cn from 'classnames';
 
 // -----------------------------
 // Props 型定義
@@ -19,6 +19,7 @@ interface WaitingPhaseProps {
   level: number;
   setLevel: (level: number) => void;
   startGame: () => void;
+  removePlayer: (playerName: string) => void;
 }
 
 // -----------------------------
@@ -37,6 +38,7 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
   level,
   setLevel,
   startGame,
+  removePlayer,
 }) => {
   const [copied, setCopied] = useState(false); // URLコピー完了の表示用
   const inputRef = useRef<HTMLInputElement>(null); // ニックネーム入力にフォーカスする用
@@ -105,6 +107,18 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
                 <span className="text-black text-xs">
                   {player === nickname && "（You）"}
                 </span>
+                {isHost && player !== host && (
+                  <span className="text-xs">
+                    （
+                    <button
+                      onClick={() => removePlayer(player)}
+                      className="text-red-600 text-xs hover:underline cursor-pointer p-0 bg-transparent border-none"
+                    >
+                      追放
+                    </button>
+                    ）
+                  </span>
+                )}
               </li>
             ))}
           </ul>
