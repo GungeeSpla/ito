@@ -13,6 +13,7 @@ import {
 import { db } from "@/firebase";
 import ProposalModal from "@/components/common/ProposalModal";
 import { RefreshCw, PlusCircle, CheckCircle2 } from "lucide-react";
+import WoodyButton from "@/components/common/WoodyButton";
 
 interface Props {
   isHost: boolean; // 現在のプレイヤーがホストかどうか
@@ -335,25 +336,17 @@ const ChooseTopicPhase: React.FC<Props> = ({
           animate={{ opacity: selectedTitle ? 0 : 1 }}
           transition={hasChosen ? { delay: 0 } : { delay: 0.8 }}
         >
-          <div className="flex justify-center">
+          <div className="flex justify-center gap-4">
             {isHost && (
-              <button
-                onClick={handleRefreshTopics}
-                className="flex items-center justify-center gap-1.5
-                  w-32 text-sm m-2 p-2 bg-emerald-600 text-white rounded hover:bg-emerald-500 hover:border-emerald-800"
-              >
+              <WoodyButton onClick={handleRefreshTopics}>
                 <RefreshCw className="w-4 h-4 translate-y-[0.05rem]" />
-                お題を再抽選
-              </button>
+                <span>お題を再抽選</span>
+              </WoodyButton>
             )}
-            <button
-              onClick={() => setShowProposalModal(true)}
-              className="flex items-center justify-center gap-1.5
-                w-32 text-sm m-2 p-2 bg-orange-500 text-white rounded hover:bg-orange-600 hover:border-orange-800"
-            >
+            <WoodyButton onClick={() => setShowProposalModal(true)}>
               <PlusCircle className="w-4 h-4 translate-y-[0.05rem]" />
-              お題を提案
-            </button>
+              <span>お題を提案</span>
+            </WoodyButton>
           </div>
 
           {isHost && (

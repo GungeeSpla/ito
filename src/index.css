@@ -6,7 +6,12 @@
   グローバルスタイル：共通レイアウトや色設定
 -------------------------------------------- */
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Helvetica Neue", "Helvetica",
+    "Hiragino Kaku Gothic ProN", "Hiragino Sans",
+    "Noto Sans JP", "Yu Gothic", "Meiryo", sans-serif;
+
   line-height: 1.5;
   font-weight: 400;
 
@@ -66,11 +71,9 @@ body {
   z-index: 0;
 
   /* 中央は透明、外側に向かって暗くするグラデーション */
-  background: radial-gradient(
-    circle at center,
-    transparent 60%,
-    rgba(0, 0, 0, 0.5) 100%
-  );
+  background: radial-gradient(circle at center,
+      transparent 60%,
+      rgba(0, 0, 0, 0.5) 100%);
 }
 
 /* --------------------------------------------
@@ -165,8 +168,8 @@ button:focus-visible {
   animation: ito-topic-card-in 500ms ease-out forwards;
   opacity: 0;
 }
-.ito-topic-card.ito-fadeout {
-}
+
+.ito-topic-card.ito-fadeout {}
 
 .ito-topic-card:hover {
   scale: 102%;
@@ -177,6 +180,7 @@ button:focus-visible {
   0% {
     opacity: 0;
   }
+
   100% {
     opacity: 1;
   }
@@ -271,6 +275,7 @@ button:focus-visible {
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
   }
+
   .dark {
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
@@ -303,6 +308,7 @@ button:focus-visible {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
