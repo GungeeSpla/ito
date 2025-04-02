@@ -28,6 +28,7 @@ const ChooseTopicPhase: React.FC<Props> = ({
   const [topicOptions, setTopicOptions] = useState<Topic[]>([]); // お題候補一覧
   const [visibleTopics, setVisibleTopics] = useState<Topic[]>([]); // 表示対象のお題（フェード用）
   const exitCalled = useRef(false); // exitComplete が複数回呼ばれないようにするフラグ
+  const exitTimeoutRef = useRef<NodeJS.Timeout | null>(null); // 
 
   // Firebaseからのデータ購読
   useEffect(() => {
@@ -57,6 +58,11 @@ const ChooseTopicPhase: React.FC<Props> = ({
       if (topic && !selectedTitle && !hasChosen) {
         setHasChosen(true);
         setSelectedTitle(topic.title);
+        exitTimeoutRef.current = setTimeout(() => {
+          console.log("安全装置によってお題を選択しました:", topic)
+          chooseTopic(topic);
+          exitCalled.current = true;
+        }, 800);
       }
     };
 
@@ -222,7 +228,11 @@ const ChooseTopicPhase: React.FC<Props> = ({
               if (selectedTitle) {
                 const selected = [...topicOptions, ...customTopics].find(t => t.title === selectedTitle);
                 if (selected) {
+                  console.log("お題を選択しました:", selected)
                   chooseTopic(selected);
+                  if (exitTimeoutRef.current) {
+                    clearTimeout(exitTimeoutRef.current);
+                  }
                 }
               }
             }}
