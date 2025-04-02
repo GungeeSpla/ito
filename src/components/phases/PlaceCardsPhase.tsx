@@ -3,6 +3,7 @@ import { ref, get, set, onValue, runTransaction } from "firebase/database";
 import { db } from "../../firebase";
 import Card from "../common/Card";
 import { AnimatePresence, motion } from "framer-motion";
+import EditHintModal from "../common/EditHintModal";
 
 // 効果音：カードを出す音
 const placeSound = new Howl({
@@ -31,6 +32,7 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
   const [isHost, setIsHost] = useState(false);
   const [level, setLevel] = useState<number>(1);
   const [topic, setTopic] = useState<{ title: string; min: string; max: string } | null>(null);
+  const [editingValue, setEditingValue] = useState<number | null>(null);
   const prevCardCountRef = useRef(0);
 
   // -----------------------------
@@ -82,6 +84,18 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
       if (snap.exists()) setTopic(snap.val());
     });
   }, [roomId, nickname]);
+
+  // -----------------------------
+  // たとえワードを編集する処理
+  // -----------------------------
+  const handleHintSubmit = (value: number, newHint: string) => {
+    setMyCards((prev) =>
+      prev.map((card) =>
+        card.value === value ? { ...card, hint: newHint } : card
+      )
+    );
+    setEditingValue(null);
+  };
 
   // -----------------------------
   // カードを場に出す処理
@@ -240,8 +254,8 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
               isActive={activeCard?.value === card.value}
               onClick={() => setActiveCard({ source: 'hand', value: card.value })}
               editable={true}
-              onEdit={() => console.log("編集クリック")}
-              onClearHint={() => console.log("削除クリック")}
+              onEdit={() => setEditingValue(card.value)}
+              onClearHint={() => handleHintSubmit(card.value, "")}
               hint={card.hint}
               isMine={true}
             />
@@ -262,6 +276,15 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
             ゲームを中断する
           </button>
         </div>
+      )}
+
+      {/* たとえワード編集用のモーダルウィンドウ */}
+      {editingValue !== null && (
+        <EditHintModal
+          initialValue={myCards.find(c => c.value === editingValue)?.hint || ""}
+          onSubmit={(newHint) => handleHintSubmit(editingValue, newHint)}
+          onClose={() => setEditingValue(null)}
+        />
       )}
     </motion.div>
   );
