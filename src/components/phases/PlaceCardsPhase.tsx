@@ -239,6 +239,11 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
               mode="reveal"
               isActive={activeCard?.value === card.value}
               onClick={() => setActiveCard({ source: 'hand', value: card.value })}
+              editable={true}
+              onEdit={() => console.log("編集クリック")}
+              onClearHint={() => console.log("削除クリック")}
+              hint={card.hint}
+              isMine={true}
             />
           ))}
         </div>

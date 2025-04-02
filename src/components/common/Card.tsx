@@ -12,6 +12,10 @@ interface CardProps {
   mode?: "place" | "reveal";
   onClick?: () => void;
   onFlipComplete?: (value: number) => void;
+  editable?: boolean;
+  onEdit?: () => void;
+  onClearHint?: () => void;
+  hint?: string;
 }
 
 // -----------------------------
@@ -45,7 +49,11 @@ const Card: React.FC<CardProps> = ({
   isActive = false,
   isMine = false,
   onClick,
-  onFlipComplete
+  onFlipComplete,
+  editable,
+  onEdit,
+  onClearHint,
+  hint,
 }) => {
   useEffect(() => {
     if (revealed && typeof value === "number" && onFlipComplete) {
@@ -111,6 +119,13 @@ const Card: React.FC<CardProps> = ({
           {(name !== "ガンジー" && name !== "おりまー" && name !== "けんしろ" && name !== "ぽんこつ") && <p className="text-3xl"></p>}
         </div>
       </div>
+
+      {editable && isMine && mode === "reveal" && (
+        <div className="absolute top-1 right-1 flex gap-1">
+          <button onClick={onEdit} className="text-white hover:text-blue-300 text-xs bg-gray-200 p-0.5">✏️</button>
+          <button onClick={onClearHint} className="text-white hover:text-red-300 text-xs bg-gray-200 p-0.5">🧽</button>
+        </div>
+      )}
     </div>
   );
 };
