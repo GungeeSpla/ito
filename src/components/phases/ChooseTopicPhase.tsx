@@ -313,7 +313,10 @@ const ChooseTopicPhase: React.FC<Props> = ({
                       <button
                         className="flex items-center justify-center gap-1
                         ml-2 text-xs bg-orange-500 text-white px-2 py-1 rounded hover:bg-orange-500 hover:border-orange-300"
-                        onClick={() => handleForceChoose(t.title)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleForceChoose(t.title);
+                        }}
                       >
                         <CheckCircle2 className="w-3 h-3 translate-y-[0.05rem]" />
                         これに決定
