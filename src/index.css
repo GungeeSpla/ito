@@ -247,6 +247,27 @@ button:focus-visible {
   }
 }
 
+.notice ul {
+  list-style: none;
+  padding-left: 0;
+  position: relative;
+}
+
+.notice ul li::before {
+  content: '●';
+  position: absolute;
+  left: -1rem;
+}
+
+.notice ul li:first-child {
+  margin-top: 0;
+}
+
+.notice ul li {
+  margin-top: 0.5rem;
+}
+
+
 @layer base {
   :root {
     --background: 0 0% 100%;

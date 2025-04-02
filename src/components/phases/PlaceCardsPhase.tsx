@@ -6,6 +6,7 @@ import Card from "@/components/common/Card";
 import EditHintModal from "@/components/common/EditHintModal";
 import { CardEntry } from "@/types/CardEntry";
 import { ArrowDownCircle, Eye, Home } from "lucide-react";
+import WoodyButton from "@/components/common/WoodyButton";
 
 // 効果音：カードを出す音
 const placeSound = new Howl({
@@ -193,10 +194,28 @@ const PlaceCardsPhase: React.FC<Props> = ({
       transition={{ duration: 0.6 }}
       className="relative min-h-screen text-white"
     >
+      {/* ヘッダー */}
+      <div key="ito-header" className="relative h-12">
+        {/* 中断ボタン */}
+        {isHost && (
+          <div className="absolute right-2 top-1/2 -translate-y-1/2">
+            <WoodyButton
+              onClick={async () => {
+                await set(ref(db, `rooms/${roomId}/phase`), "waiting");
+                await set(ref(db, `rooms/${roomId}/lastUpdated`), Date.now());
+              }}
+            >
+              <Home className="w-4 h-4 translate-y-[0.1rem]" />
+              ロビーに戻る
+            </WoodyButton>
+          </div>
+        )}
+      </div>
+
       {/* お題表示 */}
       {topic && (
-        <div className="absolute top-0 w-full text-center px-4">
-          <h2 className="text-3xl font-bold text-shadow-md mt-6 mb-4">
+        <div className="relative w-full text-center px-4">
+          <h2 className="text-3xl font-bold text-shadow-md mt-0 mb-4">
             お題：{topic.title}
           </h2>
           <div className="max-w-md mx-auto">
@@ -313,24 +332,6 @@ const PlaceCardsPhase: React.FC<Props> = ({
           ))}
         </div>
       </div>
-
-      {/* 中断ボタン */}
-      {isHost && (
-        <div className="fixed top-4 right-4 z-50">
-          <button
-            onClick={async () => {
-              await set(ref(db, `rooms/${roomId}/phase`), "waiting");
-              await set(ref(db, `rooms/${roomId}/lastUpdated`), Date.now());
-            }}
-            className="
-              flex items-center justify-center gap-1  
-              px-3 py-1.5 bg-red-600 text-white text-sm rounded shadow hover:bg-red-500 transition"
-          >
-            <Home className="w-4 h-4 translate-y-[-0.00rem]" />
-            ロビーに戻る
-          </button>
-        </div>
-      )}
 
       {/* たとえワード編集用のモーダルウィンドウ */}
       {editingValue !== null && (
