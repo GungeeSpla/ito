@@ -113,7 +113,7 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
       flippedCards.length === revealedSequence.length
     ) {
       const isSorted = revealedSequence.every(
-        (val, i, arr) => i === 0 || arr[i - 1] <= val
+        (val, i, arr) => i === 0 || arr[i - 1] <= val,
       );
 
       if (!isSorted) {
@@ -129,7 +129,7 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
   // 🔁 カードからアニメーション完了通知を受け取る
   const handleFlipComplete = (cardValue: number) => {
     setFlippedCards((prev) =>
-      prev.includes(cardValue) ? prev : [...prev, cardValue]
+      prev.includes(cardValue) ? prev : [...prev, cardValue],
     );
   };
 
@@ -142,9 +142,13 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
     <div className="relative min-h-screen text-white">
       {/* タイトルとステータス */}
       <div className="text-center pt-6">
-        <h2 className="text-3xl font-bold text-shadow-md mt-6 mb-4">カードをめくろう！</h2>
+        <h2 className="text-3xl font-bold text-shadow-md mt-6 mb-4">
+          カードをめくろう！
+        </h2>
         {status === "success" && (
-          <div className="mb-4 text-green-400 font-bold text-2xl">✅ 成功！</div>
+          <div className="mb-4 text-green-400 font-bold text-2xl">
+            ✅ 成功！
+          </div>
         )}
         {status === "fail" && (
           <div className="mb-4 text-red-400 font-bold text-2xl">❌ 失敗！</div>
@@ -154,7 +158,7 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
       {/* カード配置 */}
       <div
         className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex gap-2 justify-center px-4"
-        style={{top: "calc(50% - 4em)"}}
+        style={{ top: "calc(50% - 4em)" }}
       >
         <div className="flex flex-wrap gap-2 justify-center items-start">
           {/* 基準カード */}
@@ -173,7 +177,10 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
                 revealed={isRevealed}
                 onClick={() => {
                   if (!isRevealed) {
-                    const revealedRef = ref(db, `rooms/${roomId}/revealedCards`);
+                    const revealedRef = ref(
+                      db,
+                      `rooms/${roomId}/revealedCards`,
+                    );
                     set(revealedRef, [...revealedCards, entry.card]);
                   }
                 }}

@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -51,23 +58,41 @@ const ProposalModal: React.FC<Props> = ({ open, onClose, onSubmit }) => {
         <div className="flex flex-col gap-4">
           <div>
             <Label htmlFor="title">タイトル</Label>
-            <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="例：投げたいもの" required />
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="例：投げたいもの"
+              required
+            />
           </div>
 
           <div className="flex gap-4">
             <div className="flex-1">
               <Label htmlFor="min">1の意味（省略可）</Label>
-              <Input id="min" value={min} onChange={(e) => setMin(e.target.value)} placeholder="例：投げたくない" />
+              <Input
+                id="min"
+                value={min}
+                onChange={(e) => setMin(e.target.value)}
+                placeholder="例：投げたくない"
+              />
             </div>
             <div className="flex-1">
               <Label htmlFor="max">100の意味（省略可）</Label>
-              <Input id="max" value={max} onChange={(e) => setMax(e.target.value)} placeholder="例：投げたい" />
+              <Input
+                id="max"
+                value={max}
+                onChange={(e) => setMax(e.target.value)}
+                placeholder="例：投げたい"
+              />
             </div>
           </div>
         </div>
 
         <DialogFooter className="mt-4">
-          <Button variant="outline" onClick={handleCancel}>キャンセル</Button>
+          <Button variant="outline" onClick={handleCancel}>
+            キャンセル
+          </Button>
           <Button onClick={handleSubmit}>決定</Button>
         </DialogFooter>
       </DialogContent>

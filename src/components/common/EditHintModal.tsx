@@ -17,7 +17,12 @@ interface Props {
   onClose: () => void;
 }
 
-const EditHintModal: React.FC<Props> = ({ initialValue = "", open, onSubmit, onClose }) => {
+const EditHintModal: React.FC<Props> = ({
+  initialValue = "",
+  open,
+  onSubmit,
+  onClose,
+}) => {
   const [hint, setHint] = useState(initialValue);
 
   useEffect(() => {
@@ -43,9 +48,7 @@ const EditHintModal: React.FC<Props> = ({ initialValue = "", open, onSubmit, onC
           <Button variant="outline" onClick={onClose}>
             キャンセル
           </Button>
-          <Button onClick={() => onSubmit(hint)}>
-            決定
-          </Button>
+          <Button onClick={() => onSubmit(hint)}>決定</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

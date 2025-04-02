@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ref, get, set, remove, onValue, child, update } from "firebase/database";
+import {
+  ref,
+  get,
+  set,
+  remove,
+  onValue,
+  child,
+  update,
+} from "firebase/database";
 import { db } from "../firebase";
 import { Topic } from "../types/Topic";
 import { topics } from "../data/topics";
@@ -48,7 +56,9 @@ const Room = () => {
   const [host, setHost] = useState("");
   const [loading, setLoading] = useState(true);
   const [phase, setPhase] = useState("waiting");
-  const [selectedSet, setSelectedSet] = useState<"normal" | "rainbow" | "classic" | "salmon" | "custom">("rainbow");
+  const [selectedSet, setSelectedSet] = useState<
+    "normal" | "rainbow" | "classic" | "salmon" | "custom"
+  >("rainbow");
   const [level, setLevel] = useState<number>(1);
   const alreadyJoined = !!players[nickname];
   const isHost = nickname === host;
@@ -74,7 +84,7 @@ const Room = () => {
     get(roomRef)
       .then((snap) => {
         if (!snap.exists()) {
-          toast.error("ルームが存在しません。")
+          toast.error("ルームが存在しません。");
           navigate("/");
           return;
         }
@@ -82,16 +92,18 @@ const Room = () => {
         setHost(room.host || "");
         setPhase(room.phase || "waiting");
         setLoading(false);
-        toast.success("ルームが見つかりました。")
+        toast.success("ルームが見つかりました。");
       })
       .catch((err) => {
-        toast.error("初期化に失敗しました。")
+        toast.error("初期化に失敗しました。");
         console.error("初期読み込み失敗", err);
         setLoading(false);
       });
 
     // 各項目をリアルタイムで購読（onValue = WebSocket的な役割）
-    const unsub1 = onValue(child(roomRef, "phase"), (snap) => setPhase(snap.val() || "waiting"));
+    const unsub1 = onValue(child(roomRef, "phase"), (snap) =>
+      setPhase(snap.val() || "waiting"),
+    );
     const unsub2 = onValue(child(roomRef, "players"), (snap) => {
       const data = snap.val();
       if (data) {
@@ -120,12 +132,12 @@ const Room = () => {
   // -----------------------------
   const addPlayer = () => {
     if (!newNickname.trim()) {
-      toast.warning("ニックネームを入力してください。")
-      return
+      toast.warning("ニックネームを入力してください。");
+      return;
     }
     if (players[newNickname]) {
-      toast.warning("この名前はすでに使われています。")
-      return
+      toast.warning("この名前はすでに使われています。");
+      return;
     }
     const updatedPlayers = {
       ...players,
@@ -185,10 +197,10 @@ const Room = () => {
 
     update(ref(db, `rooms/${safeRoomId}`), updates);
 
-    console.log("ゲームを開始します。")
-    console.log("- カテゴリ:", selectedSet)
-    console.log("- レベル:", level)
-    console.log("- お題候補:", randomTopics)
+    console.log("ゲームを開始します。");
+    console.log("- カテゴリ:", selectedSet);
+    console.log("- レベル:", level);
+    console.log("- お題候補:", randomTopics);
   };
 
   // -----------------------------
@@ -199,7 +211,7 @@ const Room = () => {
 
     update(ref(db, `rooms/${safeRoomId}`), {
       topic,
-      phase: "dealCards"
+      phase: "dealCards",
     });
   };
 
@@ -210,7 +222,7 @@ const Room = () => {
     if (!isHost) return;
 
     const playerRef = ref(db, `rooms/${safeRoomId}/players/${playerName}`);
-    remove(playerRef)
+    remove(playerRef);
   };
 
   // -----------------------------
@@ -229,11 +241,14 @@ const Room = () => {
   // -----------------------------
   // ロード中はプレースホルダーを表示
   // -----------------------------
-  if (loading) return (
-    <div className="flex items-center justify-center h-screen text-white">
-      <span className="text-xl font-semibold animate-pulse-dots">読み込み中</span>
-    </div>
-  );
+  if (loading)
+    return (
+      <div className="flex items-center justify-center h-screen text-white">
+        <span className="text-xl font-semibold animate-pulse-dots">
+          読み込み中
+        </span>
+      </div>
+    );
 
   // -----------------------------
   // 各フェーズごとに表示を切り替え

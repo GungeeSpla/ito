@@ -43,7 +43,7 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
-  background-image: url('/images/wood-bg.jpg');
+  background-image: url("/images/wood-bg.jpg");
   background-repeat: repeat;
   background-size: 100vw 50em;
   background-attachment: fixed;
@@ -66,7 +66,11 @@ body {
   z-index: 0;
 
   /* 中央は透明、外側に向かって暗くするグラデーション */
-  background: radial-gradient(circle at center, transparent 60%, rgba(0, 0, 0, 0.5) 100%);
+  background: radial-gradient(
+    circle at center,
+    transparent 60%,
+    rgba(0, 0, 0, 0.5) 100%
+  );
 }
 
 /* --------------------------------------------
@@ -143,7 +147,7 @@ button:focus-visible {
 }
 
 .ito-topic-card {
-  background-image: url('/images/topic-bg.jpg');
+  background-image: url("/images/topic-bg.jpg");
   background-repeat: no-repeat;
   background-size: 100% 100%;
   border: 1px solid #fdf045;
@@ -192,22 +196,22 @@ button:focus-visible {
 /* プレイヤーごとのカード裏面（背景色＋アイコン） */
 .player-ガンジー .ito-card-back {
   background-color: #0f8846;
-  background-image: url('/images/icon-gungee.png');
+  background-image: url("/images/icon-gungee.png");
 }
 
 .player-ぽんこつ .ito-card-back {
   background-color: #e6af00;
-  background-image: url('/images/icon-ponkotsu.png');
+  background-image: url("/images/icon-ponkotsu.png");
 }
 
 .player-おりまー .ito-card-back {
   background-color: #8d0842;
-  background-image: url('/images/icon-orima.png');
+  background-image: url("/images/icon-orima.png");
 }
 
 .player-けんしろ .ito-card-back {
   background-color: #07539f;
-  background-image: url('/images/icon-kenshiro.png');
+  background-image: url("/images/icon-kenshiro.png");
 }
 
 /* --------------------------------------------

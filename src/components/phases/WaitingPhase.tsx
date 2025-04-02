@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Crown } from "lucide-react";
-import cn from 'classnames';
+import cn from "classnames";
 
 // -----------------------------
 // Props 型定義
@@ -15,7 +15,9 @@ interface WaitingPhaseProps {
   setNewNickname: (name: string) => void;
   addPlayer: () => void;
   selectedSet: string;
-  setSelectedSet: React.Dispatch<React.SetStateAction<"normal" | "rainbow" | "classic" | "salmon" | "custom">>;
+  setSelectedSet: React.Dispatch<
+    React.SetStateAction<"normal" | "rainbow" | "classic" | "salmon" | "custom">
+  >;
   level: number;
   setLevel: (level: number) => void;
   startGame: () => void;
@@ -72,7 +74,6 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
   return (
     <div className="min-h-[80vh] flex items-center justify-center  text-white px-4">
       <div className="bg-white/70 backdrop-blur-sm text-black p-6 rounded-xl shadow-md w-full max-w-md animate-fade-in relative">
-
         {/* URLコピーUI */}
         <div className="mb-4 text-center relative">
           <button
@@ -85,11 +86,11 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
           {/* コピー完了の吹き出し */}
           <div
             className={cn(
-              'absolute top-2 right-2 text-sm text-white px-3 py-1 rounded bg-black bg-opacity-75',
-              'before:absolute before:top-1/2 before:left-[-15px] before:-translate-y-1/2',
-              'before:border-8 before:border-transparent before:border-r-black',
-              'transition-opacity duration-500',
-              copied ? 'opacity-100' : 'opacity-0 pointer-events-none'
+              "absolute top-2 right-2 text-sm text-white px-3 py-1 rounded bg-black bg-opacity-75",
+              "before:absolute before:top-1/2 before:left-[-15px] before:-translate-y-1/2",
+              "before:border-8 before:border-transparent before:border-r-black",
+              "transition-opacity duration-500",
+              copied ? "opacity-100" : "opacity-0 pointer-events-none",
             )}
           >
             コピーしました！
@@ -99,13 +100,20 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
         {/* プレイヤー一覧 */}
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-2">
-            <span className="bg-white text-black text-xs px-2 py-1 rounded">参加者一覧</span>
+            <span className="bg-white text-black text-xs px-2 py-1 rounded">
+              参加者一覧
+            </span>
           </div>
           <ul className="space-y-1">
             {Object.keys(players).map((player) => (
               <li key={player} className="text-sm">
                 {player}
-                {player === host && <Crown size={16} className="inline text-yellow-700 ml-1 relative -top-0.5" />}
+                {player === host && (
+                  <Crown
+                    size={16}
+                    className="inline text-yellow-700 ml-1 relative -top-0.5"
+                  />
+                )}
                 <span className="text-black text-xs">
                   {player === nickname && "（You）"}
                 </span>
@@ -169,7 +177,9 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
           </form>
         ) : (
           <p className="mb-4 text-center text-black">
-            {isHost ? "ゲストを招待して、ゲームを開始してください。" : "ホストのゲーム開始を待っています。"}
+            {isHost
+              ? "ゲストを招待して、ゲームを開始してください。"
+              : "ホストのゲーム開始を待っています。"}
           </p>
         )}
 
@@ -181,7 +191,16 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
               <label className="block mb-1">お題セット</label>
               <select
                 value={selectedSet}
-                onChange={(e) => setSelectedSet(e.target.value as "normal" | "rainbow" | "classic" | "salmon" | "custom")}
+                onChange={(e) =>
+                  setSelectedSet(
+                    e.target.value as
+                      | "normal"
+                      | "rainbow"
+                      | "classic"
+                      | "salmon"
+                      | "custom",
+                  )
+                }
                 className="w-full p-2 bg-white text-black rounded
                   focus:outline-none focus:ring-2 focus:ring-blue-400"
               >

@@ -13,8 +13,8 @@ interface Props {
 }
 
 const DealCardsPhase: React.FC<Props> = () => {
-  dealSound.play()
-  
+  dealSound.play();
+
   return (
     <div>
       {/* <h2>カードを配っています…</h2> */}

@@ -4,7 +4,7 @@ export const selectRandomTopics = (
   allTopics: Topic[],
   selectedSet: string,
   usedTitles: string[],
-  count: number = 3
+  count: number = 3,
 ): Topic[] => {
   return allTopics
     .filter((t) => t.set === selectedSet && !usedTitles.includes(t.title))

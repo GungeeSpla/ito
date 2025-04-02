@@ -9,7 +9,8 @@ import { get, ref } from "firebase/database";
 // ------------------------------------------------------
 // 与えられたリストからランダムに1つ選ぶユーティリティ関数
 // ------------------------------------------------------
-const getRandom = (list: string[]) => list[Math.floor(Math.random() * list.length)];
+const getRandom = (list: string[]) =>
+  list[Math.floor(Math.random() * list.length)];
 
 // ------------------------------------------------------
 // ランダムな3単語で構成されるIDの候補を生成

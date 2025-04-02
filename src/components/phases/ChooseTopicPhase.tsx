@@ -1,7 +1,15 @@
 import React, { useRef, useState, useEffect } from "react";
 import { Topic } from "../../types/Topic";
 import { motion, AnimatePresence } from "framer-motion";
-import { ref, onValue, set, update, push, remove, off } from "firebase/database";
+import {
+  ref,
+  onValue,
+  set,
+  update,
+  push,
+  remove,
+  off,
+} from "firebase/database";
 import { db } from "../../firebase";
 import ProposalModal from "../ProposalModal";
 
@@ -19,7 +27,9 @@ const ChooseTopicPhase: React.FC<Props> = ({
   const [selectedTitle, setSelectedTitle] = useState<string | null>(null); // 選択されたお題タイトル
   const [votes, setVotes] = useState<Record<string, string>>({}); // 各プレイヤーの投票情報
   const [players, setPlayers] = useState<Record<string, boolean>>({}); // プレイヤー一覧
-  const [tiebreakMethod, setTiebreakMethod] = useState<"random" | "host">("random"); // 同票時の処理
+  const [tiebreakMethod, setTiebreakMethod] = useState<"random" | "host">(
+    "random",
+  ); // 同票時の処理
   const [showProposalModal, setShowProposalModal] = useState(false); // お題提案モーダル表示
   const [customTopics, setCustomTopics] = useState<Topic[]>([]); // カスタムお題一覧
   const nickname = localStorage.getItem("nickname") || "";
@@ -28,7 +38,7 @@ const ChooseTopicPhase: React.FC<Props> = ({
   const [topicOptions, setTopicOptions] = useState<Topic[]>([]); // お題候補一覧
   const [visibleTopics, setVisibleTopics] = useState<Topic[]>([]); // 表示対象のお題（フェード用）
   const exitCalled = useRef(false); // exitComplete が複数回呼ばれないようにするフラグ
-  const exitTimeoutRef = useRef<NodeJS.Timeout | null>(null); // 
+  const exitTimeoutRef = useRef<NodeJS.Timeout | null>(null); //
 
   // Firebaseからのデータ購読
   useEffect(() => {
@@ -59,7 +69,7 @@ const ChooseTopicPhase: React.FC<Props> = ({
         setHasChosen(true);
         setSelectedTitle(topic.title);
         exitTimeoutRef.current = setTimeout(() => {
-          console.log("安全装置によってお題を選択しました:", topic)
+          console.log("安全装置によってお題を選択しました:", topic);
           chooseTopic(topic);
           exitCalled.current = true;
         }, 800);
@@ -129,7 +139,9 @@ const ChooseTopicPhase: React.FC<Props> = ({
   // ホストが強制決定
   const handleForceChoose = async (title: string) => {
     if (!isHost || !roomId) return;
-    const topic = [...topicOptions, ...customTopics].find((t) => t.title === title);
+    const topic = [...topicOptions, ...customTopics].find(
+      (t) => t.title === title,
+    );
     if (topic) {
       await set(ref(db, `rooms/${roomId}/selectedTopic`), topic);
       await update(ref(db, `rooms/${roomId}/usedTitles`), {
@@ -147,7 +159,11 @@ const ChooseTopicPhase: React.FC<Props> = ({
   };
 
   // お題を提案（カスタム追加）
-  const handleAddTopic = async (topic: { title: string; min?: string; max?: string }) => {
+  const handleAddTopic = async (topic: {
+    title: string;
+    min?: string;
+    max?: string;
+  }) => {
     if (!roomId) return;
     const topicListRef = ref(db, `rooms/${roomId}/customTopics`);
     const newTopic: Topic = {
@@ -164,7 +180,10 @@ const ChooseTopicPhase: React.FC<Props> = ({
   useEffect(() => {
     if (!roomId || selectedTitle) return;
     const totalVotes = Object.values(votes);
-    if (Object.keys(players).length > 0 && totalVotes.length === Object.keys(players).length) {
+    if (
+      Object.keys(players).length > 0 &&
+      totalVotes.length === Object.keys(players).length
+    ) {
       const count: Record<string, number> = {};
       totalVotes.forEach((title) => {
         count[title] = (count[title] || 0) + 1;
@@ -179,7 +198,9 @@ const ChooseTopicPhase: React.FC<Props> = ({
       }
 
       if (topVotes.length === 1 || tiebreakMethod === "random") {
-        const topic = [...topicOptions, ...customTopics].find((t) => t.title === chosenTitle);
+        const topic = [...topicOptions, ...customTopics].find(
+          (t) => t.title === chosenTitle,
+        );
         if (topic) {
           (async () => {
             await set(ref(db, `rooms/${roomId}/selectedTopic`), topic);
@@ -190,7 +211,15 @@ const ChooseTopicPhase: React.FC<Props> = ({
         }
       }
     }
-  }, [votes, players, topicOptions, customTopics, selectedTitle, tiebreakMethod, roomId]);
+  }, [
+    votes,
+    players,
+    topicOptions,
+    customTopics,
+    selectedTitle,
+    tiebreakMethod,
+    roomId,
+  ]);
 
   return (
     <div className="min-h-[70vh] flex items-center justify-center text-white px-4">
@@ -215,9 +244,9 @@ const ChooseTopicPhase: React.FC<Props> = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: selectedTitle ? 0 : 1 }}
           transition={hasChosen ? { delay: 0 } : { delay: 0.2 }}
-          
         >
-          みんなで話し合ったあと、やりたいお題カードをクリックして投票してください。<br />
+          みんなで話し合ったあと、やりたいお題カードをクリックして投票してください。
+          <br />
           （ホスト権限で決定することもできます）
         </motion.p>
 
@@ -227,9 +256,11 @@ const ChooseTopicPhase: React.FC<Props> = ({
               if (exitCalled.current) return;
               exitCalled.current = true;
               if (selectedTitle) {
-                const selected = [...topicOptions, ...customTopics].find(t => t.title === selectedTitle);
+                const selected = [...topicOptions, ...customTopics].find(
+                  (t) => t.title === selectedTitle,
+                );
                 if (selected) {
-                  console.log("お題を選択しました:", selected)
+                  console.log("お題を選択しました:", selected);
                   chooseTopic(selected);
                   if (exitTimeoutRef.current) {
                     clearTimeout(exitTimeoutRef.current);
@@ -239,9 +270,12 @@ const ChooseTopicPhase: React.FC<Props> = ({
             }}
           >
             {visibleTopics.map((t, index) => {
-              const voteCount = Object.values(votes).filter((v) => v === t.title).length;
+              const voteCount = Object.values(votes).filter(
+                (v) => v === t.title,
+              ).length;
               const isVoted = votes[nickname] === t.title;
-              const isChosen = selectedTitle !== null && selectedTitle === t.title;
+              const isChosen =
+                selectedTitle !== null && selectedTitle === t.title;
               return (
                 <motion.div
                   key={t.title}
@@ -270,7 +304,9 @@ const ChooseTopicPhase: React.FC<Props> = ({
                     </div>
                     <div className="h-[2px] bg-gray-900 mt-1"></div>
                   </div>
-                  <p className="text-sm text-gray-900 mb-2">票: {voteCount} {isVoted && <span>（投票済み）</span>}</p>
+                  <p className="text-sm text-gray-900 mb-2">
+                    票: {voteCount} {isVoted && <span>（投票済み）</span>}
+                  </p>
                   {isHost && (
                     <button
                       className="ml-2 text-xs bg-orange-500 text-white px-2 py-1 rounded hover:bg-orange-500 hover:border-orange-300"
@@ -313,7 +349,9 @@ const ChooseTopicPhase: React.FC<Props> = ({
               <label className="mr-2">同票時の決定方法：</label>
               <select
                 value={tiebreakMethod}
-                onChange={(e) => handleTiebreakChange(e.target.value as "random" | "host")}
+                onChange={(e) =>
+                  handleTiebreakChange(e.target.value as "random" | "host")
+                }
                 className="border border-gray-300 rounded px-2 py-1 text-black bg-white"
               >
                 <option value="random">ランダムに決定</option>

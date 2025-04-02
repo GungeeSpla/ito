@@ -45,10 +45,10 @@ function App() {
     // フェードアウト → 画面遷移（アニメーションと同期）
     setIsFading(true);
     setTimeout(() => {
-      toast.success("ルームを作成しました。")
-      console.log("ルームを作成しました。")
-      console.log("ニックネーム:", nickname)
-      console.log("ルームID:", roomId)
+      toast.success("ルームを作成しました。");
+      console.log("ルームを作成しました。");
+      console.log("ニックネーム:", nickname);
+      console.log("ルームID:", roomId);
       navigate(`/room/${roomId}`);
     }, 300); // CSS側のdurationに合わせてる
   };

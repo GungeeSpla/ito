@@ -97,8 +97,10 @@ const Card: React.FC<CardProps> = ({
           style={{ backfaceVisibility: "hidden" }}
         >
           {hint && (
-            <div className="absolute w-full text-center top-6 left-1/2 -translate-x-1/2 text-[10px]
-            text-black bg-opacity-50 px-1">
+            <div
+              className="absolute w-full text-center top-6 left-1/2 -translate-x-1/2 text-[10px]
+            text-black bg-opacity-50 px-1"
+            >
               {hint}
             </div>
           )}
@@ -123,25 +125,42 @@ const Card: React.FC<CardProps> = ({
           title={isMine && typeof value === "number" ? `${value}` : ""}
         >
           {hint && (
-            <div className="absolute w-full text-center top-0 left-1/2 -translate-x-1/2 text-[0.8rem]
-            text-white bg-black bg-opacity-20 px-1 py-0.5">
+            <div
+              className="absolute w-full text-center top-0 left-1/2 -translate-x-1/2 text-[0.8rem]
+            text-white bg-black bg-opacity-20 px-1 py-0.5"
+            >
               {hint}
             </div>
           )}
-          {name && (name !== "ガンジー" && name !== "おりまー" && name !== "けんしろ" && name !== "ぽんこつ") && <p className="text-xs mb-1">{name}</p>}
-          {(name !== "ガンジー" && name !== "おりまー" && name !== "けんしろ" && name !== "ぽんこつ") && <p className="text-3xl"></p>}
+          {name &&
+            name !== "ガンジー" &&
+            name !== "おりまー" &&
+            name !== "けんしろ" &&
+            name !== "ぽんこつ" && <p className="text-xs mb-1">{name}</p>}
+          {name !== "ガンジー" &&
+            name !== "おりまー" &&
+            name !== "けんしろ" &&
+            name !== "ぽんこつ" && <p className="text-3xl"></p>}
         </div>
       </div>
 
       {editable && isMine && mode === "reveal" && (
         <div>
           <div className="absolute top-1 left-1 flex gap-1">
-            <button title="たとえワードを削除する" onClick={onClearHint} className="text-white hover:bg-red-300 hover:border-red-400 text-xs bg-gray-400 p-0.5">
+            <button
+              title="たとえワードを削除する"
+              onClick={onClearHint}
+              className="text-white hover:bg-red-300 hover:border-red-400 text-xs bg-gray-400 p-0.5"
+            >
               <Eraser size={16} />
             </button>
           </div>
           <div className="absolute top-1 right-1 flex gap-1">
-            <button title="たとえワードを入力する" onClick={onEdit} className="text-white hover:bg-blue-300 hover:border-blue-400 text-xs bg-gray-400 p-0.5">
+            <button
+              title="たとえワードを入力する"
+              onClick={onEdit}
+              className="text-white hover:bg-blue-300 hover:border-blue-400 text-xs bg-gray-400 p-0.5"
+            >
               <Pencil size={16} />
             </button>
           </div>

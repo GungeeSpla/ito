@@ -10,12 +10,18 @@ interface UseDealCardsProps {
   level: number;
 }
 
-export const useDealCards = ({ phase, isHost, players, roomId, level }: UseDealCardsProps) => {
+export const useDealCards = ({
+  phase,
+  isHost,
+  players,
+  roomId,
+  level,
+}: UseDealCardsProps) => {
   useEffect(() => {
     const deal = async () => {
       const playerNames = Object.keys(players);
       const totalCards = playerNames.length + (level - 1);
-      
+
       const numberPool = Array.from({ length: 100 }, (_, i) => i + 1);
       const shuffledNumbers = numberPool
         .sort(() => 0.5 - Math.random())
