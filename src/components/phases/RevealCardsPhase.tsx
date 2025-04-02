@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Howl } from "howler";
 import { ref, onValue, set } from "firebase/database";
-import { db } from "../../firebase";
-import Card from "../common/Card";
-import EmojiBurst from "../common/EmojiBurst";
-import FailBurst from "../common/FailBurst";
+import { db } from "@/firebase";
+import Card from "@/components/common/Card";
+import EmojiBurst from "@/components/common/EmojiBurst";
+import FailBurst from "@/components/common/FailBurst";
+import { CardEntry } from "@/types/CardEntry";
 
 // 効果音：カードをめくる音
 const flipSound = new Howl({
@@ -24,19 +25,13 @@ const failSound = new Howl({
   volume: 1,
 });
 
-interface CardEntry {
-  name: string;
-  card: number;
-  hint?: string;
-}
-
 interface Props {
   roomId: string;
   nickname: string;
+  cardOrder: CardEntry[];
 }
 
-const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
-  const [cardOrder, setCardOrder] = useState<CardEntry[]>([]);
+const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname, cardOrder }) => {
   const [revealedCards, setRevealedCards] = useState<number[]>([]);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
   const [isHost, setIsHost] = useState(false);
@@ -58,17 +53,6 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
       failSound.play();
     }
   }, [status]);
-
-  useEffect(() => {
-    const orderRef = ref(db, `rooms/${roomId}/cardOrder`);
-    const unsub = onValue(orderRef, (snap) => {
-      const data = snap.val();
-      if (Array.isArray(data)) {
-        setCardOrder(data);
-      }
-    });
-    return () => unsub();
-  }, [roomId]);
 
   useEffect(() => {
     const hostRef = ref(db, `rooms/${roomId}/host`);

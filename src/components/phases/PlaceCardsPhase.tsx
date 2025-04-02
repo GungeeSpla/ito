@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ref, get, set, onValue, runTransaction } from "firebase/database";
-import { db } from "../../firebase";
-import Card from "../common/Card";
+import { db } from "@/firebase";
 import { AnimatePresence, motion } from "framer-motion";
-import EditHintModal from "../common/EditHintModal";
+import Card from "@/components/common/Card";
+import EditHintModal from "@/components/common/EditHintModal";
+import { CardEntry } from "@/types/CardEntry";
 
 // 効果音：カードを出す音
 const placeSound = new Howl({
@@ -17,15 +18,16 @@ const placeSound = new Howl({
 interface Props {
   roomId: string;
   nickname: string;
+  cardOrder: CardEntry[];
+  setCardOrder: (v: CardEntry[]) => void;
 }
 
-interface CardEntry {
-  name: string;
-  card: number;
-  hint?: string;
-}
-
-const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
+const PlaceCardsPhase: React.FC<Props> = ({
+  roomId,
+  nickname,
+  cardOrder,
+  setCardOrder,
+}) => {
   const [myCards, setMyCards] = useState<{ value: number; hint?: string }[]>(
     [],
   );
@@ -33,7 +35,6 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
     source: "hand" | "field";
     value: number;
   } | null>(null);
-  const [cardOrder, setCardOrder] = useState<CardEntry[]>([]);
   const [players, setPlayers] = useState<Record<string, boolean>>({});
   const [isHost, setIsHost] = useState(false);
   const [level, setLevel] = useState<number>(1);
@@ -150,13 +151,12 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
     const orderRef = ref(db, `rooms/${roomId}/cardOrder`);
 
     let hintToRestore = "";
-    setCardOrder((prevOrder) => {
-      const found = prevOrder.find(
-        (c) => c.name === nickname && c.card === cardToRemove,
-      );
-      if (found?.hint) hintToRestore = found.hint;
-      return prevOrder;
-    });
+    const found = cardOrder.find(
+      (c) => c.name === nickname && c.card === cardToRemove,
+    );
+    if (found?.hint) {
+      hintToRestore = found.hint;
+    }
 
     await runTransaction(orderRef, (currentOrder) =>
       currentOrder.filter(

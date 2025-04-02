@@ -115,12 +115,19 @@ const Room = () => {
     const unsub3 = onValue(child(roomRef, "host"), (snap) => {
       if (snap.exists()) setHost(snap.val());
     });
+    const unsub4 = onValue(child(roomRef, "cardOrder"), (snap) => {
+      const data = snap.val();
+      if (Array.isArray(data)) {
+        setCardOrder(data);
+      }
+    });
 
     // クリーンアップ
     return () => {
       unsub1();
       unsub2();
       unsub3();
+      unsub4();
     };
   }, [roomId, navigate]);
 
@@ -292,11 +299,24 @@ const Room = () => {
   }
 
   if (phase === "placeCards") {
-    return <PlaceCardsPhase roomId={safeRoomId} nickname={nickname} />;
+    return (
+      <PlaceCardsPhase
+        roomId={safeRoomId}
+        nickname={nickname}
+        cardOrder={cardOrder}
+        setCardOrder={setCardOrder}
+      />
+    );
   }
 
   if (phase === "revealCards") {
-    return <RevealCardsPhase roomId={safeRoomId} nickname={nickname} />;
+    return (
+      <RevealCardsPhase
+        roomId={safeRoomId}
+        nickname={nickname}
+        cardOrder={cardOrder}
+      />
+    );
   }
 
   // 未定義のフェーズ用フォールバック
