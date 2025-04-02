@@ -22,6 +22,7 @@ interface Props {
 interface CardEntry {
   name: string;
   card: number;
+  hint?: string;
 }
 
 const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
@@ -103,15 +104,17 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
   const handleInsertCard = async (insertIndex: number) => {
     if (!activeCard || activeCard.source !== "hand") return;
 
+    const cardData = myCards.find(c => c.value === activeCard.value);
+    if (!cardData) return;
+
     const orderRef = ref(db, `rooms/${roomId}/cardOrder`);
     await runTransaction(orderRef, (currentOrder) => {
       const newOrder = Array.isArray(currentOrder) ? [...currentOrder] : [];
       const filtered = newOrder.filter((c: CardEntry) => !(c.name === nickname && c.card === activeCard.value));
-      const cardHint = myCards.find(c => c.value === activeCard.value)?.hint || "";
       filtered.splice(insertIndex, 0, {
         name: nickname,
         card: activeCard.value,
-        hint: cardHint
+        hint: cardData.hint || ""
       });
       return filtered;
     });
@@ -119,7 +122,7 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
     setMyCards((prev) => {
       const updated = prev.filter(c => c.value !== activeCard.value);
       const cardRef = ref(db, `rooms/${roomId}/cards/${nickname}`);
-      set(cardRef, updated.map(v => ({ value: v.value, hint: v.hint })));
+      set(cardRef, updated.map(v => ({ value: v.value, hint: v.hint || "" })));
       return updated;
     });
 
@@ -131,17 +134,26 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
   // -----------------------------
   const handleRemoveCard = async (cardToRemove: number) => {
     const orderRef = ref(db, `rooms/${roomId}/cardOrder`);
+
+    let hintToRestore = "";
+    setCardOrder((prevOrder) => {
+      const found = prevOrder.find((c) => c.name === nickname && c.card === cardToRemove);
+      if (found?.hint) hintToRestore = found.hint;
+      return prevOrder;
+    });
+
     await runTransaction(orderRef, (currentOrder) =>
       currentOrder.filter((c: CardEntry) => !(c.name === nickname && c.card === cardToRemove))
     );
 
     setMyCards((prev) => {
-      const updated = [...prev, { value: cardToRemove }];
+      const updated = [...prev, { value: cardToRemove, hint: hintToRestore }];
       const cardRef = ref(db, `rooms/${roomId}/cards/${nickname}`);
       set(cardRef, updated.map(v => ({ value: v.value, hint: v.hint || "" })));
       return updated;
     });
   };
+
 
   const proceedToReveal = async () => {
     const phaseRef = ref(db, `rooms/${roomId}/phase`);
@@ -213,6 +225,7 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
                   isMine={entry.name === nickname}
                   mode="place"
                   onClick={isMine ? () => handleRemoveCard(entry.card) : undefined}
+                  hint={entry.hint}
                 />
                 {activeCard?.source === "hand" && (
                   <motion.button
@@ -281,6 +294,7 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
       {/* たとえワード編集用のモーダルウィンドウ */}
       {editingValue !== null && (
         <EditHintModal
+          open={true}
           initialValue={myCards.find(c => c.value === editingValue)?.hint || ""}
           onSubmit={(newHint) => handleHintSubmit(editingValue, newHint)}
           onClose={() => setEditingValue(null)}
