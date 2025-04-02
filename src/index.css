@@ -157,9 +157,25 @@ button:focus-visible {
   transition-property: all;
 }
 
+.ito-topic-card.ito-fadein {
+  animation: ito-topic-card-in 500ms ease-out forwards;
+  opacity: 0;
+}
+.ito-topic-card.ito-fadeout {
+}
+
 .ito-topic-card:hover {
   scale: 102%;
   box-shadow: 0.5em 0.5em 1em rgba(0, 0, 0, 0.5);
+}
+
+@keyframes ito-topic-card-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 /* --------------------------------------------

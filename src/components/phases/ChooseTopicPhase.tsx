@@ -1,19 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Topic } from "../../types/Topic";
 import { motion, AnimatePresence } from "framer-motion";
-import { ref, onValue, set, update, push } from "firebase/database";
+import { ref, onValue, set, update, push, remove, off } from "firebase/database";
 import { db } from "../../firebase";
 import ProposalModal from "../ProposalModal";
 
 interface Props {
-  topicOptions: Topic[]; // 親コンポーネントから渡される候補お題
   isHost: boolean; // 現在のプレイヤーがホストかどうか
   chooseTopic: (topic: Topic) => void; // お題が確定した時に呼ばれるコールバック
   onRefreshTopics: () => void; // お題を再抽選する処理
 }
 
 const ChooseTopicPhase: React.FC<Props> = ({
-  topicOptions,
   isHost,
   chooseTopic,
   onRefreshTopics,
@@ -27,55 +25,93 @@ const ChooseTopicPhase: React.FC<Props> = ({
   const [customTopics, setCustomTopics] = useState<Topic[]>([]); // 提案された追加お題
   const nickname = localStorage.getItem("nickname") || "";
   const roomId = window.location.pathname.split("/").pop(); // URLからルームIDを取得
+  const [hasChosen, setHasChosen] = useState(false);
+  const [topicOptions, setTopicOptions] = useState<Topic[]>([]);
+  const exitCalled = useRef(false);
+  const [visibleTopics, setVisibleTopics] = useState<Topic[]>([]);
 
   // 初期データの購読（votes / players / selectedTopic / tiebreakMethod / customTopics）
   useEffect(() => {
+
     if (!roomId) return;
 
+    // Firebase Realtime Database の参照を定義
     const votesRef = ref(db, `rooms/${roomId}/votes`);
     const playersRef = ref(db, `rooms/${roomId}/players`);
     const topicRef = ref(db, `rooms/${roomId}/selectedTopic`);
     const methodRef = ref(db, `rooms/${roomId}/tiebreakMethod`);
     const customRef = ref(db, `rooms/${roomId}/customTopics`);
+    const optionsRef = ref(db, `rooms/${roomId}/topicOptions`);
 
-    // 投票状況を購読
-    onValue(votesRef, (snap) => {
+    // 各データに対する購読コールバック定義
+    const handleVotes = (snap: any) => {
       const data = snap.val();
       if (data) setVotes(data);
-    });
+    };
 
-    // プレイヤー一覧を購読
-    onValue(playersRef, (snap) => {
+    const handlePlayers = (snap: any) => {
       const data = snap.val();
       if (data) setPlayers(data);
-    });
+    };
 
-    // お題が確定した場合の処理
-    onValue(topicRef, (snap) => {
+    const handleTopic = (snap: any) => {
       const topic = snap.val();
-      if (topic && !selectedTitle) {
+      if (topic && !selectedTitle && !hasChosen) {
+        setHasChosen(true);
         setSelectedTitle(topic.title);
-        chooseTopic(topic);
       }
-    });
+    };
 
-    // 同票時のルールを取得
-    onValue(methodRef, (snap) => {
+    const handleMethod = (snap: any) => {
       const value = snap.val();
       if (value === "random" || value === "host") {
         setTiebreakMethod(value);
       }
-    });
+    };
 
-    // 提案されたお題の購読
-    onValue(customRef, (snap) => {
-      const data = snap.val();
-      if (data) {
-        const values = Object.values(data) as Topic[];
-        setCustomTopics(values);
-      }
-    });
+    const handleCustom = (snap: any) => {
+      const data = snap.val() || {};
+      const values = Object.values(data) as Topic[];
+      setCustomTopics(values);
+    };
+
+    const handleOptions = (snap: any) => {
+      const data = snap.val() || [];
+      setTopicOptions(data);
+    };
+
+    // Firebase の購読を開始
+    onValue(votesRef, handleVotes);
+    onValue(playersRef, handlePlayers);
+    onValue(topicRef, handleTopic);
+    onValue(methodRef, handleMethod);
+    onValue(customRef, handleCustom);
+    onValue(optionsRef, handleOptions);
+
+    // アンマウント時 or 依存変数更新時に購読を解除（メモリリークや多重購読を防ぐ）
+    return () => {
+      off(votesRef, "value", handleVotes);
+      off(playersRef, "value", handlePlayers);
+      off(topicRef, "value", handleTopic);
+      off(methodRef, "value", handleMethod);
+      off(customRef, "value", handleCustom);
+      off(optionsRef, "value", handleOptions);
+    };
   }, [roomId, selectedTitle, chooseTopic]);
+
+  useEffect(() => {
+    if (hasChosen) {
+      setVisibleTopics([]);
+    } else {
+      setVisibleTopics([...topicOptions, ...customTopics]);
+    }
+  }, [topicOptions, customTopics, hasChosen]);
+
+  // お題を再抽選する
+  const handleRefreshTopics = async () => {
+    await remove(ref(db, `rooms/${roomId}/customTopics`));
+    await onRefreshTopics();
+  };
 
   // お題に投票する
   const handleVote = async (title: string) => {
@@ -187,21 +223,42 @@ const ChooseTopicPhase: React.FC<Props> = ({
 
         {/* お題カード一覧 */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <AnimatePresence>
-            {[...topicOptions, ...customTopics].map((t, index) => {
+          <AnimatePresence
+            onExitComplete={() => {
+              if (exitCalled.current) return;
+              exitCalled.current = true;
+              if (selectedTitle) {
+                const selected = [...topicOptions, ...customTopics].find(t => t.title === selectedTitle);
+                if (selected) {
+                  console.log("お題が選ばれました: ", selected)
+                  chooseTopic(selected);
+                }
+              }
+            }}
+          >
+            {visibleTopics.map((t, index) => {
               const voteCount = Object.values(votes).filter((v) => v === t.title).length;
               const isVoted = votes[nickname] === t.title;
+              const isChosen = selectedTitle !== null && selectedTitle === t.title;
               return (
                 <motion.div
                   key={t.title}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.5, ease: "easeOut", delay: 0.4 + 0.1 * index }}
+                  initial={false}
+                  exit={
+                    hasChosen
+                      ? isChosen
+                        ? { opacity: 0, scale: 1.2 }
+                        : { opacity: 0, scale: 0.95 }
+                      : {}
+                  }
+                  transition={{ duration: 0.5, ease: "easeOut" }}
                   layout
                   onClick={() => handleVote(t.title)}
-                  className={`ito-topic-card ${isVoted ? "bg-blue-100 border-blue-500" : "bg-white border-gray-300"} 
+                  className={`ito-topic-card
+                    ${isVoted ? "bg-blue-100 border-blue-500" : "bg-white border-gray-300"} 
+                    ${!hasChosen ? "ito-fadein" : "ito-fadeout"}
                     pb-8 relative bg-white text-black rounded-xl p-4 text-center transition border border-gray-300`}
+                  style={{ animationDelay: `${400 + index * 100}ms` }}
                 >
                   <h3 className="text-lg font-semibold mb-2">{t.title}</h3>
                   <div className="my-4">
@@ -231,13 +288,17 @@ const ChooseTopicPhase: React.FC<Props> = ({
           className="text-center text-white text-shadow-md mt-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: selectedTitle ? 0 : 1 }}
-          transition={{ delay: 1 }}
+          transition={
+            hasChosen
+                ? { delay: 0 }
+                : { delay: 0.8 }
+          }
         >
           <div className="text-center">
             {/* お題再抽選ボタン（ホストのみ） */}
             {isHost && (
               <button
-                onClick={onRefreshTopics}
+                onClick={handleRefreshTopics}
                 className="w-32 text-sm m-2 p-2 bg-emerald-600 text-white rounded hover:bg-emerald-500 hover:border-emerald-800"
               >
                 お題を再抽選

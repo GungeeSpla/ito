@@ -48,25 +48,26 @@ const Room = () => {
   const [host, setHost] = useState("");
   const [loading, setLoading] = useState(true);
   const [phase, setPhase] = useState("waiting");
-  const [topicOptions, setTopicOptions] = useState<Topic[]>([]);
   const [selectedSet, setSelectedSet] = useState<"normal" | "rainbow" | "classic" | "salmon" | "custom">("rainbow");
   const [level, setLevel] = useState<number>(1);
+  const alreadyJoined = !!players[nickname];
+  const isHost = nickname === host;
+  
+  // トースト通知を1回だけ出す
   let toastTimerId: ReturnType<typeof setTimeout>;
   const toastOnce = (fn: () => void) => {
     clearTimeout(toastTimerId);
     toastTimerId = setTimeout(fn, 10);
   };
-
-  const alreadyJoined = !!players[nickname];
-  const isHost = nickname === host;
-
+  
+  // お題の再抽選
   const onRefreshTopics = async () => {
     const usedTopicsSnap = await get(ref(db, `rooms/${safeRoomId}/usedTitles`));
     const usedTitles = usedTopicsSnap.exists()
       ? Object.keys(usedTopicsSnap.val())
       : [];
     const randomTopics = selectRandomTopics(topics, selectedSet, usedTitles);
-    setTopicOptions(randomTopics);
+    await set(ref(db, `rooms/${safeRoomId}/topicOptions`), randomTopics);
   };
 
   // -----------------------------
@@ -92,7 +93,7 @@ const Room = () => {
         setHost(room.host || "");
         setPhase(room.phase || "waiting");
         setLoading(false);
-        toastOnce(() => toast.success("ルームに参加しました。"))
+        toastOnce(() => toast.success("ルームが見つかりました。"))
       })
       .catch((err) => {
         toastOnce(() => toast.error("初期化に失敗しました。"))
@@ -102,21 +103,13 @@ const Room = () => {
 
     // 各項目をリアルタイムで購読（onValue = WebSocket的な役割）
     const unsub1 = onValue(child(roomRef, "phase"), (snap) => setPhase(snap.val() || "waiting"));
-    const unsub2 = onValue(child(roomRef, "topicOptions"), (snap) => {
-      const data = snap.val();
-      if (Array.isArray(data)) setTopicOptions(data);
-    });
-    const unsub3 = onValue(child(roomRef, "players"), (snap) => {
+    const unsub2 = onValue(child(roomRef, "players"), (snap) => {
       const data = snap.val();
       if (data) {
         setPlayers(data);
-        // if (nickname && !data[nickname]) {
-        //   toast.error("ホストによってルームから退出させられました。");
-        //   navigate("/");
-        // }
       }
     });
-    const unsub4 = onValue(child(roomRef, "host"), (snap) => {
+    const unsub3 = onValue(child(roomRef, "host"), (snap) => {
       if (snap.exists()) setHost(snap.val());
     });
 
@@ -125,7 +118,6 @@ const Room = () => {
       unsub1();
       unsub2();
       unsub3();
-      unsub4();
     };
   }, [roomId, navigate]);
 
@@ -188,6 +180,7 @@ const Room = () => {
     const updates = {
       cardOrder: [],
       cards: {},
+      customTopics: {},
       host,
       level,
       phase: "chooseTopic",
@@ -202,6 +195,11 @@ const Room = () => {
     };
 
     update(ref(db, `rooms/${safeRoomId}`), updates);
+    
+    console.log("ゲームを開始します。")
+    console.log("- カテゴリ:", selectedSet)
+    console.log("- レベル:", level)
+    console.log("- お題候補:", randomTopics)
   };
 
   // -----------------------------
@@ -276,7 +274,6 @@ const Room = () => {
   if (phase === "chooseTopic") {
     return (
       <ChooseTopicPhase
-        topicOptions={topicOptions}
         isHost={isHost}
         chooseTopic={chooseTopic}
         onRefreshTopics={onRefreshTopics}
