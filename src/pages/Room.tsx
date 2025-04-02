@@ -49,7 +49,7 @@ const Room = () => {
   const [loading, setLoading] = useState(true);
   const [phase, setPhase] = useState("waiting");
   const [topicOptions, setTopicOptions] = useState<Topic[]>([]);
-  const [selectedSet, setSelectedSet] = useState<"normal" | "rainbow" | "classic" | "salmon">("rainbow");
+  const [selectedSet, setSelectedSet] = useState<"normal" | "rainbow" | "classic" | "salmon" | "custom">("rainbow");
   const [level, setLevel] = useState<number>(1);
   let toastTimerId: ReturnType<typeof setTimeout>;
   const toastOnce = (fn: () => void) => {

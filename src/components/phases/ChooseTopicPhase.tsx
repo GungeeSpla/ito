@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Topic } from "../../types/Topic";
 import { motion, AnimatePresence } from "framer-motion";
-import { ref, onValue, set, update } from "firebase/database";
+import { ref, onValue, set, update, push } from "firebase/database";
 import { db } from "../../firebase";
+import ProposalModal from "../ProposalModal";
 
 interface Props {
   topicOptions: Topic[];
@@ -19,12 +20,10 @@ const ChooseTopicPhase: React.FC<Props> = ({
 }) => {
   const [selectedTitle, setSelectedTitle] = useState<string | null>(null);
   const [votes, setVotes] = useState<Record<string, string>>({});
-  const [customTitle, setCustomTitle] = useState("");
-  const [customMin, setCustomMin] = useState("");
-  const [customMax, setCustomMax] = useState("");
   const [players, setPlayers] = useState<Record<string, boolean>>({});
   const [tiebreakMethod, setTiebreakMethod] = useState<"random" | "host">("random");
-
+  const [showProposalModal, setShowProposalModal] = useState(false);
+  const [customTopics, setCustomTopics] = useState<Topic[]>([]);
   const nickname = localStorage.getItem("nickname") || "";
   const roomId = window.location.pathname.split("/").pop();
 
@@ -35,6 +34,7 @@ const ChooseTopicPhase: React.FC<Props> = ({
     const playersRef = ref(db, `rooms/${roomId}/players`);
     const topicRef = ref(db, `rooms/${roomId}/selectedTopic`);
     const methodRef = ref(db, `rooms/${roomId}/tiebreakMethod`);
+    const customRef = ref(db, `rooms/${roomId}/customTopics`);
 
     onValue(votesRef, (snap) => {
       const data = snap.val();
@@ -60,6 +60,14 @@ const ChooseTopicPhase: React.FC<Props> = ({
         setTiebreakMethod(value);
       }
     });
+
+    onValue(customRef, (snap) => {
+      const data = snap.val();
+      if (data) {
+        const values = Object.values(data) as Topic[];
+        setCustomTopics(values);
+      }
+    });
   }, [roomId, selectedTitle, chooseTopic]);
 
   const handleVote = async (title: string) => {
@@ -71,7 +79,7 @@ const ChooseTopicPhase: React.FC<Props> = ({
 
   const handleForceChoose = async (title: string) => {
     if (!isHost || !roomId) return;
-    const topic = topicOptions.find((t) => t.title === title);
+    const topic = [...topicOptions, ...customTopics].find((t) => t.title === title);
     if (topic) {
       (async () => {
         await set(ref(db, `rooms/${roomId}/selectedTopic`), topic);
@@ -82,21 +90,24 @@ const ChooseTopicPhase: React.FC<Props> = ({
     }
   };
 
-  const handleCustomSubmit = async () => {
-    if (!isHost || selectedTitle || !customTitle || !roomId) return;
-    const newTopic = {
-      title: customTitle,
-      min: customMin || "",
-      max: customMax || "",
-    };
-    await set(ref(db, `rooms/${roomId}/selectedTopic`), newTopic);
-  };
-
   const handleTiebreakChange = async (value: "random" | "host") => {
     setTiebreakMethod(value);
     if (isHost && roomId) {
       await set(ref(db, `rooms/${roomId}/tiebreakMethod`), value);
     }
+  };
+
+  const handleAddTopic = async (topic: { title: string; min?: string; max?: string }) => {
+    if (!roomId) return;
+    const topicListRef = ref(db, `rooms/${roomId}/customTopics`);
+    const newTopic: Topic = {
+      title: topic.title,
+      min: topic.min ?? "",
+      max: topic.max ?? "",
+      set: "custom",
+    };
+    await push(topicListRef, newTopic);
+    setShowProposalModal(false);
   };
 
   useEffect(() => {
@@ -117,7 +128,7 @@ const ChooseTopicPhase: React.FC<Props> = ({
       }
 
       if (topVotes.length === 1 || tiebreakMethod === "random") {
-        const topic = topicOptions.find((t) => t.title === chosenTitle);
+        const topic = [...topicOptions, ...customTopics].find((t) => t.title === chosenTitle);
         if (topic) {
           (async () => {
             await set(ref(db, `rooms/${roomId}/selectedTopic`), topic);
@@ -128,10 +139,15 @@ const ChooseTopicPhase: React.FC<Props> = ({
         }
       }
     }
-  }, [votes, players, topicOptions, selectedTitle, tiebreakMethod, roomId]);
+  }, [votes, players, topicOptions, customTopics, selectedTitle, tiebreakMethod, roomId]);
 
   return (
     <div className="min-h-[70vh] flex items-center justify-center text-white px-4">
+      <ProposalModal
+        open={showProposalModal}
+        onClose={() => setShowProposalModal(false)}
+        onSubmit={handleAddTopic}
+      />
 
       <div className="max-w-3xl w-full">
         <motion.h2
@@ -143,21 +159,19 @@ const ChooseTopicPhase: React.FC<Props> = ({
           お題の選択
         </motion.h2>
 
-        {/* お題再抽選ボタン：ホストだけ表示 */}
-        {isHost && (
-          <div className="text-center">
-            <button
-              onClick={onRefreshTopics}
-              className="text-sm mb-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-500"
-            >
-              お題を再抽選
-            </button>
-          </div>
-        )}
+        <motion.p
+          className="text-center text-white text-shadow-md my-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: selectedTitle ? 0 : 1 }}
+          transition={{ delay: 0.2 }}
+        >
+          みんなで話し合ったあと、やりたいお題カードをクリックして投票してください。<br />
+          （ホスト権限で決定することもできます）
+        </motion.p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <AnimatePresence>
-            {topicOptions.map((t) => {
+            {[...topicOptions, ...customTopics].map((t, index) => {
               const voteCount = Object.values(votes).filter((v) => v === t.title).length;
               const isVoted = votes[nickname] === t.title;
               return (
@@ -166,7 +180,8 @@ const ChooseTopicPhase: React.FC<Props> = ({
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.4 }}
+                  transition={{ duration: 0.5, ease: "easeOut", delay: 0.4 + 0.1 * index }}
+                  layout
                   onClick={() => handleVote(t.title)}
                   className={`ito-topic-card ${isVoted ? "bg-blue-100 border-blue-500" : "bg-white border-gray-300"} 
                     pb-8 relative bg-white text-black rounded-xl p-4 text-center transition border border-gray-300`}
@@ -192,70 +207,48 @@ const ChooseTopicPhase: React.FC<Props> = ({
               );
             })}
 
-            {isHost && (
-              <motion.div
-                key="custom"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={selectedTitle ? { opacity: 0, scale: 1.1 } : { opacity: 1, scale: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.4 }}
-                className="pb-8 relative bg-white text-black rounded-xl p-4 shadow-md text-center transition border border-gray-300"
-              >
-                <h3 className="text-lg font-semibold mb-2">自由入力</h3>
-                <input
-                  type="text"
-                  placeholder="お題タイトル"
-                  className="w-full mb-2 px-2 py-1 border border-gray-300 text-black bg-white rounded"
-                  value={customTitle}
-                  onChange={(e) => setCustomTitle(e.target.value)}
-                />
-                <input
-                  type="text"
-                  placeholder="1 の意味（省略可）"
-                  className="w-full mb-2 px-2 py-1 border border-gray-300 text-black bg-white rounded"
-                  value={customMin}
-                  onChange={(e) => setCustomMin(e.target.value)}
-                />
-                <input
-                  type="text"
-                  placeholder="100 の意味（省略可）"
-                  className="w-full mb-4 px-2 py-1 border border-gray-300 text-black bg-white rounded"
-                  value={customMax}
-                  onChange={(e) => setCustomMax(e.target.value)}
-                />
-                <button
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
-                  onClick={handleCustomSubmit}
-                >
-                  これにする
-                </button>
-              </motion.div>
-            )}
           </AnimatePresence>
         </div>
 
-        <motion.p
+        <motion.div
           className="text-center text-white text-shadow-md mt-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: selectedTitle ? 0 : 1 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 1 }}
         >
-          {isHost
-            ? "みんなで話し合ったあと、投票してください。（ホストが強制的に選ぶこともできます）"
-            : "みんなで話し合ったあと、投票してください。（ホストが強制的に選ぶこともできます）"}
-        </motion.p>
+          <div className="text-center">
+            {/* お題再抽選ボタン：ホストだけ表示 */}
+            {isHost && (
+              <button
+                onClick={onRefreshTopics}
+                className="w-32 text-sm m-2 p-2 bg-emerald-600 text-white rounded hover:bg-emerald-500 hover:border-emerald-800"
+              >
+                お題を再抽選
+              </button>
+            )}
+            {/* お題を提案ボタン：全員に表示 */}
+            <button
+              onClick={() => setShowProposalModal(true)}
+              className="w-32 text-sm m-2 p-2 bg-orange-500 text-white rounded hover:bg-orange-600 hover:border-orange-800"
+            >
+              お題を提案
+            </button>
+          </div>
 
-        <div className="mt-4 text-white text-shadow-md text-center">
-          <label className="mr-2">同票時の決定方法：</label>
-          <select
-            value={tiebreakMethod}
-            onChange={(e) => handleTiebreakChange(e.target.value as "random" | "host")}
-            className="border border-gray-300 rounded px-2 py-1 text-black bg-white"
-          >
-            <option value="random">ランダムに決定</option>
-            <option value="host">ホストが決定</option>
-          </select>
-        </div>
+          {isHost && (
+            <div className="mt-4 text-white text-shadow-md text-center">
+              <label className="mr-2">同票時の決定方法：</label>
+              <select
+                value={tiebreakMethod}
+                onChange={(e) => handleTiebreakChange(e.target.value as "random" | "host")}
+                className="border border-gray-300 rounded px-2 py-1 text-black bg-white"
+              >
+                <option value="random">ランダムに決定</option>
+                <option value="host">ホストが決定</option>
+              </select>
+            </div>
+          )}
+        </motion.div>
       </div>
     </div>
   );

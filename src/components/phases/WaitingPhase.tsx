@@ -15,7 +15,7 @@ interface WaitingPhaseProps {
   setNewNickname: (name: string) => void;
   addPlayer: () => void;
   selectedSet: string;
-  setSelectedSet: React.Dispatch<React.SetStateAction<"normal" | "rainbow" | "classic" | "salmon">>;
+  setSelectedSet: React.Dispatch<React.SetStateAction<"normal" | "rainbow" | "classic" | "salmon" | "custom">>;
   level: number;
   setLevel: (level: number) => void;
   startGame: () => void;
@@ -181,7 +181,7 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
               <label className="block mb-1">お題セット</label>
               <select
                 value={selectedSet}
-                onChange={(e) => setSelectedSet(e.target.value as "normal" | "rainbow" | "classic" | "salmon")}
+                onChange={(e) => setSelectedSet(e.target.value as "normal" | "rainbow" | "classic" | "salmon" | "custom")}
                 className="w-full p-2 bg-white text-black rounded
                   focus:outline-none focus:ring-2 focus:ring-blue-400"
               >
