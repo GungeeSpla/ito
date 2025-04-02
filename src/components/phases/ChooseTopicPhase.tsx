@@ -11,7 +11,7 @@ import {
   off,
 } from "firebase/database";
 import { db } from "../../firebase";
-import ProposalModal from "../ProposalModal";
+import ProposalModal from "../common/ProposalModal";
 
 interface Props {
   isHost: boolean; // 現在のプレイヤーがホストかどうか
