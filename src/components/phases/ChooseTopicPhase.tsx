@@ -214,7 +214,8 @@ const ChooseTopicPhase: React.FC<Props> = ({
           className="text-center text-white text-shadow-md my-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: selectedTitle ? 0 : 1 }}
-          transition={{ delay: 0.2 }}
+          transition={hasChosen ? { delay: 0 } : { delay: 0.2 }}
+          
         >
           みんなで話し合ったあと、やりたいお題カードをクリックして投票してください。<br />
           （ホスト権限で決定することもできます）

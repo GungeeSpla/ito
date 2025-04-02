@@ -24,7 +24,7 @@ interface CardEntry {
 }
 
 const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
-  const [myCards, setMyCards] = useState<number[]>([]);
+  const [myCards, setMyCards] = useState<{ value: number; hint?: string }[]>([]);
   const [activeCard, setActiveCard] = useState<{ source: 'hand' | 'field'; value: number } | null>(null);
   const [cardOrder, setCardOrder] = useState<CardEntry[]>([]);
   const [players, setPlayers] = useState<Record<string, boolean>>({});
@@ -41,7 +41,9 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
     get(cardRef).then((snap) => {
       if (snap.exists()) {
         const data = snap.val();
-        const values = Array.isArray(data) ? data.map((d) => d.value) : [data.value];
+        const values = Array.isArray(data)
+          ? data.map((d) => ({ value: d.value, hint: d.hint || "" }))
+          : [{ value: data.value, hint: data.hint || "" }];
         setMyCards(values);
       }
     });
@@ -91,14 +93,19 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
     await runTransaction(orderRef, (currentOrder) => {
       const newOrder = Array.isArray(currentOrder) ? [...currentOrder] : [];
       const filtered = newOrder.filter((c: CardEntry) => !(c.name === nickname && c.card === activeCard.value));
-      filtered.splice(insertIndex, 0, { name: nickname, card: activeCard.value });
+      const cardHint = myCards.find(c => c.value === activeCard.value)?.hint || "";
+      filtered.splice(insertIndex, 0, {
+        name: nickname,
+        card: activeCard.value,
+        hint: cardHint
+      });
       return filtered;
     });
 
     setMyCards((prev) => {
-      const updated = prev.filter(c => c !== activeCard.value);
+      const updated = prev.filter(c => c.value !== activeCard.value);
       const cardRef = ref(db, `rooms/${roomId}/cards/${nickname}`);
-      set(cardRef, updated.map(v => ({ value: v })));
+      set(cardRef, updated.map(v => ({ value: v.value, hint: v.hint })));
       return updated;
     });
 
@@ -115,9 +122,9 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
     );
 
     setMyCards((prev) => {
-      const updated = [...prev, cardToRemove];
+      const updated = [...prev, { value: cardToRemove }];
       const cardRef = ref(db, `rooms/${roomId}/cards/${nickname}`);
-      set(cardRef, updated.map(v => ({ value: v })));
+      set(cardRef, updated.map(v => ({ value: v.value, hint: v.hint || "" })));
       return updated;
     });
   };
@@ -155,7 +162,7 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
       {/* 場のカード */}
       <div
         className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex gap-2 justify-center px-4"
-        style={{top: "calc(50% - 4em)"}}
+        style={{ top: "calc(50% - 4em)" }}
       >
         <div className="flex items-center gap-2">
           <Card value={0} name="" />
@@ -225,13 +232,13 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
           className="flex flex-wrap gap-2 justify-center scale-150 translate-y-20 transform"
           style={{ transformOrigin: "bottom" }}
         >
-          {myCards.map((value) => (
+          {myCards.map((card) => (
             <Card
-              key={value}
-              value={value}
+              key={card.value}
+              value={card.value}
               mode="reveal"
-              isActive={activeCard?.value === value}
-              onClick={() => setActiveCard({ source: 'hand', value })}
+              isActive={activeCard?.value === card.value}
+              onClick={() => setActiveCard({ source: 'hand', value: card.value })}
             />
           ))}
         </div>
@@ -251,7 +258,7 @@ const PlaceCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
           </button>
         </div>
       )}
-</motion.div>
+    </motion.div>
   );
 };
 

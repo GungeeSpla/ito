@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { db } from "./firebase";
 import { ref, set } from "firebase/database";
 import { generateUniqueRoomId } from "./utils/generateRoomId";
+import { toast } from "sonner";
 
 // ----------------------------------------
 // トップページコンポーネント：ルーム作成画面
@@ -22,7 +23,7 @@ function App() {
   // -----------------------------
   const createRoom = async () => {
     if (!nickname.trim()) {
-      alert("ニックネームを入力してね！");
+      toast.error("ニックネームを入力してください。");
       return;
     }
 
@@ -44,6 +45,10 @@ function App() {
     // フェードアウト → 画面遷移（アニメーションと同期）
     setIsFading(true);
     setTimeout(() => {
+      toast.success("ルームを作成しました。")
+      console.log("ルームを作成しました。")
+      console.log("ニックネーム:", nickname)
+      console.log("ルームID:", roomId)
       navigate(`/room/${roomId}`);
     }, 300); // CSS側のdurationに合わせてる
   };

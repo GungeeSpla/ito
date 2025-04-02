@@ -52,14 +52,7 @@ const Room = () => {
   const [level, setLevel] = useState<number>(1);
   const alreadyJoined = !!players[nickname];
   const isHost = nickname === host;
-  
-  // トースト通知を1回だけ出す
-  let toastTimerId: ReturnType<typeof setTimeout>;
-  const toastOnce = (fn: () => void) => {
-    clearTimeout(toastTimerId);
-    toastTimerId = setTimeout(fn, 10);
-  };
-  
+
   // お題の再抽選
   const onRefreshTopics = async () => {
     const usedTopicsSnap = await get(ref(db, `rooms/${safeRoomId}/usedTitles`));
@@ -76,16 +69,12 @@ const Room = () => {
   useEffect(() => {
     deleteOldRooms(); // 古いルームの自動削除（メンテ用）
 
-    const roomRef = ref(db, `rooms/${safeRoomId}`);
-
     // 初回読み取り：ルームが存在するかチェック
+    const roomRef = ref(db, `rooms/${safeRoomId}`);
     get(roomRef)
       .then((snap) => {
         if (!snap.exists()) {
-          clearTimeout(toastTimerId)
-          toastTimerId = setTimeout(() => {
-            toastOnce(() => toast.error("ルームが存在しません。"))
-          }, 10)
+          toast.error("ルームが存在しません。")
           navigate("/");
           return;
         }
@@ -93,10 +82,10 @@ const Room = () => {
         setHost(room.host || "");
         setPhase(room.phase || "waiting");
         setLoading(false);
-        toastOnce(() => toast.success("ルームが見つかりました。"))
+        toast.success("ルームが見つかりました。")
       })
       .catch((err) => {
-        toastOnce(() => toast.error("初期化に失敗しました。"))
+        toast.error("初期化に失敗しました。")
         console.error("初期読み込み失敗", err);
         setLoading(false);
       });
@@ -195,7 +184,7 @@ const Room = () => {
     };
 
     update(ref(db, `rooms/${safeRoomId}`), updates);
-    
+
     console.log("ゲームを開始します。")
     console.log("- カテゴリ:", selectedSet)
     console.log("- レベル:", level)
@@ -229,7 +218,7 @@ const Room = () => {
   // -----------------------------
   const leaveRoom = () => {
     if (!nickname || !safeRoomId) return;
-  
+
     const playerRef = ref(db, `rooms/${safeRoomId}/players/${nickname}`);
     remove(playerRef).then(() => {
       toast.info("ルームを退出しました。");
