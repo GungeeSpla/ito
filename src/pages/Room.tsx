@@ -9,22 +9,23 @@ import {
   child,
   update,
 } from "firebase/database";
-import { db } from "../firebase";
-import { Topic } from "../types/Topic";
-import { topics } from "../data/topics";
-import { deleteOldRooms } from "../utils/deleteOldRooms";
-import { selectRandomTopics } from "../utils/selectRandomTopics";
+import { db } from "@/firebase";
+import { Topic } from "@/types/Topic";
+import { topics } from "@/data/topics";
+import { deleteOldRooms } from "@/utils/deleteOldRooms";
+import { selectRandomTopics } from "@/utils/selectRandomTopics";
 import { toast } from "sonner";
+import { CardEntry } from "@/types/CardEntry";
 
 // 各フェーズごとの画面コンポーネント
-import WaitingPhase from "../components/phases/WaitingPhase";
-import ChooseTopicPhase from "../components/phases/ChooseTopicPhase";
-import DealCardsPhase from "../components/phases/DealCardsPhase";
-import PlaceCardsPhase from "../components/phases/PlaceCardsPhase";
-import RevealCardsPhase from "../components/phases/RevealCardsPhase";
+import WaitingPhase from "@/components/phases/WaitingPhase";
+import ChooseTopicPhase from "@/components/phases/ChooseTopicPhase";
+import DealCardsPhase from "@/components/phases/DealCardsPhase";
+import PlaceCardsPhase from "@/components/phases/PlaceCardsPhase";
+import RevealCardsPhase from "@/components/phases/RevealCardsPhase";
 
 // フェーズ内のカード配布処理（カスタムフック）
-import { useDealCards } from "../hooks/useDealCards";
+import { useDealCards } from "@/hooks/useDealCards";
 
 // --------------------------------------------
 // ルーム画面（/room/:roomId）
@@ -62,6 +63,7 @@ const Room = () => {
   const [level, setLevel] = useState<number>(1);
   const alreadyJoined = !!players[nickname];
   const isHost = nickname === host;
+  const [cardOrder, setCardOrder] = useState<CardEntry[]>([]);
 
   // お題の再抽選
   const onRefreshTopics = async () => {

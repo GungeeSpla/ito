@@ -27,6 +27,7 @@ const failSound = new Howl({
 interface CardEntry {
   name: string;
   card: number;
+  hint?: string;
 }
 
 interface Props {
@@ -184,6 +185,7 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname }) => {
                     set(revealedRef, [...revealedCards, entry.card]);
                   }
                 }}
+                hint={entry.hint}
                 onFlipComplete={handleFlipComplete}
               />
             );
