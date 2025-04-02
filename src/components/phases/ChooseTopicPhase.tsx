@@ -16,26 +16,24 @@ const ChooseTopicPhase: React.FC<Props> = ({
   chooseTopic,
   onRefreshTopics,
 }) => {
-  // 状態定義
-  const [selectedTitle, setSelectedTitle] = useState<string | null>(null); // 選択されたお題のタイトル
-  const [votes, setVotes] = useState<Record<string, string>>({}); // プレイヤーごとの投票記録
+  const [selectedTitle, setSelectedTitle] = useState<string | null>(null); // 選択されたお題タイトル
+  const [votes, setVotes] = useState<Record<string, string>>({}); // 各プレイヤーの投票情報
   const [players, setPlayers] = useState<Record<string, boolean>>({}); // プレイヤー一覧
-  const [tiebreakMethod, setTiebreakMethod] = useState<"random" | "host">("random"); // 同票時の処理方法
-  const [showProposalModal, setShowProposalModal] = useState(false); // モーダル表示フラグ
-  const [customTopics, setCustomTopics] = useState<Topic[]>([]); // 提案された追加お題
+  const [tiebreakMethod, setTiebreakMethod] = useState<"random" | "host">("random"); // 同票時の処理
+  const [showProposalModal, setShowProposalModal] = useState(false); // お題提案モーダル表示
+  const [customTopics, setCustomTopics] = useState<Topic[]>([]); // カスタムお題一覧
   const nickname = localStorage.getItem("nickname") || "";
-  const roomId = window.location.pathname.split("/").pop(); // URLからルームIDを取得
-  const [hasChosen, setHasChosen] = useState(false);
-  const [topicOptions, setTopicOptions] = useState<Topic[]>([]);
-  const exitCalled = useRef(false);
-  const [visibleTopics, setVisibleTopics] = useState<Topic[]>([]);
+  const roomId = window.location.pathname.split("/").pop(); // ルームIDをURLから取得
+  const [hasChosen, setHasChosen] = useState(false); // お題が選ばれたかどうか
+  const [topicOptions, setTopicOptions] = useState<Topic[]>([]); // お題候補一覧
+  const [visibleTopics, setVisibleTopics] = useState<Topic[]>([]); // 表示対象のお題（フェード用）
+  const exitCalled = useRef(false); // exitComplete が複数回呼ばれないようにするフラグ
 
-  // 初期データの購読（votes / players / selectedTopic / tiebreakMethod / customTopics）
+  // Firebaseからのデータ購読
   useEffect(() => {
-
     if (!roomId) return;
 
-    // Firebase Realtime Database の参照を定義
+    // Firebase参照定義
     const votesRef = ref(db, `rooms/${roomId}/votes`);
     const playersRef = ref(db, `rooms/${roomId}/players`);
     const topicRef = ref(db, `rooms/${roomId}/selectedTopic`);
@@ -43,7 +41,7 @@ const ChooseTopicPhase: React.FC<Props> = ({
     const customRef = ref(db, `rooms/${roomId}/customTopics`);
     const optionsRef = ref(db, `rooms/${roomId}/topicOptions`);
 
-    // 各データに対する購読コールバック定義
+    // データ購読ハンドラ
     const handleVotes = (snap: any) => {
       const data = snap.val();
       if (data) setVotes(data);
@@ -80,7 +78,7 @@ const ChooseTopicPhase: React.FC<Props> = ({
       setTopicOptions(data);
     };
 
-    // Firebase の購読を開始
+    // データの購読開始
     onValue(votesRef, handleVotes);
     onValue(playersRef, handlePlayers);
     onValue(topicRef, handleTopic);
@@ -88,7 +86,7 @@ const ChooseTopicPhase: React.FC<Props> = ({
     onValue(customRef, handleCustom);
     onValue(optionsRef, handleOptions);
 
-    // アンマウント時 or 依存変数更新時に購読を解除（メモリリークや多重購読を防ぐ）
+    // クリーンアップ: 購読解除
     return () => {
       off(votesRef, "value", handleVotes);
       off(playersRef, "value", handlePlayers);
@@ -99,6 +97,7 @@ const ChooseTopicPhase: React.FC<Props> = ({
     };
   }, [roomId, selectedTitle, chooseTopic]);
 
+  // お題が選ばれたら表示対象から除外（フェードアウト）
   useEffect(() => {
     if (hasChosen) {
       setVisibleTopics([]);
@@ -107,13 +106,13 @@ const ChooseTopicPhase: React.FC<Props> = ({
     }
   }, [topicOptions, customTopics, hasChosen]);
 
-  // お題を再抽選する
+  // お題再抽選
   const handleRefreshTopics = async () => {
     await remove(ref(db, `rooms/${roomId}/customTopics`));
     await onRefreshTopics();
   };
 
-  // お題に投票する
+  // お題に投票
   const handleVote = async (title: string) => {
     if (!roomId || selectedTitle) return;
     await update(ref(db, `rooms/${roomId}/votes`), {
@@ -121,21 +120,19 @@ const ChooseTopicPhase: React.FC<Props> = ({
     });
   };
 
-  // ホストが任意のお題を即決する
+  // ホストが強制決定
   const handleForceChoose = async (title: string) => {
     if (!isHost || !roomId) return;
     const topic = [...topicOptions, ...customTopics].find((t) => t.title === title);
     if (topic) {
-      (async () => {
-        await set(ref(db, `rooms/${roomId}/selectedTopic`), topic);
-        await update(ref(db, `rooms/${roomId}/usedTitles`), {
-          [topic.title]: true,
-        });
-      })();
+      await set(ref(db, `rooms/${roomId}/selectedTopic`), topic);
+      await update(ref(db, `rooms/${roomId}/usedTitles`), {
+        [topic.title]: true,
+      });
     }
   };
 
-  // 同票時のルールを変更する（ホストのみ）
+  // 同票時の決定ルール変更（ホストのみ）
   const handleTiebreakChange = async (value: "random" | "host") => {
     setTiebreakMethod(value);
     if (isHost && roomId) {
@@ -143,7 +140,7 @@ const ChooseTopicPhase: React.FC<Props> = ({
     }
   };
 
-  // お題を提案してFirebaseに追加する
+  // お題を提案（カスタム追加）
   const handleAddTopic = async (topic: { title: string; min?: string; max?: string }) => {
     if (!roomId) return;
     const topicListRef = ref(db, `rooms/${roomId}/customTopics`);
@@ -157,7 +154,7 @@ const ChooseTopicPhase: React.FC<Props> = ({
     setShowProposalModal(false);
   };
 
-  // 全員投票済み時、自動的にお題を決定するロジック
+  // 全員投票完了後に自動決定
   useEffect(() => {
     if (!roomId || selectedTitle) return;
     const totalVotes = Object.values(votes);
@@ -170,7 +167,6 @@ const ChooseTopicPhase: React.FC<Props> = ({
       const topVotes = sorted.filter(([_, v]) => v === sorted[0][1]);
       let chosenTitle = topVotes[0][0];
 
-      // 同票の場合の処理
       if (topVotes.length > 1 && tiebreakMethod === "random") {
         const random = topVotes[Math.floor(Math.random() * topVotes.length)][0];
         chosenTitle = random;
@@ -192,7 +188,6 @@ const ChooseTopicPhase: React.FC<Props> = ({
 
   return (
     <div className="min-h-[70vh] flex items-center justify-center text-white px-4">
-      {/* お題提案モーダル */}
       <ProposalModal
         open={showProposalModal}
         onClose={() => setShowProposalModal(false)}
@@ -200,7 +195,6 @@ const ChooseTopicPhase: React.FC<Props> = ({
       />
 
       <div className="max-w-3xl w-full">
-        {/* タイトル表示 */}
         <motion.h2
           className="text-xl font-bold text-center mt-6 mb-6 text-shadow-md"
           initial={{ opacity: 0 }}
@@ -210,7 +204,6 @@ const ChooseTopicPhase: React.FC<Props> = ({
           お題の選択
         </motion.h2>
 
-        {/* サブテキスト */}
         <motion.p
           className="text-center text-white text-shadow-md my-6"
           initial={{ opacity: 0 }}
@@ -221,7 +214,6 @@ const ChooseTopicPhase: React.FC<Props> = ({
           （ホスト権限で決定することもできます）
         </motion.p>
 
-        {/* お題カード一覧 */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <AnimatePresence
             onExitComplete={() => {
@@ -230,7 +222,6 @@ const ChooseTopicPhase: React.FC<Props> = ({
               if (selectedTitle) {
                 const selected = [...topicOptions, ...customTopics].find(t => t.title === selectedTitle);
                 if (selected) {
-                  console.log("お題が選ばれました: ", selected)
                   chooseTopic(selected);
                 }
               }
@@ -283,19 +274,13 @@ const ChooseTopicPhase: React.FC<Props> = ({
           </AnimatePresence>
         </div>
 
-        {/* 操作パネル */}
         <motion.div
           className="text-center text-white text-shadow-md mt-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: selectedTitle ? 0 : 1 }}
-          transition={
-            hasChosen
-                ? { delay: 0 }
-                : { delay: 0.8 }
-          }
+          transition={hasChosen ? { delay: 0 } : { delay: 0.8 }}
         >
           <div className="text-center">
-            {/* お題再抽選ボタン（ホストのみ） */}
             {isHost && (
               <button
                 onClick={handleRefreshTopics}
@@ -304,7 +289,6 @@ const ChooseTopicPhase: React.FC<Props> = ({
                 お題を再抽選
               </button>
             )}
-            {/* お題を提案（全員表示） */}
             <button
               onClick={() => setShowProposalModal(true)}
               className="w-32 text-sm m-2 p-2 bg-orange-500 text-white rounded hover:bg-orange-600 hover:border-orange-800"
@@ -313,7 +297,6 @@ const ChooseTopicPhase: React.FC<Props> = ({
             </button>
           </div>
 
-          {/* 同票時のルール選択（ホストのみ） */}
           {isHost && (
             <div className="mt-4 text-white text-shadow-md text-center">
               <label className="mr-2">同票時の決定方法：</label>
