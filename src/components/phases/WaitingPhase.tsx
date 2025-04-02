@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Crown } from "lucide-react";
+import { Crown, PlayIcon, LogOut, UserPlus, Copy } from "lucide-react";
 import cn from "classnames";
 
 // -----------------------------
@@ -75,11 +75,13 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
     <div className="min-h-[80vh] flex items-center justify-center  text-white px-4">
       <div className="bg-white/70 backdrop-blur-sm text-black p-6 rounded-xl shadow-md w-full max-w-md animate-fade-in relative">
         {/* URLコピーUI */}
-        <div className="mb-4 text-center relative">
+        <div className="mb-4 flex justify-center relative">
           <button
             onClick={handleCopyUrl}
-            className="focus:outline-none px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500 transition"
+            className="flex items-center justify-center gap-1.5
+              focus:outline-none px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-500 transition"
           >
+            <Copy className="w-3 h-3" />
             ルームURLをコピー
           </button>
 
@@ -135,11 +137,13 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
         </div>
 
         {alreadyJoined && (
-          <div className="text-center mt-3 mb-4">
+          <div className="flex justify-center mt-3 mb-4">
             <button
               onClick={leaveRoom}
-              className="text-xs bg-red-600 hover:bg-red-500 text-white font-medium py-2 px-4 rounded"
+              className="flex items-center justify-center gap-1.5
+                text-xs bg-red-600 hover:bg-red-500 text-white font-medium py-2 px-4 rounded"
             >
+              <LogOut className="w-3 h-3" />
               ルームから退出する
             </button>
           </div>
@@ -169,9 +173,11 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
             <button
               type="submit"
               disabled={!newNickname.trim()}
-              className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-500 transition
+              className="flex items-center justify-center gap-1.5
+                w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-500 transition
                 disabled:opacity-50 disabled:cursor-not-allowed"
             >
+              <UserPlus className="w-4 h-4" />
               参加する
             </button>
           </form>
@@ -228,14 +234,15 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
               </select>
             </div>
 
-            {/* ゲーム開始ボタン */}
             <button
               onClick={startGame}
               disabled={Object.keys(players).length <= 1}
-              className="w-full py-2 rounded transition
+              className="flex items-center justify-center gap-1.5
+                w-full py-2 rounded transition
               bg-green-600 text-white hover:bg-green-500
               disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed"
             >
+              <PlayIcon className="w-4 h-4" />
               ゲーム開始
             </button>
           </div>

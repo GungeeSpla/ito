@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { db } from "./firebase";
+import { db } from "@/firebase";
 import { ref, set } from "firebase/database";
-import { generateUniqueRoomId } from "./utils/generateRoomId";
+import { generateUniqueRoomId } from "@/utils/generateRoomId";
 import { toast } from "sonner";
+import { Sparkles } from "lucide-react";
 
 // ----------------------------------------
 // トップページコンポーネント：ルーム作成画面
@@ -96,8 +97,10 @@ function App() {
             disabled={!nickname.trim()}
             className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-500
               focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200
-              disabled:cursor-not-allowed disabled:opacity-50"
+              disabled:cursor-not-allowed disabled:opacity-50
+              flex items-center justify-center gap-1.5"
           >
+            <Sparkles className="w-4 h-4" />
             ルームを作成
           </button>
         </form>

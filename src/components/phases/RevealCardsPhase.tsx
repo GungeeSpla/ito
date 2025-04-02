@@ -6,6 +6,7 @@ import Card from "@/components/common/Card";
 import EmojiBurst from "@/components/common/EmojiBurst";
 import FailBurst from "@/components/common/FailBurst";
 import { CardEntry } from "@/types/CardEntry";
+import { Home } from "lucide-react";
 
 // 効果音：カードをめくる音
 const flipSound = new Howl({
@@ -181,8 +182,11 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname, cardOrder }) => {
           <div className="absolute left-1/2 top-[calc(100%+40px)] -translate-x-1/2">
             <button
               onClick={resetGame}
-              className="px-4 py-2 w-fit whitespace-nowrap bg-green-600 text-white rounded shadow-lg"
+              className="
+                flex items-center justify-center gap-1  
+                px-4 py-2 w-fit whitespace-nowrap bg-green-600 text-white rounded shadow-lg"
             >
+              <Home className="w-4 h-4 translate-y-[0.05rem]" />
               ロビーに戻る
             </button>
           </div>

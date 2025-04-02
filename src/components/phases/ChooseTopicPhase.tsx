@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
-import { Topic } from "../../types/Topic";
+import { Topic } from "@/types/Topic";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ref,
@@ -10,8 +10,9 @@ import {
   remove,
   off,
 } from "firebase/database";
-import { db } from "../../firebase";
-import ProposalModal from "../common/ProposalModal";
+import { db } from "@/firebase";
+import ProposalModal from "@/components/common/ProposalModal";
+import { RefreshCw, PlusCircle, CheckCircle2 } from "lucide-react";
 
 interface Props {
   isHost: boolean; // 現在のプレイヤーがホストかどうか
@@ -308,12 +309,16 @@ const ChooseTopicPhase: React.FC<Props> = ({
                     票: {voteCount} {isVoted && <span>（投票済み）</span>}
                   </p>
                   {isHost && (
-                    <button
-                      className="ml-2 text-xs bg-orange-500 text-white px-2 py-1 rounded hover:bg-orange-500 hover:border-orange-300"
-                      onClick={() => handleForceChoose(t.title)}
-                    >
-                      これに決定
-                    </button>
+                    <div className="flex justify-center">
+                      <button
+                        className="flex items-center justify-center gap-1
+                        ml-2 text-xs bg-orange-500 text-white px-2 py-1 rounded hover:bg-orange-500 hover:border-orange-300"
+                        onClick={() => handleForceChoose(t.title)}
+                      >
+                        <CheckCircle2 className="w-3 h-3 translate-y-[0.05rem]" />
+                        これに決定
+                      </button>
+                    </div>
                   )}
                 </motion.div>
               );
@@ -327,19 +332,23 @@ const ChooseTopicPhase: React.FC<Props> = ({
           animate={{ opacity: selectedTitle ? 0 : 1 }}
           transition={hasChosen ? { delay: 0 } : { delay: 0.8 }}
         >
-          <div className="text-center">
+          <div className="flex justify-center">
             {isHost && (
               <button
                 onClick={handleRefreshTopics}
-                className="w-32 text-sm m-2 p-2 bg-emerald-600 text-white rounded hover:bg-emerald-500 hover:border-emerald-800"
+                className="flex items-center justify-center gap-1.5
+                  w-32 text-sm m-2 p-2 bg-emerald-600 text-white rounded hover:bg-emerald-500 hover:border-emerald-800"
               >
+                <RefreshCw className="w-4 h-4 translate-y-[0.05rem]" />
                 お題を再抽選
               </button>
             )}
             <button
               onClick={() => setShowProposalModal(true)}
-              className="w-32 text-sm m-2 p-2 bg-orange-500 text-white rounded hover:bg-orange-600 hover:border-orange-800"
+              className="flex items-center justify-center gap-1.5
+                w-32 text-sm m-2 p-2 bg-orange-500 text-white rounded hover:bg-orange-600 hover:border-orange-800"
             >
+              <PlusCircle className="w-4 h-4 translate-y-[0.05rem]" />
               お題を提案
             </button>
           </div>

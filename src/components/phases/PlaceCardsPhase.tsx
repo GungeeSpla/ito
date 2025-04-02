@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import Card from "@/components/common/Card";
 import EditHintModal from "@/components/common/EditHintModal";
 import { CardEntry } from "@/types/CardEntry";
+import { ArrowDownCircle, Eye, Home } from "lucide-react";
 
 // 効果音：カードを出す音
 const placeSound = new Howl({
@@ -220,10 +221,12 @@ const PlaceCardsPhase: React.FC<Props> = ({
               <motion.button
                 layout
                 className="
-                text-xs bg-blue-600 text-white px-1 py-3 rounded 
-                hover:bg-blue-500 transition writing-vertical"
+                  flex items-center justify-center gap-0.5
+                  text-xs bg-blue-600 text-white px-1 py-3 rounded 
+                  hover:bg-blue-500 transition writing-vertical"
                 onClick={() => handleInsertCard(0)}
               >
+                <ArrowDownCircle className="w-3 h-3 translate-x-[0.05rem]" />
                 ここに出す
               </motion.button>
             )}
@@ -256,9 +259,13 @@ const PlaceCardsPhase: React.FC<Props> = ({
                 {activeCard?.source === "hand" && (
                   <motion.button
                     layout
-                    className="text-xs bg-blue-600 text-white px-1 py-3 rounded hover:bg-blue-500 transition writing-vertical"
+                    className="
+                      flex items-center justify-center gap-0.5  
+                      text-xs bg-blue-600 text-white px-1 py-3 rounded
+                      hover:bg-blue-500 transition writing-vertical"
                     onClick={() => handleInsertCard(index + 1)}
                   >
+                    <ArrowDownCircle className="w-3 h-3 translate-x-[0.05rem]" />
                     ここに出す
                   </motion.button>
                 )}
@@ -271,8 +278,11 @@ const PlaceCardsPhase: React.FC<Props> = ({
           <div className="absolute left-1/2 top-[calc(100%+40px)] -translate-x-1/2">
             <button
               onClick={proceedToReveal}
-              className="px-4 py-2 w-fit whitespace-nowrap bg-green-600 text-white rounded shadow-lg"
+              className="
+                flex items-center justify-center gap-1  
+                px-4 py-2 w-fit whitespace-nowrap bg-green-600 text-white rounded shadow-lg"
             >
+              <Eye className="w-4 h-4 translate-y-[0.1rem]" />
               めくりフェーズへ！
             </button>
           </div>
@@ -312,9 +322,12 @@ const PlaceCardsPhase: React.FC<Props> = ({
               await set(ref(db, `rooms/${roomId}/phase`), "waiting");
               await set(ref(db, `rooms/${roomId}/lastUpdated`), Date.now());
             }}
-            className="px-3 py-1.5 bg-red-600 text-white text-sm rounded shadow hover:bg-red-500 transition"
+            className="
+              flex items-center justify-center gap-1  
+              px-3 py-1.5 bg-red-600 text-white text-sm rounded shadow hover:bg-red-500 transition"
           >
-            ゲームを中断する
+            <Home className="w-4 h-4 translate-y-[-0.00rem]" />
+            ロビーに戻る
           </button>
         </div>
       )}
