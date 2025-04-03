@@ -7,6 +7,8 @@ import EditHintModal from "@/components/common/EditHintModal";
 import { CardEntry } from "@/types/CardEntry";
 import { ArrowDownCircle, Eye, Home } from "lucide-react";
 import WoodyButton from "@/components/common/WoodyButton";
+import FallingText from "@/components/common/FallingText";
+import styles from "./PlaceCardsPhase.module.scss";
 
 // 効果音：カードを出す音
 const placeSound = new Howl({
@@ -47,6 +49,15 @@ const PlaceCardsPhase: React.FC<Props> = ({
   } | null>(null);
   const [editingValue, setEditingValue] = useState<number | null>(null);
   const prevCardCountRef = useRef(0);
+  const [initialRender, setInitialRender] = useState(true);
+
+  // 初回マウント時にだけ true にする
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setInitialRender(false);
+    }, 2500);
+    return () => clearTimeout(timeout);
+  }, []);
 
   // -----------------------------
   // Firebase購読系（初期化時）
@@ -188,12 +199,7 @@ const PlaceCardsPhase: React.FC<Props> = ({
     cardOrder.length >= Object.keys(players).length + (level - 1);
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.6 }}
-      className="relative min-h-screen text-white"
-    >
+    <div className="relative min-h-screen text-white">
       {/* ヘッダー */}
       <div key="ito-header" className="relative h-12">
         {/* 中断ボタン */}
@@ -214,23 +220,28 @@ const PlaceCardsPhase: React.FC<Props> = ({
 
       {/* お題表示 */}
       {topic && (
-        <div className="relative w-full text-center px-4">
+        <div className="relative w-full text-center max-w-xl mx-auto">
           <h2 className="text-3xl font-bold text-shadow-md mt-0 mb-4">
-            お題：{topic.title}
+            <FallingText text={`お題：${topic.title}`} duration={0.8} />
           </h2>
-          <div className="max-w-md mx-auto">
-            <div className="grid grid-cols-2 font-bold text-white ">
+          <div className={`${styles.scaleDescription} max-w-md mx-auto`}>
+            <div
+              className={`${styles.scaleText} grid grid-cols-2 font-bold text-white`}
+            >
               <div className="text-left text-shadow-sm">1 {topic.min}</div>
               <div className="text-right text-shadow-sm">{topic.max} 100</div>
             </div>
-            <div className="box-shadow-md h-[2px] bg-white mt-1"></div>
+            <div
+              className={`${styles.scaleBar} box-shadow-md h-[2px] bg-white mt-1`}
+            ></div>
           </div>
         </div>
       )}
 
       {/* 場のカード */}
       <div
-        className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex gap-2 justify-center px-4"
+        className={`${styles.playedCardsArea}
+          absolute inset-x-0 top-1/2 -translate-y-1/2 flex gap-2 justify-center px-4`}
         style={{ top: "calc(50% - 4em)" }}
       >
         <div className="flex items-center gap-2">
@@ -295,21 +306,19 @@ const PlaceCardsPhase: React.FC<Props> = ({
 
         {isHost && allPlaced && (
           <div className="absolute left-1/2 top-[calc(100%+40px)] -translate-x-1/2">
-            <button
-              onClick={proceedToReveal}
-              className="
-                flex items-center justify-center gap-1  
-                px-4 py-2 w-fit whitespace-nowrap bg-green-600 text-white rounded shadow-lg"
-            >
+            <WoodyButton onClick={proceedToReveal}>
               <Eye className="w-4 h-4 translate-y-[0.1rem]" />
               めくりフェーズへ！
-            </button>
+            </WoodyButton>
           </div>
         )}
       </div>
 
       {/* 自分の手札 */}
-      <div className="fixed bottom-0 w-full bg-gradient-to-t from-gray-900 to-transparent pt-8 pb-4 z-10">
+      <div
+        className={`${styles.handCardsArea}
+        fixed bottom-0 w-full bg-gradient-to-t from-gray-900 to-transparent pt-8 pb-4 z-10`}
+      >
         <div
           className="flex flex-wrap gap-2 justify-center scale-150 translate-y-20 transform"
           style={{ transformOrigin: "bottom" }}
@@ -328,6 +337,7 @@ const PlaceCardsPhase: React.FC<Props> = ({
               onClearHint={() => handleHintSubmit(card.value, "")}
               hint={card.hint}
               isMine={true}
+              className={initialRender ? styles.handCard : ""}
             />
           ))}
         </div>
@@ -344,7 +354,7 @@ const PlaceCardsPhase: React.FC<Props> = ({
           onClose={() => setEditingValue(null)}
         />
       )}
-    </motion.div>
+    </div>
   );
 };
 

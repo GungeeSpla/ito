@@ -18,6 +18,7 @@ interface CardProps {
   onEdit?: () => void;
   onClearHint?: () => void;
   hint?: string;
+  className?: string;
 }
 
 // -----------------------------
@@ -56,6 +57,7 @@ const Card: React.FC<CardProps> = ({
   onEdit,
   onClearHint,
   hint,
+  className,
 }) => {
   useEffect(() => {
     if (revealed && typeof value === "number" && onFlipComplete) {
@@ -72,8 +74,8 @@ const Card: React.FC<CardProps> = ({
     <div
       className={`
         ito-card w-36 h-48 relative [perspective:1000px] cursor-pointer 
-        transition hover:scale-105 duration-200 
-        ${playerClass}
+        transition hover:scale-105 duration-200
+        ${playerClass} ${className}
       `}
       onClick={onClick}
     >

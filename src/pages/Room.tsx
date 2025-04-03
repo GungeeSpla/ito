@@ -295,7 +295,7 @@ const Room = () => {
   }
 
   if (phase === "dealCards") {
-    return <DealCardsPhase roomId={safeRoomId} nickname={nickname} />;
+    return <DealCardsPhase isHost={isHost} />;
   }
 
   if (phase === "placeCards") {

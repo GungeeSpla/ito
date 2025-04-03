@@ -7,6 +7,7 @@ import EmojiBurst from "@/components/common/EmojiBurst";
 import FailBurst from "@/components/common/FailBurst";
 import { CardEntry } from "@/types/CardEntry";
 import { Home } from "lucide-react";
+import WoodyButton from "@/components/common/WoodyButton";
 
 // 効果音：カードをめくる音
 const flipSound = new Howl({
@@ -126,19 +127,19 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname, cardOrder }) => {
 
   return (
     <div className="relative min-h-screen text-white">
+      {/* ヘッダー */}
+      <div key="ito-header" className="relative h-12"></div>
+
       {/* タイトルとステータス */}
-      <div className="text-center pt-6">
-        <h2 className="text-3xl font-bold text-shadow-md mt-6 mb-4">
+      <div className="relative w-full text-center max-w-xl mx-auto">
+        <h2 className="text-3xl font-bold text-shadow-md mt-0 mb-4">
           カードをめくろう！
         </h2>
-        {status === "success" && (
-          <div className="mb-4 text-green-400 font-bold text-2xl">
-            ✅ 成功！
-          </div>
-        )}
-        {status === "fail" && (
-          <div className="mb-4 text-red-400 font-bold text-2xl">❌ 失敗！</div>
-        )}
+        <p className="text-center text-white text-shadow-md my-6">
+          カードを好きな順番でクリックしてめくりましょう。
+          <br />
+          （誰でも可能）
+        </p>
       </div>
 
       {/* カード配置 */}
@@ -177,18 +178,26 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname, cardOrder }) => {
           })}
         </div>
 
+        <div className="absolute left-1/2 top-[calc(100%+40px)] -translate-x-1/2">
+          {status === "success" && (
+            <div className="mb-4 text-green-400 font-bold text-2xl">
+              ✅ 成功！
+            </div>
+          )}
+          {status === "fail" && (
+            <div className="mb-4 text-red-400 font-bold text-2xl">
+              ❌ 失敗！
+            </div>
+          )}
+        </div>
+
         {/* ロビーに戻るボタン */}
         {isHost && isComplete && (
-          <div className="absolute left-1/2 top-[calc(100%+40px)] -translate-x-1/2">
-            <button
-              onClick={resetGame}
-              className="
-                flex items-center justify-center gap-1  
-                px-4 py-2 w-fit whitespace-nowrap bg-green-600 text-white rounded shadow-lg"
-            >
+          <div className="absolute left-1/2 top-[calc(100%+7rem)] -translate-x-1/2">
+            <WoodyButton onClick={resetGame}>
               <Home className="w-4 h-4 translate-y-[0.05rem]" />
               ロビーに戻る
-            </button>
+            </WoodyButton>
           </div>
         )}
       </div>

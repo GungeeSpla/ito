@@ -1,0 +1,88 @@
+.scaleDescription {
+}
+
+.scaleText {
+  overflow: hidden;
+  transform: translateY(100%);
+  clip-path: inset(0 0 100% 0);
+  opacity: 0;
+  animation: riseUpClip 500ms 1300ms ease-out forwards;
+}
+
+.scaleBar {
+  overflow: hidden;
+  clip-path: inset(0 50% 0 50%);
+  opacity: 0;
+  animation: revealFromCenter 500ms 1000ms ease-out forwards;
+}
+
+.playedCardsArea {
+  opacity: 0;
+  animation: fadeIn 500ms 1500ms ease-out forwards;
+}
+
+.handCardsArea {
+  opacity: 0;
+  animation: fadeIn 500ms 1500ms ease-out forwards;
+}
+
+.handCard {
+  transform: translateY(-5rem) rotate(-10deg);
+  opacity: 0;
+  pointer-events: none;
+  animation: cardDropIn 1000ms 1500ms ease forwards !important;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes revealFromCenter {
+  0% {
+    clip-path: inset(0 50% 0 50%);
+    opacity: 0;
+  }
+  100% {
+    clip-path: inset(0 0 0 0);
+    opacity: 1;
+  }
+}
+
+.reveal-center {
+  animation: revealFromCenter 0.6s ease-out forwards;
+  overflow: hidden;
+}
+
+@keyframes riseUpClip {
+  0% {
+    transform: translateY(100%);
+    clip-path: inset(0 0 100% 0);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    clip-path: inset(0 0 0 0);
+    opacity: 1;
+  }
+}
+
+@keyframes cardDropIn {
+  0% {
+    transform: translateY(-5rem) rotate(-10deg);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+.card-drop {
+  animation: cardDropIn 0.5s ease-out forwards;
+}
