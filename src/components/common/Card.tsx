@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { Pencil, Eraser } from "lucide-react";
+import NumberSVG from "@/components/common/NumberSVG";
 
 // -----------------------------
 // Props型：カード1枚の情報
@@ -105,9 +106,7 @@ const Card: React.FC<CardProps> = ({
             </div>
           )}
           {name && <p className="text-sm">{name}</p>}
-          {(mode === "reveal" || value === 0) && (
-            <strong className="text-7xl">{value}</strong>
-          )}
+          {(mode === "reveal" || value === 0) && <NumberSVG value={value} />}
         </div>
 
         {/* 裏面 */}
