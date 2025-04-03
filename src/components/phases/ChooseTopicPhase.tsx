@@ -249,7 +249,7 @@ const ChooseTopicPhase: React.FC<Props> = ({
       <div key="ito-header" className="relative h-12">
         {/* 中断ボタン */}
         {isHost && (
-          <div className="absolute right-2 top-1/2 -translate-y-1/2">
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-x-2">
             <WoodyButton
               onClick={async () => {
                 await set(ref(db, `rooms/${roomId}/phase`), "waiting");
@@ -279,11 +279,11 @@ const ChooseTopicPhase: React.FC<Props> = ({
           animate={{ opacity: selectedTitle ? 0 : 1 }}
           transition={hasChosen ? { delay: 0 } : { delay: 0.2 }}
         >
-          みんなで話し合ったあと、遊びたいお題カードを
+          遊びたいお題カードを
           <ClickOrTouch />
           して投票してください。
           <br />
-          （ホストは自分の一存で決めることもできます）
+          （ホストの一存で決めることもできます）
         </motion.p>
 
         <div className="max-w-3xl mx-auto flex items-center justify-center text-white px-4">

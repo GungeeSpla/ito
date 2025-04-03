@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import Card from "@/components/common/Card";
 import EditHintModal from "@/components/common/EditHintModal";
 import { CardEntry } from "@/types/CardEntry";
-import { ArrowDownCircle, Eye, Home } from "lucide-react";
+import { ArrowDownCircle, Eye, Home, RefreshCcw } from "lucide-react";
 import WoodyButton from "@/components/common/WoodyButton";
 import FallingText from "@/components/common/FallingText";
 import styles from "./PlaceCardsPhase.module.scss";
@@ -110,7 +110,20 @@ const PlaceCardsPhase: React.FC<Props> = ({
   }, [roomId, nickname]);
 
   // -----------------------------
-  // たとえワードを編集する処理
+  // 手札を配り直す
+  // -----------------------------
+  const handleRedistribute = async () => {
+    // 全カード削除
+    await set(ref(db, `rooms/${roomId}/cardOrder`), []);
+    await set(ref(db, `rooms/${roomId}/cards`), {});
+
+    // フェーズを強制的に "dealCards" に戻す
+    await set(ref(db, `rooms/${roomId}/phase`), "dealCards");
+    await set(ref(db, `rooms/${roomId}/lastUpdated`), Date.now());
+  };
+
+  // -----------------------------
+  // たとえワードを編集する
   // -----------------------------
   const handleHintSubmit = (value: number, newHint: string) => {
     setMyCards((prev) =>
@@ -122,7 +135,7 @@ const PlaceCardsPhase: React.FC<Props> = ({
   };
 
   // -----------------------------
-  // カードを場に出す処理
+  // カードを場に出す
   // -----------------------------
   const handleInsertCard = async (insertIndex: number) => {
     if (!activeCard || activeCard.source !== "hand") return;
@@ -158,7 +171,7 @@ const PlaceCardsPhase: React.FC<Props> = ({
   };
 
   // -----------------------------
-  // カードを場から引っ込める処理
+  // カードを場から引っ込める
   // -----------------------------
   const handleRemoveCard = async (cardToRemove: number) => {
     const orderRef = ref(db, `rooms/${roomId}/cardOrder`);
@@ -204,7 +217,11 @@ const PlaceCardsPhase: React.FC<Props> = ({
       <div key="ito-header" className="relative h-12">
         {/* 中断ボタン */}
         {isHost && (
-          <div className="absolute right-2 top-1/2 -translate-y-1/2">
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-x-2">
+            <WoodyButton onClick={handleRedistribute}>
+              <RefreshCcw className="w-4 h-4 translate-y-[0.1rem]" />
+              手札を配り直す
+            </WoodyButton>
             <WoodyButton
               onClick={async () => {
                 await set(ref(db, `rooms/${roomId}/phase`), "waiting");

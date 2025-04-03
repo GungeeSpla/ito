@@ -6,7 +6,7 @@ import Card from "@/components/common/Card";
 import EmojiBurst from "@/components/common/EmojiBurst";
 import FailBurst from "@/components/common/FailBurst";
 import { CardEntry } from "@/types/CardEntry";
-import { Home } from "lucide-react";
+import { Undo2, Home } from "lucide-react";
 import WoodyButton from "@/components/common/WoodyButton";
 import ClickOrTouch from "@/components/common/ClickOrTouch";
 
@@ -129,7 +129,31 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname, cardOrder }) => {
   return (
     <div className="relative min-h-screen text-white">
       {/* ヘッダー */}
-      <div key="ito-header" className="relative h-12"></div>
+      <div key="ito-header" className="relative h-12">
+        {/* 中断ボタン */}
+        {isHost && (
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-x-2">
+            <WoodyButton
+              onClick={async () => {
+                await set(ref(db, `rooms/${roomId}/phase`), "placeCards");
+                await set(ref(db, `rooms/${roomId}/lastUpdated`), Date.now());
+              }}
+            >
+              <Undo2 className="w-4 h-4 translate-y-[0.1rem]" />
+              プレイフェーズに戻る
+            </WoodyButton>
+            <WoodyButton
+              onClick={async () => {
+                await set(ref(db, `rooms/${roomId}/phase`), "waiting");
+                await set(ref(db, `rooms/${roomId}/lastUpdated`), Date.now());
+              }}
+            >
+              <Home className="w-4 h-4 translate-y-[0.1rem]" />
+              ロビーに戻る
+            </WoodyButton>
+          </div>
+        )}
+      </div>
 
       {/* タイトルとステータス */}
       <div className="relative w-full text-center max-w-xl mx-auto">
