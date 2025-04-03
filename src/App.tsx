@@ -4,7 +4,7 @@ import { db } from "@/firebase";
 import { ref, set } from "firebase/database";
 import { generateUniqueRoomId } from "@/utils/generateRoomId";
 import { toast } from "sonner";
-import { Sparkles } from "lucide-react";
+import { Rocket, ExternalLink } from "lucide-react";
 
 // ----------------------------------------
 // トップページコンポーネント：ルーム作成画面
@@ -67,43 +67,95 @@ function App() {
   // UI描画
   // -----------------------------
   return (
-    <div
-      className={`min-h-[70vh] flex items-center justify-center transition-opacity duration-300
-        ${isFading ? "opacity-0" : "opacity-100"}`}
-    >
-      <div className="bg-white/70 backdrop-blur-sm text-black p-6 rounded-xl shadow-md w-80 text-center animate-fade-in">
-        <h1 className="text-xl font-bold mb-4">
-          ニックネームを入力して、ルームを作成してください。
-        </h1>
+    <div className="relative min-h-screen text-white">
+      {/* ヘッダー */}
+      <div key="ito-header" className="relative h-12"></div>
 
-        {/* 入力フォーム（ニックネーム + 送信ボタン） */}
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            createRoom();
-          }}
+      {/* コンテンツ */}
+      <div className="relative w-full text-center px-4">
+        {/*-------- 見出し --------*/}
+        <h2 className="text-3xl font-bold text-shadow-md mt-0 mb-4">
+          itoレインボーオンライン
+        </h2>
+
+        {/*-------- 設定画面 --------*/}
+        <div
+          className="
+          bg-white/70 backdrop-blur-sm text-black p-6 my-6 rounded-xl shadow-md
+          w-full max-w-md animate-fade-in relative mx-auto"
         >
-          <input
-            ref={inputRef}
-            type="text"
-            placeholder="ここにニックネームを入力"
-            value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
-            className="w-full p-2 border border-gray-600 bg-white text-black rounded mb-4 text-center
+          <h1 className="text-xl font-bold mb-4">
+            ニックネームを入力して、ルームを作成してください。
+          </h1>
+
+          {/* 入力フォーム（ニックネーム + 送信ボタン） */}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              createRoom();
+            }}
+          >
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder="ここにニックネームを入力"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+              className="w-full p-2 border border-gray-600 bg-white text-black rounded mb-4 text-center
               placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-          />
-          <button
-            type="submit"
-            disabled={!nickname.trim()}
-            className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-500
+            />
+            <button
+              type="submit"
+              disabled={!nickname.trim()}
+              className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-500
               focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200
               disabled:cursor-not-allowed disabled:opacity-50
               flex items-center justify-center gap-1.5"
-          >
-            <Sparkles className="w-4 h-4" />
-            ルームを作成
-          </button>
-        </form>
+            >
+              <Rocket className="w-4 h-4 translate-y-[0.1rem]" />
+              ルームを作成
+            </button>
+          </form>
+        </div>
+
+        {/*-------- 注意書き --------*/}
+        <div
+          className="notice
+            max-w-xl mx-auto text-left
+          text-white text-shadow-md p-4"
+        >
+          <ul>
+            <li>
+              <a
+                href="https://arclightgames.jp/product/705rainbow/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 inline-flex items-center gap-0.5 underline hover:text-blue-600"
+              >
+                itoレインボー <ExternalLink size={12} />
+              </a>
+              は2022年に株式会社アークライトおよびナカムラミツル氏によってデザインされたボードゲームです。
+            </li>
+            <li>
+              当サイトは個人が趣味で制作したファンサイトであり、公式とは一切関係ありません。お問い合わせは
+              <a
+                href="https://x.com/gungeex"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 inline-flex items-center gap-0.5 underline hover:text-blue-600"
+              >
+                こちら <ExternalLink size={12} />
+              </a>
+              。
+            </li>
+            <li>
+              Discordなどで通話しながら遊んでいただくことを前提に設計しています。
+            </li>
+            <li>
+              itoレインボーのルールは説明しませんので、既プレイの方や実物をお持ちの方と一緒に遊んでくださいませ。
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   );

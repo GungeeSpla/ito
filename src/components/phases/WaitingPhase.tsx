@@ -79,7 +79,6 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
   // UI描画
   // -----------------------------
   return (
-    // <div className="relative min-h-screen text-white">
     <div className="relative min-h-screen text-white">
       {/* ヘッダー */}
       <div key="ito-header" className="relative h-12"></div>
