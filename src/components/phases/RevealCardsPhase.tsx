@@ -8,6 +8,7 @@ import FailBurst from "@/components/common/FailBurst";
 import { CardEntry } from "@/types/CardEntry";
 import { Home } from "lucide-react";
 import WoodyButton from "@/components/common/WoodyButton";
+import ClickOrTouch from "@/components/common/ClickOrTouch";
 
 // 効果音：カードをめくる音
 const flipSound = new Howl({
@@ -136,7 +137,9 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname, cardOrder }) => {
           カードをめくろう！
         </h2>
         <p className="text-center text-white text-shadow-md my-6">
-          カードを好きな順番でクリックしてめくりましょう。
+          カードを好きな順番で
+          <ClickOrTouch />
+          してめくりましょう。
           <br />
           （誰でも可能）
         </p>

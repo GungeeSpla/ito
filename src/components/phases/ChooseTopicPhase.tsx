@@ -14,6 +14,7 @@ import { db } from "@/firebase";
 import ProposalModal from "@/components/common/ProposalModal";
 import { RefreshCw, PlusCircle, CheckCircle2, Home } from "lucide-react";
 import WoodyButton from "@/components/common/WoodyButton";
+import ClickOrTouch from "../common/ClickOrTouch";
 
 interface Props {
   isHost: boolean; // 現在のプレイヤーがホストかどうか
@@ -266,7 +267,9 @@ const ChooseTopicPhase: React.FC<Props> = ({
           animate={{ opacity: selectedTitle ? 0 : 1 }}
           transition={hasChosen ? { delay: 0 } : { delay: 0.2 }}
         >
-          みんなで話し合ったあと、遊びたいお題カードをクリックして投票してください。
+          みんなで話し合ったあと、遊びたいお題カードを
+          <ClickOrTouch />
+          して投票してください。
           <br />
           （ホスト権限で決定することもできます）
         </motion.p>
