@@ -19,7 +19,7 @@ const Layout: React.FC = () => {
         <Outlet />
       </main>
 
-      <Toaster richColors position="bottom-right" />
+      <Toaster richColors position="bottom-right" expand />
     </div>
   );
 };

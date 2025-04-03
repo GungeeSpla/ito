@@ -16,7 +16,6 @@ function App() {
   // 状態管理
   // -----------------------------
   const [nickname, setNickname] = useState(""); // 入力されたニックネーム
-  const [isFading, setIsFading] = useState(false); // フェードアウト用の状態フラグ
   const inputRef = useRef<HTMLInputElement>(null); // 初期フォーカス用の参照
 
   // -----------------------------
@@ -44,7 +43,6 @@ function App() {
     localStorage.setItem("nickname", nickname);
 
     // フェードアウト → 画面遷移（アニメーションと同期）
-    setIsFading(true);
     setTimeout(() => {
       toast.success("ルームを作成しました。");
       console.log("ルームを作成しました。");

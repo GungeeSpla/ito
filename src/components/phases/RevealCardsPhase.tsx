@@ -141,7 +141,7 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname, cardOrder }) => {
           <ClickOrTouch />
           してめくりましょう。
           <br />
-          （誰でも可能）
+          （だれでもめくれます）
         </p>
       </div>
 

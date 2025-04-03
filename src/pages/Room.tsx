@@ -14,7 +14,7 @@ import { Topic } from "@/types/Topic";
 import { topics } from "@/data/topics";
 import { deleteOldRooms } from "@/utils/deleteOldRooms";
 import { selectRandomTopics } from "@/utils/selectRandomTopics";
-import { toast } from "sonner";
+import { toastWithAnimation } from "@/utils/toast";
 import { CardEntry } from "@/types/CardEntry";
 
 // 各フェーズごとの画面コンポーネント
@@ -86,7 +86,9 @@ const Room = () => {
     get(roomRef)
       .then((snap) => {
         if (!snap.exists()) {
-          toast.error("ルームが存在しません。");
+          toastWithAnimation("ルームが存在しません。", {
+            type: "error",
+          });
           navigate("/");
           return;
         }
@@ -94,10 +96,14 @@ const Room = () => {
         setHost(room.host || "");
         setPhase(room.phase || "waiting");
         setLoading(false);
-        toast.success("ルームが見つかりました。");
+        toastWithAnimation("ルームが見つかりました。", {
+          type: "success",
+        });
       })
       .catch((err) => {
-        toast.error("初期化に失敗しました。");
+        toastWithAnimation("初期化に失敗しました。", {
+          type: "error",
+        });
         console.error("初期読み込み失敗", err);
         setLoading(false);
       });
@@ -141,11 +147,15 @@ const Room = () => {
   // -----------------------------
   const addPlayer = () => {
     if (!newNickname.trim()) {
-      toast.warning("ニックネームを入力してください。");
+      toastWithAnimation("ニックネームを入力してください。", {
+        type: "warn",
+      });
       return;
     }
     if (players[newNickname]) {
-      toast.warning("この名前はすでに使われています。");
+      toastWithAnimation("この名前はすでに使われています。", {
+        type: "warn",
+      });
       return;
     }
     const updatedPlayers = {
@@ -242,7 +252,9 @@ const Room = () => {
 
     const playerRef = ref(db, `rooms/${safeRoomId}/players/${nickname}`);
     remove(playerRef).then(() => {
-      toast.info("ルームを退出しました。");
+      toastWithAnimation("ルームを退出しました。", {
+        type: "success",
+      });
       navigate("/");
     });
   };

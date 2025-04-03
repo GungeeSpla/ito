@@ -15,6 +15,7 @@ import ProposalModal from "@/components/common/ProposalModal";
 import { RefreshCw, PlusCircle, CheckCircle2, Home } from "lucide-react";
 import WoodyButton from "@/components/common/WoodyButton";
 import ClickOrTouch from "../common/ClickOrTouch";
+import { toastWithAnimation } from "@/utils/toast";
 
 interface Props {
   isHost: boolean; // 現在のプレイヤーがホストかどうか
@@ -195,6 +196,17 @@ const ChooseTopicPhase: React.FC<Props> = ({
       const topVotes = sorted.filter(([_, v]) => v === sorted[0][1]);
       let chosenTitle = topVotes[0][0];
 
+      if (topVotes.length > 1 && tiebreakMethod === "host") {
+        const message = isHost
+          ? "同票なのでホストが決めてください！"
+          : "同票なのでホストに決めてもらいます。";
+        toastWithAnimation(message, {
+          duration: 5000,
+          type: "info",
+        });
+        return;
+      }
+
       if (topVotes.length > 1 && tiebreakMethod === "random") {
         const random = topVotes[Math.floor(Math.random() * topVotes.length)][0];
         chosenTitle = random;
@@ -271,7 +283,7 @@ const ChooseTopicPhase: React.FC<Props> = ({
           <ClickOrTouch />
           して投票してください。
           <br />
-          （ホスト権限で決定することもできます）
+          （ホストは自分の一存で決めることもできます）
         </motion.p>
 
         <div className="max-w-3xl mx-auto flex items-center justify-center text-white px-4">
@@ -320,6 +332,7 @@ const ChooseTopicPhase: React.FC<Props> = ({
                     ${!hasChosen ? "ito-fadein" : "ito-fadeout"}
                     pb-8 relative bg-white text-black rounded-xl p-4 text-center transition border border-gray-300`}
                     style={{ animationDelay: `${400 + index * 100}ms` }}
+                    title="これに投票する"
                   >
                     <h3 className="text-lg font-semibold mb-2">{t.title}</h3>
                     <div className="my-4">
@@ -335,6 +348,7 @@ const ChooseTopicPhase: React.FC<Props> = ({
                     {isHost && (
                       <div className="flex justify-center">
                         <button
+                          title="これに決定する"
                           className="flex items-center justify-center gap-1
                         ml-2 text-xs bg-orange-500 text-white px-2 py-1 rounded hover:bg-orange-500 hover:border-orange-300"
                           onClick={(e) => {
@@ -343,7 +357,7 @@ const ChooseTopicPhase: React.FC<Props> = ({
                           }}
                         >
                           <CheckCircle2 className="w-3 h-3 translate-y-[0.05rem]" />
-                          これに決定
+                          これにする
                         </button>
                       </div>
                     )}
