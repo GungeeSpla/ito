@@ -1,8 +1,5 @@
 import React from "react";
-import { Outlet, useLocation } from "react-router-dom"; // ページ遷移とルーティング用
-import { useEffect, useState } from "react";
-import { ref, onValue } from "firebase/database";
-import { db } from "../firebase";
+import { Outlet } from "react-router-dom"; // ページ遷移とルーティング用
 import { Toaster } from "sonner";
 
 // ------------------------------------------------
@@ -11,23 +8,6 @@ import { Toaster } from "sonner";
 // - <Outlet /> に現在のページをレンダリング
 // ------------------------------------------------
 const Layout: React.FC = () => {
-  const location = useLocation(); // 現在のURLパスを取得
-  const [phase, setPhase] = useState<string | null>(null);
-
-  // Firebaseから現在のフェーズを取得・監視
-  useEffect(() => {
-    const roomId = location.pathname.split("/").pop();
-    if (!roomId || !location.pathname.startsWith("/room")) return;
-    const phaseRef = ref(db, `rooms/${roomId}/phase`);
-    const unsub = onValue(phaseRef, (snap) => {
-      if (snap.exists()) {
-        setPhase(snap.val());
-      }
-    });
-    return () => unsub();
-  }, [location]);
-  // ページ遷移ナビゲーション関数
-
   return (
     <div className="w-screen h-screen flex flex-col overflow-hidden">
       {/* 外側をぼんやり暗く */}
