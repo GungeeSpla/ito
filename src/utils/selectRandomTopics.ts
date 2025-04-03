@@ -4,10 +4,15 @@ export const selectRandomTopics = (
   allTopics: Topic[],
   selectedSet: string,
   usedTitles: string[],
+  customTopics: Topic[],
   count: number = 3,
 ): Topic[] => {
-  return allTopics
-    .filter((t) => t.set === selectedSet && !usedTitles.includes(t.title))
-    .sort(() => 0.5 - Math.random())
-    .slice(0, count);
+  const sourceTopics =
+    selectedSet === "custom"
+      ? customTopics.filter((t) => !usedTitles.includes(t.title))
+      : allTopics.filter(
+          (t) => t.set === selectedSet && !usedTitles.includes(t.title),
+        );
+
+  return sourceTopics.sort(() => 0.5 - Math.random()).slice(0, count);
 };

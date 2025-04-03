@@ -8,6 +8,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import cn from "classnames";
+import { Topic } from "@/types/Topic";
 
 // -----------------------------
 // Props 型定義
@@ -30,6 +31,7 @@ interface WaitingPhaseProps {
   startGame: () => void;
   removePlayer: (playerName: string) => void;
   leaveRoom: () => void;
+  setCustomTopics: (topics: Topic[]) => void;
 }
 
 // -----------------------------
@@ -50,9 +52,46 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
   startGame,
   removePlayer,
   leaveRoom,
+  setCustomTopics,
 }) => {
   const [copied, setCopied] = useState(false); // URLコピー完了の表示用
   const inputRef = useRef<HTMLInputElement>(null); // ニックネーム入力にフォーカスする用
+  const [customPromptText, setCustomPromptText] = useState("");
+
+  // -----------------------------
+  // カスタムお題をパース
+  // -----------------------------
+  const parseCustomPrompts = (text: string): Topic[] => {
+    const seenTitles = new Set<string>();
+    return text
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line !== "")
+      .map((line) => {
+        const parts = line.split(",").map((part) => part.trim());
+        const [title = "", min = "", max = ""] = parts;
+        return { title, min, max, set: "custom" as const };
+      })
+      .filter(({ title }) => {
+        if (seenTitles.has(title)) return false;
+        seenTitles.add(title);
+        return true;
+      });
+  };
+
+  // カスタムお題の保存＆Room.tsx側に反映
+  useEffect(() => {
+    localStorage.setItem("customPromptText", customPromptText);
+    setCustomTopics(parseCustomPrompts(customPromptText));
+  }, [customPromptText]);
+
+  // 初回：ローカルストレージから復元
+  useEffect(() => {
+    const savedCustomPrompts = localStorage.getItem("customPromptText");
+    if (savedCustomPrompts) {
+      setCustomPromptText(savedCustomPrompts);
+    }
+  }, []);
 
   // -----------------------------
   // 初回マウント時にローカルのニックネームを自動復元
@@ -237,8 +276,25 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
                   <option value="normal">通常</option>
                   <option value="classic">クラシック</option>
                   <option value="salmon">サーモンラン</option>
+                  <option value="custom">カスタム</option>
                 </select>
               </div>
+
+              {selectedSet === "custom" && isHost && (
+                <div>
+                  <label className="block mb-1">
+                    カスタムお題セット（カンマ区切りで記述）
+                  </label>
+                  <textarea
+                    value={customPromptText}
+                    onChange={(e) => setCustomPromptText(e.target.value)}
+                    rows={6}
+                    placeholder={`例：\nコンビニの商品の人気, 人気ない, 人気ある\n100円ショップの商品の人気, 人気ない, 人気ある`}
+                    className="w-full p-2 bg-white text-black rounded resize-y
+                      focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  />
+                </div>
+              )}
 
               {/* レベル選択 */}
               <div>

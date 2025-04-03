@@ -64,14 +64,19 @@ const Room = () => {
   const alreadyJoined = !!players[nickname];
   const isHost = nickname === host;
   const [cardOrder, setCardOrder] = useState<CardEntry[]>([]);
+  const [customTopics, setCustomTopics] = useState<Topic[]>([]);
 
   // お題の再抽選
   const onRefreshTopics = async () => {
-    const usedTopicsSnap = await get(ref(db, `rooms/${safeRoomId}/usedTitles`));
-    const usedTitles = usedTopicsSnap.exists()
-      ? Object.keys(usedTopicsSnap.val())
-      : [];
-    const randomTopics = selectRandomTopics(topics, selectedSet, usedTitles);
+    const usedTopicsSnap = await get(ref(db, `rooms/${safeRoomId}/usedTopics`));
+    const usedTopics = usedTopicsSnap.exists() ? usedTopicsSnap.val() : {};
+    const usedTitles = Object.keys(usedTopics);
+    const randomTopics = selectRandomTopics(
+      topics,
+      selectedSet,
+      usedTitles,
+      customTopics,
+    );
     await set(ref(db, `rooms/${safeRoomId}/topicOptions`), randomTopics);
   };
 
@@ -181,10 +186,15 @@ const Room = () => {
   const startGame = async () => {
     if (!isHost) return;
 
-    const usedTopicsSnap = await get(ref(db, `rooms/${safeRoomId}/usedTitles`));
-    const usedData = usedTopicsSnap.exists() ? usedTopicsSnap.val() : {};
-    const usedTitles = Object.keys(usedData);
-    const randomTopics = selectRandomTopics(topics, selectedSet, usedTitles);
+    const usedTopicsSnap = await get(ref(db, `rooms/${safeRoomId}/usedTopics`));
+    const usedTopics = usedTopicsSnap.exists() ? usedTopicsSnap.val() : {};
+    const usedTitles = Object.keys(usedTopics);
+    const randomTopics = selectRandomTopics(
+      topics,
+      selectedSet,
+      usedTitles,
+      customTopics,
+    );
 
     let currentTiebreakMethod = "random";
     const tiebreakRef = ref(db, `rooms/${safeRoomId}/tiebreakMethod`);
@@ -207,7 +217,7 @@ const Room = () => {
       players,
       revealedCards: [],
       selectedTopic: {},
-      usedTitles: usedData,
+      usedTopics: usedTopics,
       tiebreakMethod: currentTiebreakMethod,
       topic: {},
       topicOptions: randomTopics,
@@ -292,6 +302,7 @@ const Room = () => {
         level={level}
         removePlayer={removePlayer}
         leaveRoom={leaveRoom}
+        setCustomTopics={setCustomTopics}
       />
     );
   }
