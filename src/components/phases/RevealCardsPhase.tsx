@@ -9,6 +9,7 @@ import { CardEntry } from "@/types/CardEntry";
 import { Undo2, Home } from "lucide-react";
 import WoodyButton from "@/components/common/WoodyButton";
 import ClickOrTouch from "@/components/common/ClickOrTouch";
+import { updateRoomMaxClearLevel } from "@/utils/levelProgress";
 
 // 効果音：カードをめくる音
 const flipSound = new Howl({
@@ -32,16 +33,26 @@ interface Props {
   roomId: string;
   nickname: string;
   cardOrder: CardEntry[];
+  level: number;
 }
 
-const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname, cardOrder }) => {
+const RevealCardsPhase: React.FC<Props> = ({
+  roomId,
+  nickname,
+  cardOrder,
+  level,
+}) => {
   const [revealedCards, setRevealedCards] = useState<number[]>([]);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
   const [isHost, setIsHost] = useState(false);
   const [status, setStatus] = useState<"success" | "fail" | null>(null);
   const [isComplete, setIsComplete] = useState(false);
-
   const prevRevealedRef = useRef<number[]>([]);
+
+  // ゲームクリア時の処理
+  const onGameClear = async () => {
+    await updateRoomMaxClearLevel(roomId, level); // ←ここで更新！
+  };
 
   // ✅ 成功時の効果音（1回だけ）
   useEffect(() => {
@@ -109,6 +120,7 @@ const RevealCardsPhase: React.FC<Props> = ({ roomId, nickname, cardOrder }) => {
         setIsComplete(true);
       } else if (revealedSequence.length === cardOrder.length) {
         setStatus("success");
+        onGameClear();
         setIsComplete(true);
       }
     }

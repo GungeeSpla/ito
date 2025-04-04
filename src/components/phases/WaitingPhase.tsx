@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import cn from "classnames";
 import { Topic } from "@/types/Topic";
+import { getRoomMaxClearLevel } from "@/utils/levelProgress";
 
 // -----------------------------
 // Props 型定義
@@ -38,6 +39,7 @@ interface WaitingPhaseProps {
 // メインコンポーネント
 // -----------------------------
 const WaitingPhase: React.FC<WaitingPhaseProps> = ({
+  roomId,
   players,
   nickname,
   host,
@@ -57,6 +59,14 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
   const [copied, setCopied] = useState(false); // URLコピー完了の表示用
   const inputRef = useRef<HTMLInputElement>(null); // ニックネーム入力にフォーカスする用
   const [customPromptText, setCustomPromptText] = useState("");
+  const [maxClearLevel, setMaxClearLevel] = useState(1);
+
+  // 最大クリアレベルを取得
+  useEffect(() => {
+    getRoomMaxClearLevel(roomId).then((level) => {
+      setMaxClearLevel(level);
+    });
+  }, [roomId]);
 
   // -----------------------------
   // カスタムお題をパース
@@ -305,7 +315,10 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
                   className="w-full p-2 bg-white text-black rounded focus:outline-none focus:ring-2
                   focus:ring-blue-400"
                 >
-                  {[1, 2, 3, 4, 5].map((lvl) => (
+                  {Array.from(
+                    { length: maxClearLevel + 1 },
+                    (_, i) => i + 1,
+                  ).map((lvl) => (
                     <option key={lvl} value={lvl}>
                       レベル {lvl}
                     </option>

@@ -338,6 +338,7 @@ const Room = () => {
         roomId={safeRoomId}
         nickname={nickname}
         cardOrder={cardOrder}
+        level={level}
       />
     );
   }
