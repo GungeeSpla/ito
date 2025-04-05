@@ -5,12 +5,12 @@ import {
   LogOut,
   UserPlus,
   Copy,
-  ExternalLink,
 } from "lucide-react";
-import cn from "classnames";
 import { Topic } from "@/types/Topic";
 import { getRoomMaxClearLevel } from "@/utils/levelProgress";
-import AppVersion from "@/components/common/AppVersion";
+import WoodyButton from "@/components/common/WoodyButton";
+import { toastWithAnimation } from "@/utils/toast";
+import NoticeGame from "@/components/common/NoticeGame";
 
 // -----------------------------
 // Props 型定義
@@ -57,7 +57,6 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
   leaveRoom,
   setCustomTopics,
 }) => {
-  const [copied, setCopied] = useState(false); // URLコピー完了の表示用
   const inputRef = useRef<HTMLInputElement>(null); // ニックネーム入力にフォーカスする用
   const [customPromptText, setCustomPromptText] = useState("");
   const [maxClearLevel, setMaxClearLevel] = useState(1);
@@ -117,9 +116,9 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
   // 現在のページURLをクリップボードにコピー
   // -----------------------------
   const handleCopyUrl = () => {
-    navigator.clipboard.writeText(window.location.href).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000); // 2秒後にフェードアウト
+    navigator.clipboard.writeText(window.location.href);
+    toastWithAnimation("ルームURLをコピーしました！", {
+      type: "success",
     });
   };
 
@@ -131,7 +130,21 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
   return (
     <div className="relative min-h-screen text-white">
       {/* ヘッダー */}
-      <div key="ito-header" className="relative h-12"></div>
+      <div key="ito-header" className="relative h-12">
+        {/* 中断ボタン */}
+        {isHost && (
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-x-2">
+            <WoodyButton onClick={handleCopyUrl}>
+              <Copy className="w-3 h-3" />
+              ルームURLをコピー
+            </WoodyButton>
+            <WoodyButton onClick={leaveRoom}>
+              <LogOut className="w-3 h-3" />
+              ルームから退出する
+            </WoodyButton>
+          </div>
+        )}
+      </div>
 
       {/* コンテンツ */}
       <div className="relative w-full text-center px-4">
@@ -139,6 +152,23 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
         <h2 className="text-3xl font-bold text-shadow-md mt-0 mb-4">
           itoレインボーオンライン
         </h2>
+        <p className="text-center text-white text-shadow-md my-6">
+          {!alreadyJoined ? (
+            <span>ニックネームを入力して、ルームに参加してください。</span>
+          ) : (
+            <span>
+              {isHost ? (
+                <span>
+                  フレンドにルームURLに伝えましょう。
+                  <br />
+                  2人以上集まったらゲームを開始できます。
+                </span>
+              ) : (
+                <span>ホストのゲーム開始を待っています。</span>
+              )}
+            </span>
+          )}
+        </p>
 
         {/*-------- 設定画面 --------*/}
         <div
@@ -146,31 +176,6 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
           bg-white/70 backdrop-blur-sm text-black p-6 my-6 rounded-xl shadow-md
           w-full max-w-md animate-fade-in relative mx-auto"
         >
-          {/* URLコピーUI */}
-          <div className="mb-4 flex justify-center relative">
-            <button
-              onClick={handleCopyUrl}
-              className="flex items-center justify-center gap-1.5
-              focus:outline-none px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-500 transition"
-            >
-              <Copy className="w-3 h-3" />
-              ルームURLをコピー
-            </button>
-
-            {/* コピー完了の吹き出し */}
-            <div
-              className={cn(
-                "absolute top-2 right-2 text-sm text-white px-3 py-1 rounded bg-black bg-opacity-75",
-                "before:absolute before:top-1/2 before:left-[-15px] before:-translate-y-1/2",
-                "before:border-8 before:border-transparent before:border-r-black",
-                "transition-opacity duration-500",
-                copied ? "opacity-100" : "opacity-0 pointer-events-none",
-              )}
-            >
-              コピーしました！
-            </div>
-          </div>
-
           {/* プレイヤー一覧 */}
           <div className="mb-4">
             <div className="flex items-center gap-2 mb-2">
@@ -208,22 +213,8 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
             </ul>
           </div>
 
-          {/* 退出ボタン */}
-          {alreadyJoined && (
-            <div className="flex justify-center mt-3 mb-4">
-              <button
-                onClick={leaveRoom}
-                className="flex items-center justify-center gap-1.5
-                text-xs bg-red-600 hover:bg-red-500 text-white font-medium py-2 px-4 rounded"
-              >
-                <LogOut className="w-3 h-3" />
-                ルームから退出する
-              </button>
-            </div>
-          )}
-
           {/* 参加フォーム or メッセージ */}
-          {!alreadyJoined ? (
+          {!alreadyJoined && (
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -231,9 +222,6 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
               }}
               className="mb-4"
             >
-              <p className="mb-4 text-center text-black">
-                ニックネームを入力して、ルームに参加してください。
-              </p>
               <input
                 ref={inputRef}
                 type="text"
@@ -254,12 +242,6 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
                 参加する
               </button>
             </form>
-          ) : (
-            <p className="mb-4 text-center text-black">
-              {isHost
-                ? "ゲストを招待して、ゲームを開始してください。"
-                : "ホストのゲーム開始を待っています。"}
-            </p>
           )}
 
           {/* ホスト用設定UI */}
@@ -326,63 +308,25 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
                   ))}
                 </select>
               </div>
-
-              <button
-                onClick={startGame}
-                disabled={Object.keys(players).length <= 1}
-                className="flex items-center justify-center gap-1.5
-                w-full py-2 rounded transition
-              bg-green-600 text-white hover:bg-green-500
-              disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed"
-              >
-                <PlayIcon className="w-4 h-4" />
-                ゲーム開始
-              </button>
             </div>
           )}
         </div>
 
-        {/*-------- 注意書き --------*/}
-        <div
-          className="notice
-            max-w-xl mx-auto text-left
-          text-white text-shadow-md p-4"
-        >
-          <ul>
-            <li>
-              <a
-                href="https://arclightgames.jp/product/705rainbow/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-400 inline-flex items-center gap-0.5 underline hover:text-blue-600"
-              >
-                itoレインボー <ExternalLink size={12} />
-              </a>
-              は2022年に株式会社アークライトおよびナカムラミツル氏によってデザインされたボードゲームです。
-            </li>
-            <li>
-              当サイトは個人が趣味で制作したファンサイトであり、公式とは一切関係ありません。お問い合わせは
-              <a
-                href="https://x.com/gungeex"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-400 inline-flex items-center gap-0.5 underline hover:text-blue-600"
-              >
-                こちら <ExternalLink size={12} />
-              </a>
-              。
-            </li>
-            <li>
-              Discordなどで通話しながら遊んでいただくことを前提に設計しています。
-            </li>
-            <li>
-              itoレインボーのルールは説明しませんので、既プレイの方や実物をお持ちの方と一緒に遊んでくださいませ。
-            </li>
-          </ul>
-          <div className="text-center">
-            <AppVersion />
+        {isHost && (
+          <div className="flex justify-center gap-x-2 h-12 scale-125">
+            <WoodyButton
+              onClick={startGame}
+              disabled={Object.keys(players).length <= 1}
+              className="absolute"
+            >
+              <PlayIcon className="w-4 h-4" />
+              ゲーム開始
+            </WoodyButton>
           </div>
-        </div>
+        )}
+        
+        {/*-------- 注意書き --------*/}
+        <NoticeGame />
       </div>
     </div>
   );

@@ -1,0 +1,33 @@
+.forceChoose {
+  position: absolute;
+  bottom: 0.4rem;
+  font-size: 0.6rem;
+  margin: 0rem;
+  padding: 0.3rem 0.3rem;
+  border-radius: 0.5rem;
+  border: none;
+  background-color: #ff7800;
+  color: white;
+  font-weight: bold;
+  box-sizing: content-box;
+  box-shadow: none;
+  height: fit-content;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2em;
+  overflow: hidden;
+  translate: 0rem 0rem;
+
+  &:hover {
+    background-color: #ff5900;
+  }
+
+  &:focus,
+  &:active {
+    outline: none;
+  }
+}
+/*
+ml-2 text-xs bg-orange-500 text-white px-2 py-1 rounded hover:bg-orange-500 hover:border-orange-300"
+*/

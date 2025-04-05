@@ -260,8 +260,7 @@ const PlaceCardsPhase: React.FC<Props> = ({
           <Card value={0} name="" />
           {activeCard?.source === "hand" &&
             !cardOrder.some((c) => c.card === activeCard.value) && (
-              <motion.button
-                layout
+              <button
                 className="
                   flex items-center justify-center gap-0.5
                   text-xs bg-blue-600 text-white px-1 py-3 rounded 
@@ -270,7 +269,7 @@ const PlaceCardsPhase: React.FC<Props> = ({
               >
                 <ArrowDownCircle className="w-3 h-3 translate-x-[0.05rem]" />
                 ここに出す
-              </motion.button>
+              </button>
             )}
         </div>
 
@@ -280,10 +279,18 @@ const PlaceCardsPhase: React.FC<Props> = ({
             return (
               <motion.div
                 key={`${entry.name}-${entry.card}`}
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
+                initial={{
+                  opacity: 0,
+                  translateY: isMine ? "2rem" : "-2rem",
+                }}
+                animate={{
+                  opacity: 1,
+                  translateY: "0rem",
+                }}
+                exit={{
+                  opacity: 0,
+                  translateY: isMine ? "2rem" : "-2rem",
+                }}
                 transition={{ duration: 0.2 }}
                 className="flex items-center gap-2"
               >
@@ -299,8 +306,7 @@ const PlaceCardsPhase: React.FC<Props> = ({
                   hint={entry.hint}
                 />
                 {activeCard?.source === "hand" && (
-                  <motion.button
-                    layout
+                  <button
                     className="
                       flex items-center justify-center gap-0.5  
                       text-xs bg-blue-600 text-white px-1 py-3 rounded
@@ -309,7 +315,7 @@ const PlaceCardsPhase: React.FC<Props> = ({
                   >
                     <ArrowDownCircle className="w-3 h-3 translate-x-[0.05rem]" />
                     ここに出す
-                  </motion.button>
+                  </button>
                 )}
               </motion.div>
             );
@@ -335,23 +341,43 @@ const PlaceCardsPhase: React.FC<Props> = ({
           className="flex flex-wrap gap-2 justify-center scale-150 translate-y-20 transform"
           style={{ transformOrigin: "bottom" }}
         >
-          {myCards.map((card) => (
-            <Card
-              key={card.value}
-              value={card.value}
-              mode="reveal"
-              isActive={activeCard?.value === card.value}
-              onClick={() =>
-                setActiveCard({ source: "hand", value: card.value })
-              }
-              editable={true}
-              onEdit={() => setEditingValue(card.value)}
-              onClearHint={() => handleHintSubmit(card.value, "")}
-              hint={card.hint}
-              isMine={true}
-              className={initialRender ? styles.handCard : ""}
-            />
-          ))}
+          <AnimatePresence>
+            {myCards.map((card) => (
+              <motion.div
+                key={`hand-motion-${card.value}`}
+                layout
+                initial={{
+                  translateY: "-2rem",
+                  opacity: 0,
+                }}
+                animate={{
+                  translateY: "0rem",
+                  opacity: 1,
+                }}
+                exit={{
+                  translateY: "-2rem",
+                  opacity: 0,
+                }}
+                transition={{ duration: 0.2 }}
+              >
+                <Card
+                  key={`hand-${card.value}`}
+                  value={card.value}
+                  mode="reveal"
+                  isActive={activeCard?.value === card.value}
+                  onClick={() =>
+                    setActiveCard({ source: "hand", value: card.value })
+                  }
+                  editable={true}
+                  onEdit={() => setEditingValue(card.value)}
+                  onClearHint={() => handleHintSubmit(card.value, "")}
+                  hint={card.hint}
+                  isMine={true}
+                  className={initialRender ? styles.handCard : ""}
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
       </div>
 

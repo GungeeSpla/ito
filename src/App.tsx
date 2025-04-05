@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { db } from "@/firebase";
 import { ref, set } from "firebase/database";
 import { generateUniqueRoomId } from "@/utils/generateRoomId";
-import { Rocket, ExternalLink } from "lucide-react";
+import { Rocket } from "lucide-react";
 import { toastWithAnimation } from "@/utils/toast";
-import AppVersion from "@/components/common/AppVersion";
+import NoticeGame from "@/components/common/NoticeGame";
 
 // ----------------------------------------
 // トップページコンポーネント：ルーム作成画面
@@ -80,6 +80,9 @@ function App() {
         <h2 className="text-3xl font-bold text-shadow-md mt-0 mb-4">
           itoレインボーオンライン
         </h2>
+        <p className="text-center text-white text-shadow-md my-6">
+          <span>ニックネームを入力して、ルームを作成してください。</span>
+        </p>
 
         {/*-------- 設定画面 --------*/}
         <div
@@ -87,10 +90,6 @@ function App() {
           bg-white/70 backdrop-blur-sm text-black p-6 my-6 rounded-xl shadow-md
           w-full max-w-md animate-fade-in relative mx-auto"
         >
-          <h1 className="text-xl font-bold mb-4">
-            ニックネームを入力して、ルームを作成してください。
-          </h1>
-
           {/* 入力フォーム（ニックネーム + 送信ボタン） */}
           <form
             onSubmit={(e) => {
@@ -122,46 +121,7 @@ function App() {
         </div>
 
         {/*-------- 注意書き --------*/}
-        <div
-          className="notice
-            max-w-xl mx-auto text-left
-          text-white text-shadow-md p-4"
-        >
-          <ul>
-            <li>
-              <a
-                href="https://arclightgames.jp/product/705rainbow/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-400 inline-flex items-center gap-0.5 underline hover:text-blue-600"
-              >
-                itoレインボー <ExternalLink size={12} />
-              </a>
-              は2022年に株式会社アークライトおよびナカムラミツル氏によってデザインされたボードゲームです。
-            </li>
-            <li>
-              当サイトは個人が趣味で制作したファンサイトであり、公式とは一切関係ありません。お問い合わせは
-              <a
-                href="https://x.com/gungeex"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-400 inline-flex items-center gap-0.5 underline hover:text-blue-600"
-              >
-                こちら <ExternalLink size={12} />
-              </a>
-              。
-            </li>
-            <li>
-              Discordなどで通話しながら遊んでいただくことを前提に設計しています。
-            </li>
-            <li>
-              itoレインボーのルールは説明しませんので、既プレイの方や実物をお持ちの方と一緒に遊んでくださいませ。
-            </li>
-          </ul>
-          <div className="text-center">
-            <AppVersion />
-          </div>
-        </div>
+        <NoticeGame />
       </div>
     </div>
   );

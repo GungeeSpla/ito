@@ -78,6 +78,17 @@ const Card: React.FC<CardProps> = ({
         ${playerClass} ${className}
       `}
       onClick={onClick}
+      layout
+      initial={{
+        translateY: "-2rem",
+      }}
+      animate={{
+        translateY: "0rem",
+      }}
+      exit={{
+        translateY: "-2rem",
+      }}
+      transition={{ duration: 0.2 }}
     >
       <div
         className={`

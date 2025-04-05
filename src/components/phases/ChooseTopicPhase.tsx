@@ -16,6 +16,7 @@ import { RefreshCw, PlusCircle, CheckCircle2, Home } from "lucide-react";
 import WoodyButton from "@/components/common/WoodyButton";
 import ClickOrTouch from "../common/ClickOrTouch";
 import { toastWithAnimation } from "@/utils/toast";
+import styles from "./ChooseTopicPhase.module.scss";
 
 interface Props {
   isHost: boolean; // 現在のプレイヤーがホストかどうか
@@ -348,9 +349,8 @@ const ChooseTopicPhase: React.FC<Props> = ({
                     {isHost && (
                       <div className="flex justify-center">
                         <button
-                          title="これに決定する"
-                          className="flex items-center justify-center gap-1
-                        ml-2 text-xs bg-orange-500 text-white px-2 py-1 rounded hover:bg-orange-500 hover:border-orange-300"
+                          title="これにする"
+                          className={styles.forceChoose}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleForceChoose(t.title);
