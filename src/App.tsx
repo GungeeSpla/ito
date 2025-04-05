@@ -5,6 +5,7 @@ import { ref, set } from "firebase/database";
 import { generateUniqueRoomId } from "@/utils/generateRoomId";
 import { Rocket, ExternalLink } from "lucide-react";
 import { toastWithAnimation } from "@/utils/toast";
+import AppVersion from "@/components/common/AppVersion";
 
 // ----------------------------------------
 // トップページコンポーネント：ルーム作成画面
@@ -157,6 +158,9 @@ function App() {
               itoレインボーのルールは説明しませんので、既プレイの方や実物をお持ちの方と一緒に遊んでくださいませ。
             </li>
           </ul>
+          <div className="text-center">
+            <AppVersion />
+          </div>
         </div>
       </div>
     </div>

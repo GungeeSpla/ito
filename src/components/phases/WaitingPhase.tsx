@@ -10,6 +10,7 @@ import {
 import cn from "classnames";
 import { Topic } from "@/types/Topic";
 import { getRoomMaxClearLevel } from "@/utils/levelProgress";
+import AppVersion from "@/components/common/AppVersion";
 
 // -----------------------------
 // Props 型定義
@@ -378,6 +379,9 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
               itoレインボーのルールは説明しませんので、既プレイの方や実物をお持ちの方と一緒に遊んでくださいませ。
             </li>
           </ul>
+          <div className="text-center">
+            <AppVersion />
+          </div>
         </div>
       </div>
     </div>
