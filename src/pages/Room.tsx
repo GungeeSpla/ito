@@ -101,9 +101,9 @@ const Room = () => {
         setHost(room.host || "");
         setPhase(room.phase || "waiting");
         setLoading(false);
-        toastWithAnimation("ルームが見つかりました。", {
-          type: "success",
-        });
+        // toastWithAnimation("ルームが見つかりました。", {
+        //   type: "success",
+        // });
       })
       .catch((err) => {
         toastWithAnimation("初期化に失敗しました。", {

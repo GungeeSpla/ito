@@ -1,13 +1,7 @@
 import React from "react";
-import { Howl } from "howler";
 import { Home } from "lucide-react";
 import WoodyButton from "@/components/common/WoodyButton";
-
-// 効果音：カードを配る音
-const dealSound = new Howl({
-  src: ["/sounds/card-deal.mp3"],
-  volume: 1,
-});
+import { dealSound } from "@/utils/sounds";
 
 interface Props {
   isHost: boolean;

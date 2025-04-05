@@ -1,6 +1,7 @@
 import React from "react";
 import { Outlet } from "react-router-dom"; // ページ遷移とルーティング用
 import { Toaster } from "sonner";
+import VolumeControl from "@/components/common/VolumeControl";
 
 // ------------------------------------------------
 // アプリ全体の共通レイアウトコンポーネント
@@ -20,6 +21,7 @@ const Layout: React.FC = () => {
       </main>
 
       <Toaster richColors position="bottom-right" expand />
+      <VolumeControl />
     </div>
   );
 };

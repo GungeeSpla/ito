@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Howl } from "howler";
 import { ref, onValue, set } from "firebase/database";
 import { db } from "@/firebase";
 import Card from "@/components/common/Card";
@@ -10,24 +9,7 @@ import { Undo2, Home } from "lucide-react";
 import WoodyButton from "@/components/common/WoodyButton";
 import ClickOrTouch from "@/components/common/ClickOrTouch";
 import { updateRoomMaxClearLevel } from "@/utils/levelProgress";
-
-// 効果音：カードをめくる音
-const flipSound = new Howl({
-  src: ["/sounds/card-flip.mp3"],
-  volume: 1,
-});
-
-// 効果音：成功した
-const successSound = new Howl({
-  src: ["/sounds/success.mp3"],
-  volume: 1,
-});
-
-// 効果音：成功した
-const failSound = new Howl({
-  src: ["/sounds/fail.mp3"],
-  volume: 1,
-});
+import { flipSound, successSound, failSound } from "@/utils/sounds";
 
 interface Props {
   roomId: string;

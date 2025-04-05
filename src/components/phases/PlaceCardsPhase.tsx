@@ -9,12 +9,7 @@ import { ArrowDownCircle, Eye, Home, RefreshCcw } from "lucide-react";
 import WoodyButton from "@/components/common/WoodyButton";
 import FallingText from "@/components/common/FallingText";
 import styles from "./PlaceCardsPhase.module.scss";
-
-// 効果音：カードを出す音
-const placeSound = new Howl({
-  src: ["/sounds/card-place.mp3"],
-  volume: 1,
-});
+import { placeSound } from "@/utils/sounds";
 
 // -----------------------------
 // 型定義
