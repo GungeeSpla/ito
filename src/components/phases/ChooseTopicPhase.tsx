@@ -75,7 +75,9 @@ const ChooseTopicPhase: React.FC<Props> = ({
         setSelectedTitle(topic.title);
         exitTimeoutRef.current = setTimeout(() => {
           console.log("安全装置によってお題を選択しました:", topic);
-          chooseTopic(topic);
+          if (isHost) {
+            chooseTopic(topic);
+          }
           exitCalled.current = true;
         }, 800);
       }
@@ -299,7 +301,9 @@ const ChooseTopicPhase: React.FC<Props> = ({
                   );
                   if (selected) {
                     console.log("お題を選択しました:", selected);
-                    chooseTopic(selected);
+                    if (isHost) {
+                      chooseTopic(selected);
+                    }
                     if (exitTimeoutRef.current) {
                       clearTimeout(exitTimeoutRef.current);
                     }
