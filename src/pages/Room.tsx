@@ -13,6 +13,7 @@ import { db } from "@/firebase";
 import { Topic } from "@/types/Topic";
 import { topics } from "@/data/topics";
 import { deleteOldRooms } from "@/utils/deleteOldRooms";
+import { deleteOldUsers } from "@/utils/deleteOldUsers";
 import { selectRandomTopics } from "@/utils/selectRandomTopics";
 import { toastWithAnimation } from "@/utils/toast";
 import { CardEntry } from "@/types/CardEntry";
@@ -92,7 +93,8 @@ const Room = () => {
   // 初期化＆リアルタイム監視（DBの値が変わるたびに再描画）
   // -----------------------------
   useEffect(() => {
-    deleteOldRooms(); // 古いルームの自動削除（メンテ用）
+    deleteOldRooms();
+    deleteOldUsers();
 
     // 初回読み取り：ルームが存在するかチェック
     const roomRef = ref(db, `rooms/${safeRoomId}`);
@@ -109,9 +111,6 @@ const Room = () => {
         setHost(room.host || "");
         setPhase(room.phase || "waiting");
         setLoading(false);
-        // toastWithAnimation("ルームが見つかりました。", {
-        //   type: "success",
-        // });
       })
       .catch((err) => {
         toastWithAnimation("初期化に失敗しました。", {

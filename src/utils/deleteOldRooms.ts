@@ -1,4 +1,4 @@
-import { db } from "../firebase";
+import { db } from "@/firebase";
 import { ref, get, remove } from "firebase/database";
 
 /**
@@ -23,13 +23,11 @@ export const deleteOldRooms = async () => {
     const updated = roomData.lastUpdated;
 
     if (updated && now - updated > timeout) {
-      console.log(`削除対象: ${roomId}`);
+      console.log(`ルーム削除: ${roomId}`);
       promises.push(remove(ref(db, `rooms/${roomId}`)));
     }
   });
 
   // 並列で削除実行（パフォーマンス効率化）
   await Promise.all(promises);
-
-  console.log("最終更新から60分以上経過したルームの削除が完了しました。");
 };

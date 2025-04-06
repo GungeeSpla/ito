@@ -63,7 +63,7 @@ function App() {
           formData.append("userId", userId);
 
           try {
-            const res = await fetch("https://ito.gungee.jp/upload.php", {
+            const res = await fetch("https://ito.gungee.jp/upload-avatar.php", {
               method: "POST",
               body: formData,
             });
