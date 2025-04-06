@@ -5,13 +5,15 @@ import { getRoomMaxClearLevel } from "@/utils/levelProgress";
 import WoodyButton from "@/components/common/WoodyButton";
 import { toastWithAnimation } from "@/utils/toast";
 import NoticeGame from "@/components/common/NoticeGame";
+import { PlayerInfo } from "@/types/Player";
+import { useUser } from "@/hooks/useUser";
 
 // -----------------------------
 // Props 型定義
 // -----------------------------
 interface WaitingPhaseProps {
   roomId: string;
-  players: Record<string, boolean>;
+  players: Record<string, PlayerInfo>;
   nickname: string;
   host: string;
   alreadyJoined: boolean;
@@ -54,6 +56,7 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
   const inputRef = useRef<HTMLInputElement>(null); // ニックネーム入力にフォーカスする用
   const [customPromptText, setCustomPromptText] = useState("");
   const [maxClearLevel, setMaxClearLevel] = useState(1);
+  const { userId } = useUser();
 
   // 最大クリアレベルを取得
   useEffect(() => {
@@ -178,23 +181,23 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
               </p>
             </div>
             <ul className="space-y-1">
-              {Object.keys(players).map((player) => (
-                <li key={player} className="text-sm">
-                  {player}
-                  {player === host && (
+              {Object.entries(players).map(([id, player]) => (
+                <li key={id} className="text-sm">
+                  {player.nickname}
+                  {id === host && (
                     <Crown
                       size={16}
                       className="inline text-yellow-700 ml-1 relative -top-0.5"
                     />
                   )}
                   <span className="text-black text-xs">
-                    {player === nickname && "（You）"}
+                    {id === userId && "（You）"}
                   </span>
-                  {isHost && player !== host && (
+                  {isHost && id !== host && (
                     <span className="text-xs">
                       （
                       <button
-                        onClick={() => removePlayer(player)}
+                        onClick={() => removePlayer(id)}
                         className="text-red-600 text-xs hover:underline cursor-pointer p-0 bg-transparent border-none"
                       >
                         追放

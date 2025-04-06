@@ -1,11 +1,12 @@
 import { useEffect } from "react";
 import { ref, set, child } from "firebase/database";
 import { db } from "../firebase";
+import { PlayerInfo } from "@/types/Player";
 
 interface UseDealCardsProps {
   phase: string;
   isHost: boolean;
-  players: Record<string, boolean>;
+  players: Record<string, PlayerInfo>;
   roomId: string;
   level: number;
 }
