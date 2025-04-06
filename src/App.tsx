@@ -207,33 +207,39 @@ function App() {
               e.preventDefault();
               createRoom();
             }}
+            className="space-y-6"
           >
             {/* ニックネーム */}
-            <input
-              ref={inputRef}
-              type="text"
-              placeholder="ここにニックネームを入力"
-              value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
-              className="w-full p-2 border border-gray-600 bg-white text-black rounded mb-4 text-center
-              placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-            />
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-100">
+                ニックネーム
+              </label>
+              <input
+                ref={inputRef}
+                type="text"
+                placeholder="ここにニックネームを入力"
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+                className="w-full p-2.5 rounded-md border border-gray-400 bg-white text-black text-center
+                 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
 
             {/* ユーザーカラー */}
-            <div className="mt-2 flex items-center gap-2">
-              <label className="text-sm">カラー:</label>
+            <div className="flex items-center gap-3">
+              <label className="text-sm text-gray-100">カラー</label>
               <input
                 type="color"
                 value={color}
                 onChange={(e) => setColor(e.target.value)}
-                className="w-8 h-8 p-0 border-none bg-transparent"
+                className="w-8 h-8 rounded-md border border-gray-300"
               />
             </div>
 
             {/* アバター画像アップロード */}
-            <div className="mt-2">
-              <label className="text-sm block mb-1">
-                プロフィール画像 (任意)
+            <div>
+              <label className="block text-sm mb-1 text-gray-100">
+                プロフィール画像（任意）
               </label>
 
               {/* 隠したinput */}
@@ -253,12 +259,12 @@ function App() {
                   document.getElementById("avatar-upload")?.click()
                 }
               >
-                ファイルを選択
+                画像を選ぶ
               </button>
 
               {/* プレビュー表示 */}
               {(avatarFile || userInfo?.avatarUrl) && (
-                <div className="mt-2">
+                <div className="mt-3">
                   <img
                     src={
                       avatarFile
@@ -266,32 +272,20 @@ function App() {
                         : userInfo?.avatarUrl || ""
                     }
                     alt="プロフィール画像プレビュー"
-                    className="w-16 h-16 object-cover border rounded"
+                    className="w-16 h-16 object-cover rounded border border-gray-300"
                   />
                 </div>
               )}
             </div>
 
-            {/* 登録されていたプロフィール画像 */}
-            {userInfo?.avatarUrl && (
-              <div className="mt-2">
-                <img
-                  src={userInfo.avatarUrl}
-                  alt="プロフィール画像"
-                  className="w-16 h-16 object-cover border"
-                />
-              </div>
-            )}
-
+            {/* 作成ボタン */}
             <button
               type="submit"
               disabled={!nickname.trim()}
-              className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-500
-              focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200
-              disabled:cursor-not-allowed disabled:opacity-50
-              flex items-center justify-center gap-1.5"
+              className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-500 transition
+               disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
             >
-              <Rocket className="w-4 h-4 translate-y-[0.1rem]" />
+              <Rocket className="w-4 h-4" />
               ルームを作成
             </button>
           </form>
