@@ -171,8 +171,9 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (userInfo?.nickname) {
-      setNickname(userInfo.nickname);
+    if (userInfo) {
+      if (userInfo.nickname) setNickname(userInfo.nickname);
+      if (userInfo.color) setColor(userInfo.color);
     }
   }, [userInfo]);
 
@@ -240,6 +241,16 @@ function App() {
                 onChange={(e) => setAvatarFile(e.target.files?.[0] || null)}
               />
             </div>
+
+            {userInfo?.avatarUrl && (
+              <div className="mt-2">
+                <img
+                  src={userInfo.avatarUrl}
+                  alt="プロフィール画像"
+                  className="w-16 h-16 object-cover border"
+                />
+              </div>
+            )}
 
             <button
               type="submit"
