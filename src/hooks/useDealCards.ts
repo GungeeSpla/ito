@@ -32,23 +32,33 @@ export const useDealCards = ({
         return;
       }
 
+      // シャッフルして配布順決定
       const shuffledPlayers = [...playerNames].sort(() => 0.5 - Math.random());
-      const bonusReceivers = shuffledPlayers.slice(0, level - 1);
 
+      // 初期化
       const cards: Record<string, { value: number; revealed: boolean }[]> = {};
-      let cardIndex = 0;
-
       playerNames.forEach((name) => {
-        const numCards = bonusReceivers.includes(name) ? 2 : 1;
         cards[name] = [];
-
-        for (let i = 0; i < numCards; i++) {
-          cards[name].push({
-            value: shuffledNumbers[cardIndex++],
-            revealed: false,
-          });
-        }
       });
+
+      // 各プレイヤーに1枚ずつ配布
+      let cardIndex = 0;
+      playerNames.forEach((name) => {
+        cards[name].push({
+          value: shuffledNumbers[cardIndex++],
+          revealed: false,
+        });
+      });
+
+      // 残りのカードをランダムに1枚ずつ配布
+      const remaining = totalCards - playerNames.length;
+      for (let i = 0; i < remaining; i++) {
+        const receiver = shuffledPlayers[i % shuffledPlayers.length];
+        cards[receiver].push({
+          value: shuffledNumbers[cardIndex++],
+          revealed: false,
+        });
+      }
 
       const roomRef = ref(db, `rooms/${roomId}`);
       await set(child(roomRef, "cards"), cards);

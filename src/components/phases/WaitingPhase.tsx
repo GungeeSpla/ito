@@ -1,11 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  Crown,
-  PlayIcon,
-  LogOut,
-  UserPlus,
-  Copy,
-} from "lucide-react";
+import { Crown, PlayIcon, LogOut, UserPlus, Copy } from "lucide-react";
 import { Topic } from "@/types/Topic";
 import { getRoomMaxClearLevel } from "@/utils/levelProgress";
 import WoodyButton from "@/components/common/WoodyButton";
@@ -299,7 +293,8 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
                   focus:ring-blue-400"
                 >
                   {Array.from(
-                    { length: maxClearLevel + 1 },
+                    { length: 10 }, // デバッグ用
+                    // { length: maxClearLevel + 1 },
                     (_, i) => i + 1,
                   ).map((lvl) => (
                     <option key={lvl} value={lvl}>
@@ -324,7 +319,7 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
             </WoodyButton>
           </div>
         )}
-        
+
         {/*-------- 注意書き --------*/}
         <NoticeGame />
       </div>
