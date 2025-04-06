@@ -230,18 +230,49 @@ function App() {
               />
             </div>
 
-            {/* アバター画像 */}
+            {/* アバター画像アップロード */}
             <div className="mt-2">
               <label className="text-sm block mb-1">
                 プロフィール画像 (任意)
               </label>
+
+              {/* 隠したinput */}
               <input
+                id="avatar-upload"
                 type="file"
                 accept="image/*"
+                style={{ display: "none" }}
                 onChange={(e) => setAvatarFile(e.target.files?.[0] || null)}
               />
+
+              {/* カスタムボタン */}
+              <button
+                type="button"
+                className="px-3 py-1 bg-gray-200 text-black text-sm rounded hover:bg-gray-300 transition"
+                onClick={() =>
+                  document.getElementById("avatar-upload")?.click()
+                }
+              >
+                ファイルを選択
+              </button>
+
+              {/* プレビュー表示 */}
+              {(avatarFile || userInfo?.avatarUrl) && (
+                <div className="mt-2">
+                  <img
+                    src={
+                      avatarFile
+                        ? URL.createObjectURL(avatarFile)
+                        : userInfo?.avatarUrl || ""
+                    }
+                    alt="プロフィール画像プレビュー"
+                    className="w-16 h-16 object-cover border rounded"
+                  />
+                </div>
+              )}
             </div>
 
+            {/* 登録されていたプロフィール画像 */}
             {userInfo?.avatarUrl && (
               <div className="mt-2">
                 <img
