@@ -19,6 +19,16 @@
 .playedCardsArea {
   opacity: 0;
   animation: fadeIn 500ms 1500ms ease-out forwards;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 47%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
 
 .handCardsArea {

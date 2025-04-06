@@ -1,4 +1,42 @@
-.forceChoose {
+.topicCard {
+  background-image: url("/images/topic-bg.jpg");
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  border: 1px solid #fdf045;
+  border-top-color: #fff280;
+  border-left-color: #fff280;
+  border-bottom-color: #7d6d00;
+  border-right-color: #7d6d00;
+  cursor: pointer;
+  scale: 100%;
+  box-shadow: 0.2em 0.2em 0.2em rgba(0, 0, 0, 0.5);
+  transition-property: all;
+
+  &.fadeIn {
+    animation: fadeIn 500ms ease-out forwards;
+    opacity: 0;
+  }
+
+  &.fadeOut {
+  }
+
+  &:hover {
+    scale: 102%;
+    box-shadow: 0.5em 0.5em 1em rgba(0, 0, 0, 0.5);
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.forceChooseButton {
   position: absolute;
   bottom: 0.4rem;
   font-size: 0.6rem;
@@ -28,6 +66,3 @@
     outline: none;
   }
 }
-/*
-ml-2 text-xs bg-orange-500 text-white px-2 py-1 rounded hover:bg-orange-500 hover:border-orange-300"
-*/

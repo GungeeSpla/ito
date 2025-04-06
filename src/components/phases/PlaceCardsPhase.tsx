@@ -10,6 +10,7 @@ import WoodyButton from "@/components/common/WoodyButton";
 import FallingText from "@/components/common/FallingText";
 import styles from "./PlaceCardsPhase.module.scss";
 import { placeSound } from "@/utils/sounds";
+import cardStyles from "@/components/common/Card.module.scss";
 
 // -----------------------------
 // 型定義
@@ -105,6 +106,23 @@ const PlaceCardsPhase: React.FC<Props> = ({
   }, [roomId, nickname]);
 
   // -----------------------------
+  // カード以外をクリックしたら選択解除
+  // -----------------------------
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (!(e.target instanceof HTMLElement)) return;
+      if (e.target.closest("." + cardStyles.handCard)) {
+        return;
+      }
+      console.log("カードの選択を解除しました。");
+      setActiveCard(null);
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
+
+  // -----------------------------
   // 手札を配り直す
   // -----------------------------
   const handleRedistribute = async () => {
@@ -138,6 +156,8 @@ const PlaceCardsPhase: React.FC<Props> = ({
     const cardData = myCards.find((c) => c.value === activeCard.value);
     if (!cardData) return;
 
+    setActiveCard(null);
+
     const orderRef = ref(db, `rooms/${roomId}/cardOrder`);
     await runTransaction(orderRef, (currentOrder) => {
       const newOrder = Array.isArray(currentOrder) ? [...currentOrder] : [];
@@ -161,8 +181,6 @@ const PlaceCardsPhase: React.FC<Props> = ({
       );
       return updated;
     });
-
-    setActiveCard(null);
   };
 
   // -----------------------------
@@ -251,28 +269,25 @@ const PlaceCardsPhase: React.FC<Props> = ({
       )}
 
       {/* 場のカード */}
-      <div
-        className={`${styles.playedCardsArea}
-          absolute inset-x-0 top-1/2 -translate-y-1/2 flex gap-2 justify-center px-4`}
-        style={{ top: "calc(50% - 4em)" }}
-      >
+      <div className={styles.playedCardsArea}>
+        {/* ゼロ */}
         <div className="flex items-center gap-2">
-          <Card value={0} name="" />
-          {activeCard?.source === "hand" &&
-            !cardOrder.some((c) => c.card === activeCard.value) && (
-              <button
-                className="
+          <Card value={0} location="field" name="" />
+          {activeCard?.source === "hand" && (
+            <button
+              className="
                   flex items-center justify-center gap-0.5
                   text-xs bg-blue-600 text-white px-1 py-3 rounded 
                   hover:bg-blue-500 transition writing-vertical"
-                onClick={() => handleInsertCard(0)}
-              >
-                <ArrowDownCircle className="w-3 h-3 translate-x-[0.05rem]" />
-                ここに出す
-              </button>
-            )}
+              onClick={() => handleInsertCard(0)}
+            >
+              <ArrowDownCircle className="w-3 h-3 translate-x-[0.05rem]" />
+              ここに出す
+            </button>
+          )}
         </div>
 
+        {/* 出されたカード */}
         <AnimatePresence initial={false}>
           {cardOrder.map((entry, index) => {
             const isMine = entry.name === nickname;
@@ -300,6 +315,7 @@ const PlaceCardsPhase: React.FC<Props> = ({
                   revealed={false}
                   isMine={entry.name === nickname}
                   mode="place"
+                  location="field"
                   onClick={
                     isMine ? () => handleRemoveCard(entry.card) : undefined
                   }
@@ -364,10 +380,13 @@ const PlaceCardsPhase: React.FC<Props> = ({
                   key={`hand-${card.value}`}
                   value={card.value}
                   mode="reveal"
+                  location="hand"
                   isActive={activeCard?.value === card.value}
-                  onClick={() =>
-                    setActiveCard({ source: "hand", value: card.value })
-                  }
+                  onClick={(e) => {
+                    console.log("カードを選択しました:", card.value);
+                    e.stopPropagation();
+                    setActiveCard({ source: "hand", value: card.value });
+                  }}
                   editable={true}
                   onEdit={() => setEditingValue(card.value)}
                   onClearHint={() => handleHintSubmit(card.value, "")}

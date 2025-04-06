@@ -10,6 +10,7 @@ import WoodyButton from "@/components/common/WoodyButton";
 import ClickOrTouch from "@/components/common/ClickOrTouch";
 import { updateRoomMaxClearLevel } from "@/utils/levelProgress";
 import { flipSound, successSound, failSound } from "@/utils/sounds";
+import styles from "./PlaceCardsPhase.module.scss";
 
 interface Props {
   roomId: string;
@@ -165,8 +166,8 @@ const RevealCardsPhase: React.FC<Props> = ({
 
       {/* カード配置 */}
       <div
-        className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex gap-2 justify-center px-4"
-        style={{ top: "calc(50% - 4em)" }}
+        className={styles.playedCardsArea}
+        style={{ animation: "none", opacity: 1 }}
       >
         <div className="flex flex-wrap gap-2 justify-center items-start">
           {/* 基準カード */}

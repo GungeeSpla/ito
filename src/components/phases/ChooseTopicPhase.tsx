@@ -328,9 +328,9 @@ const ChooseTopicPhase: React.FC<Props> = ({
                     transition={{ duration: 0.5, ease: "easeOut" }}
                     layout
                     onClick={() => handleVote(t.title)}
-                    className={`ito-topic-card
+                    className={`${styles.topicCard}
                     ${isVoted ? "bg-blue-100 border-blue-500" : "bg-white border-gray-300"} 
-                    ${!hasChosen ? "ito-fadein" : "ito-fadeout"}
+                    ${!hasChosen ? "fadeIn" : "fadeOut"}
                     pb-8 relative bg-white text-black rounded-xl p-4 text-center transition border border-gray-300`}
                     style={{ animationDelay: `${400 + index * 100}ms` }}
                     title="これに投票する"
@@ -350,7 +350,7 @@ const ChooseTopicPhase: React.FC<Props> = ({
                       <div className="flex justify-center">
                         <button
                           title="これにする"
-                          className={styles.forceChoose}
+                          className={styles.forceChooseButton}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleForceChoose(t.title);

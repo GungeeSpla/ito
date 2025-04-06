@@ -69,8 +69,6 @@ body {
   inset: 0;
   pointer-events: none;
   z-index: 0;
-
-  /* 中央は透明、外側に向かって暗くするグラデーション */
   background: radial-gradient(circle at center,
       transparent 60%,
       rgba(0, 0, 0, 0.5) 100%);
@@ -137,68 +135,17 @@ button:focus-visible {
 /* --------------------------------------------
   itoカードのベーススタイル
 -------------------------------------------- */
-.ito-card {
-  filter: drop-shadow(0.2em 0.2em 0.2em rgba(0, 0, 0, 0.5));
-}
-
-.ito-card:hover {
-  filter: drop-shadow(0.5em 0.5em 1em rgba(0, 0, 0, 0.5));
-}
 
 .box-shadow-md {
   box-shadow: 0.2em 0.2em 0.4em rgba(0, 0, 0, 0.8);
 }
 
-.ito-topic-card {
-  background-image: url("/images/topic-bg.jpg");
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
-  border: 1px solid #fdf045;
-  border-top-color: #fff280;
-  border-left-color: #fff280;
-  border-bottom-color: #7d6d00;
-  border-right-color: #7d6d00;
-  cursor: pointer;
-  scale: 100%;
-  box-shadow: 0.2em 0.2em 0.2em rgba(0, 0, 0, 0.5);
-  transition-property: all;
-}
-
-.ito-topic-card.ito-fadein {
-  animation: ito-topic-card-in 500ms ease-out forwards;
-  opacity: 0;
-}
-
-.ito-topic-card.ito-fadeout {}
-
-.ito-topic-card:hover {
-  scale: 102%;
-  box-shadow: 0.5em 0.5em 1em rgba(0, 0, 0, 0.5);
-}
-
-@keyframes ito-topic-card-in {
-  0% {
-    opacity: 0;
-  }
-
-  100% {
-    opacity: 1;
-  }
-}
-
 /* --------------------------------------------
   itoカードの裏面スタイル
 -------------------------------------------- */
-.ito-card-back {
-  background-repeat: no-repeat;
-  background-position: center center;
-  background-size: 100% auto;
-  background-attachment: fixed;
-  border: 0.3em solid white;
-}
 
 /* プレイヤーごとのカード裏面（背景色＋アイコン） */
-.player-ガンジー .ito-card-back {
+/* .player-ガンジー .ito-card-back {
   background-color: #0f8846;
   background-image: url("/images/icon-gungee.png");
 }
@@ -216,7 +163,7 @@ button:focus-visible {
 .player-けんしろ .ito-card-back {
   background-color: #07539f;
   background-image: url("/images/icon-kenshiro.png");
-}
+} */
 
 /* --------------------------------------------
   Tailwindのカスタムユーティリティ：読み込み中アニメーション

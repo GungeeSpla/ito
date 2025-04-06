@@ -2,6 +2,7 @@ import React from "react";
 
 interface NumberSVGProps {
   value: number | "?";
+  className?: string;
 }
 
 const getColorFromValue = (value: number): string => {
@@ -19,12 +20,13 @@ const getColorFromValue = (value: number): string => {
   return colors[index];
 };
 
-const NumberSVG: React.FC<NumberSVGProps> = ({ value }) => {
+const NumberSVG: React.FC<NumberSVGProps> = ({ value, className }) => {
   if (value === "?") value = 0;
   const fillColor = getColorFromValue(value);
 
   return (
     <svg
+      className={className}
       style={{ marginTop: "2.5rem" }}
       width="100"
       height="100"
