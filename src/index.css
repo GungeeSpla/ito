@@ -140,6 +140,25 @@ button:focus-visible {
   box-shadow: 0.2em 0.2em 0.4em rgba(0, 0, 0, 0.8);
 }
 
+.responsive-text {
+  font-size: 0.8rem;
+}
+
+.responsive-text-hand-card {
+  font-size: 1.2rem;
+}
+
+
+@media (min-width: 640px) {
+  .responsive-text {
+    font-size: 1rem;
+  }
+
+  .responsive-text-hand-card {
+    font-size: 1.5rem;
+  }
+}
+
 /* --------------------------------------------
   itoカードの裏面スタイル
 -------------------------------------------- */

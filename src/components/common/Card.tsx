@@ -18,7 +18,6 @@ interface CardProps {
   location?: "hand" | "field";
   onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
   onFlipComplete?: (value: number) => void;
-  editable?: boolean;
   onEdit?: () => void;
   onClearHint?: () => void;
   hint?: string;
@@ -60,7 +59,6 @@ const Card: React.FC<CardProps> = ({
   isMine = false,
   onClick,
   onFlipComplete,
-  editable,
   onEdit,
   onClearHint,
   hint,
@@ -107,11 +105,11 @@ const Card: React.FC<CardProps> = ({
         >
           <div className={styles.dot} />
           {(mode === "reveal" || value === 0) && (
-            <NumberSVG className={styles.number} value={value} />
+            <NumberSVG className={styles.numberSvg} value={value} />
           )}
           {location === "hand" && hint && (
             <div
-              className="absolute w-full text-center top-6 left-1/2 -translate-x-1/2 text-[10px]
+              className="absolute w-full text-center top-6 left-1/2 -translate-x-1/2 text-xs
             text-black bg-opacity-50 px-1"
             >
               {hint}

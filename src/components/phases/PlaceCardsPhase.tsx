@@ -269,7 +269,7 @@ const PlaceCardsPhase: React.FC<Props> = ({
       )}
 
       {/* 場のカード */}
-      <div className={styles.playedCardsArea}>
+      <div className={`${styles.playedCardsArea} responsive-text`}>
         {/* ゼロ */}
         <div className="flex items-center gap-2">
           <Card value={0} location="field" name="" />
@@ -296,15 +296,15 @@ const PlaceCardsPhase: React.FC<Props> = ({
                 key={`${entry.name}-${entry.card}`}
                 initial={{
                   opacity: 0,
-                  translateY: isMine ? "2rem" : "-2rem",
+                  translateY: isMine ? "2em" : "-2em",
                 }}
                 animate={{
                   opacity: 1,
-                  translateY: "0rem",
+                  translateY: "0em",
                 }}
                 exit={{
                   opacity: 0,
-                  translateY: isMine ? "2rem" : "-2rem",
+                  translateY: isMine ? "2em" : "-2em",
                 }}
                 transition={{ duration: 0.2 }}
                 className="flex items-center gap-2"
@@ -337,26 +337,26 @@ const PlaceCardsPhase: React.FC<Props> = ({
             );
           })}
         </AnimatePresence>
-
-        {isHost && allPlaced && (
-          <div className="absolute left-1/2 top-[calc(100%+40px)] -translate-x-1/2">
-            <WoodyButton onClick={proceedToReveal}>
-              <Eye className="w-4 h-4 translate-y-[0.1rem]" />
-              めくりフェーズへ！
-            </WoodyButton>
-          </div>
-        )}
       </div>
+
+      {isHost && allPlaced && (
+        <div
+          className="absolute responsive-text transition duration-200
+            left-1/2 top-1/2 -translate-x-1/2 translate-y-[8em]"
+        >
+          <WoodyButton onClick={proceedToReveal}>
+            <Eye className="w-4 h-4 translate-y-[0.1rem]" />
+            めくりフェーズへ！
+          </WoodyButton>
+        </div>
+      )}
 
       {/* 自分の手札 */}
       <div
-        className={`${styles.handCardsArea}
-        fixed bottom-0 w-full bg-gradient-to-t from-gray-900 to-transparent pt-8 pb-4 z-10`}
+        className={`${styles.handCardsArea} responsive-text w-full overflow-x-auto px-4 pt-8 pb-2 fixed bottom-0 z-10`}
       >
-        <div
-          className="flex flex-wrap gap-2 justify-center scale-150 translate-y-20 transform"
-          style={{ transformOrigin: "bottom" }}
-        >
+        <div className="h-[14em] w-full absolute left-0 bottom-0 bg-gradient-to-t from-gray-900 to-transparent" />
+        <div className="w-max mx-auto flex gap-2 responsive-text-hand-card">
           <AnimatePresence>
             {myCards.map((card) => (
               <motion.div
@@ -387,7 +387,6 @@ const PlaceCardsPhase: React.FC<Props> = ({
                     e.stopPropagation();
                     setActiveCard({ source: "hand", value: card.value });
                   }}
-                  editable={true}
                   onEdit={() => setEditingValue(card.value)}
                   onClearHint={() => handleHintSubmit(card.value, "")}
                   hint={card.hint}

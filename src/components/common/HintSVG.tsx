@@ -8,7 +8,6 @@ interface HintSVGProps {
 const MAX_WIDTH = 100;
 const MAX_HEIGHT = 110;
 const LINE_HEIGHT = 1.2;
-const MAX_LINES = Infinity;
 const MAX_FONT_SIZE = 20;
 const MIN_FONT_SIZE = 1;
 
@@ -106,12 +105,6 @@ const HintSVG: React.FC<HintSVGProps> = ({ text, className }) => {
     </svg>
   );
 };
-
-function measureCharWidth(textEl: SVGTextElement): number {
-  textEl.textContent = "ああああああ"; // 適当な文字列で平均を測る
-  const bbox = textEl.getBBox();
-  return bbox.width / (textEl.textContent?.length || 1);
-}
 
 function breakLinesByMeasurement(
   textEl: SVGTextElement,

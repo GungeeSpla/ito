@@ -12,7 +12,6 @@ const MIN_FONT_SIZE = 1;
 
 const NameSVG: React.FC<NameSVGProps> = ({ text, className }) => {
   const [fontSize, setFontSize] = useState(16);
-  const [startY, setStartY] = useState(0);
 
   useEffect(() => {
     if (!text) return;
@@ -45,7 +44,6 @@ const NameSVG: React.FC<NameSVGProps> = ({ text, className }) => {
 
       if (width <= MAX_WIDTH && height <= MAX_HEIGHT) {
         bestSize = size;
-        setStartY((MAX_HEIGHT - height) / 2); // 中央寄せ
         break;
       }
     }

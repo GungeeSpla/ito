@@ -25,13 +25,7 @@ const NumberSVG: React.FC<NumberSVGProps> = ({ value, className }) => {
   const fillColor = getColorFromValue(value);
 
   return (
-    <svg
-      className={className}
-      style={{ marginTop: "2.5rem" }}
-      width="100"
-      height="100"
-      viewBox="0 0 100 100"
-    >
+    <svg className={className} viewBox="0 0 100 100">
       <defs>
         <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
           <feDropShadow dx="1" dy="1" stdDeviation="0" floodColor="black" />
@@ -40,16 +34,16 @@ const NumberSVG: React.FC<NumberSVGProps> = ({ value, className }) => {
       </defs>
       <text
         x="50"
-        y="50"
-        textAnchor="middle"
-        fontSize="60"
+        y="55"
+        fontSize="50"
         fontWeight="bold"
         fill={fillColor}
         stroke="black"
         strokeWidth="3"
         filter="url(#shadow)"
         paintOrder="stroke"
-        dominantBaseline="top"
+        textAnchor="middle"
+        dominantBaseline="middle"
       >
         {value}
       </text>
