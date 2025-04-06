@@ -19,28 +19,78 @@ function App() {
   // 状態管理
   // -----------------------------
   const [nickname, setNickname] = useState(""); // 入力されたニックネーム
+  const [color, setColor] = useState("#888888"); // ユーザーカラー
+  const [avatarFile, setAvatarFile] = useState<File | null>(null); // プロフィ―ル画像
   const inputRef = useRef<HTMLInputElement>(null); // 初期フォーカス用の参照
 
-  // userInfo が取得できたら nickname を初期化
-  useEffect(() => {
-    if (userInfo?.nickname) {
-      setNickname(userInfo.nickname);
-    }
-  }, [userInfo]);
+  // -----------------------------
+  // プロフィール画像をアップロード・変換する処理
+  // -----------------------------
+  const uploadAvatarImage = async (
+    file: File,
+    userId: string,
+  ): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        img.src = reader.result as string;
+      };
+
+      img.onload = async () => {
+        const canvas = document.createElement("canvas");
+        const size = 256;
+        canvas.width = size;
+        canvas.height = size;
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return reject("Canvas unsupported");
+
+        ctx.clearRect(0, 0, size, size);
+
+        const ratio = Math.min(size / img.width, size / img.height);
+        const x = (size - img.width * ratio) / 2;
+        const y = (size - img.height * ratio) / 2;
+
+        ctx.drawImage(img, x, y, img.width * ratio, img.height * ratio);
+
+        canvas.toBlob(async (blob) => {
+          if (!blob) return reject("Blob generation failed");
+
+          const formData = new FormData();
+          formData.append("avatar", blob, `${userId}.png`);
+          formData.append("userId", userId);
+
+          try {
+            const res = await fetch("https://ito.gungee.jp/upload.php", {
+              method: "POST",
+              body: formData,
+            });
+
+            const data = await res.json();
+            if (data.success && data.url) {
+              resolve(data.url);
+            } else {
+              reject("Upload failed: " + data.message);
+            }
+          } catch (err) {
+            reject("Upload error: " + err);
+          }
+        }, "image/png");
+      };
+
+      reader.onerror = (err) => reject(err);
+      reader.readAsDataURL(file);
+    });
+  };
 
   // -----------------------------
   // ルーム作成処理
   // -----------------------------
   const createRoom = async () => {
     try {
-      console.log("🏁 createRoom: start");
-
-      if (!nickname.trim()) {
-        toastWithAnimation("ニックネームを入力してください。", {
-          type: "error",
-        });
-        return;
-      }
+      console.log("createRoom: start");
 
       if (!userId) {
         toastWithAnimation("ユーザーIDが取得できませんでした。", {
@@ -49,11 +99,25 @@ function App() {
         return;
       }
 
+      let avatarUrl = "";
+      if (avatarFile) {
+        try {
+          avatarUrl = await uploadAvatarImage(avatarFile, userId);
+        } catch (e) {
+          console.warn("画像アップロードに失敗しました", e);
+          toastWithAnimation("画像のアップロードに失敗しました。", {
+            type: "warn",
+          });
+        }
+      }
+
       // 必要なときだけユーザーを登録
       await ensureUserExists();
 
       // nickname 更新
-      await updateUserInfo({ nickname });
+      const updateData: any = { nickname, color };
+      if (avatarUrl) updateData.avatarUrl = avatarUrl;
+      await updateUserInfo(updateData);
 
       // 再取得（userInfo は非同期更新されるので注意）
       const snap = await get(ref(db, `users/${userId}`));
@@ -105,7 +169,7 @@ function App() {
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
-  
+
   useEffect(() => {
     if (userInfo?.nickname) {
       setNickname(userInfo.nickname);
@@ -136,13 +200,14 @@ function App() {
           bg-white/70 backdrop-blur-sm text-black p-6 my-6 rounded-xl shadow-md
           w-full max-w-md animate-fade-in relative mx-auto"
         >
-          {/* 入力フォーム（ニックネーム + 送信ボタン） */}
+          {/* 入力フォーム */}
           <form
             onSubmit={(e) => {
               e.preventDefault();
               createRoom();
             }}
           >
+            {/* ニックネーム */}
             <input
               ref={inputRef}
               type="text"
@@ -152,6 +217,30 @@ function App() {
               className="w-full p-2 border border-gray-600 bg-white text-black rounded mb-4 text-center
               placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
             />
+
+            {/* ユーザーカラー */}
+            <div className="mt-2 flex items-center gap-2">
+              <label className="text-sm">カラー:</label>
+              <input
+                type="color"
+                value={color}
+                onChange={(e) => setColor(e.target.value)}
+                className="w-8 h-8 p-0 border-none bg-transparent"
+              />
+            </div>
+
+            {/* アバター画像 */}
+            <div className="mt-2">
+              <label className="text-sm block mb-1">
+                プロフィール画像 (任意)
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setAvatarFile(e.target.files?.[0] || null)}
+              />
+            </div>
+
             <button
               type="submit"
               disabled={!nickname.trim()}

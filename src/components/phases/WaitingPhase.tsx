@@ -14,7 +14,6 @@ import { useUser } from "@/hooks/useUser";
 interface WaitingPhaseProps {
   roomId: string;
   players: Record<string, PlayerInfo>;
-  nickname: string;
   host: string;
   alreadyJoined: boolean;
   newNickname: string;
@@ -38,7 +37,6 @@ interface WaitingPhaseProps {
 const WaitingPhase: React.FC<WaitingPhaseProps> = ({
   roomId,
   players,
-  nickname,
   host,
   alreadyJoined,
   newNickname,

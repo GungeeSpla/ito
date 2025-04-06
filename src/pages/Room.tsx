@@ -274,7 +274,6 @@ const Room = () => {
       <WaitingPhase
         roomId={safeRoomId}
         players={players}
-        nickname={userInfo.nickname}
         host={host}
         alreadyJoined={alreadyJoined}
         newNickname={newNickname}
