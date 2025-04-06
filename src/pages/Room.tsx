@@ -24,6 +24,7 @@ import DealCardsPhase from "@/components/phases/DealCardsPhase";
 import PlaceCardsPhase from "@/components/phases/PlaceCardsPhase";
 import RevealCardsPhase from "@/components/phases/RevealCardsPhase";
 import { useDealCards } from "@/hooks/useDealCards";
+import { useJoinRoom } from "@/hooks/useJoinRoom";
 
 // --------------------------------------------
 // ルーム画面（/room/:roomId）
@@ -32,25 +33,9 @@ import { useDealCards } from "@/hooks/useDealCards";
 const Room = () => {
   const navigate = useNavigate();
   const { roomId } = useParams<{ roomId: string }>();
-  const { userId, userInfo, updateUserInfo } = useUser();
-
-  useEffect(() => {
-    if (!roomId) {
-      navigate("/", { replace: true });
-    }
-  }, [roomId, navigate]);
-
+  const { userId, userInfo, ensureUserExists } = useUser();
   if (!roomId) return null;
-
-  const safeRoomId = roomId;
-
-  // ローカルストレージからニックネームを取得
-  const storedNickname = localStorage.getItem("nickname") || "";
-
-  // -----------------------------
-  // 状態管理
-  // -----------------------------
-  const [nickname, setNickname] = useState(storedNickname);
+  const safeRoomId = roomId ?? "";
   const [newNickname, setNewNickname] = useState("");
   const [players, setPlayers] = useState<Record<string, PlayerInfo>>({});
   const [host, setHost] = useState("");
@@ -60,10 +45,34 @@ const Room = () => {
     "normal" | "rainbow" | "classic" | "salmon" | "custom"
   >("rainbow");
   const [level, setLevel] = useState<number>(1);
-  const alreadyJoined = !!players[userId];
   const isHost = userId === host;
   const [cardOrder, setCardOrder] = useState<CardEntry[]>([]);
   const [customTopics, setCustomTopics] = useState<Topic[]>([]);
+  useEffect(() => {
+    if (userId) {
+      ensureUserExists();
+    }
+  }, [userId]);
+  const { joinRoom, alreadyJoined } = useJoinRoom({
+    roomId: safeRoomId,
+    userId,
+    userInfo: {
+      ...userInfo,
+      nickname: userInfo?.nickname ?? "名無しさん",
+      color: userInfo?.color ?? "",
+      avatarUrl: userInfo?.avatarUrl ?? "",
+      joinedAt: Date.now(),
+    },
+    players,
+    setPlayers,
+    setHost,
+  });
+
+  useEffect(() => {
+    if (!roomId) {
+      navigate("/", { replace: true });
+    }
+  }, [roomId, navigate]);
 
   // お題の再抽選
   const onRefreshTopics = async () => {
@@ -147,52 +156,6 @@ const Room = () => {
   useDealCards({ phase, isHost, players, roomId: safeRoomId, level });
 
   // -----------------------------
-  // プレイヤー参加処理（ニックネームを登録）
-  // -----------------------------
-  const addPlayer = () => {
-    // 更新にはユーザーID、ユーザー情報の両方が必要
-    if (!userInfo || !userId) return;
-
-    // if (!newNickname.trim()) {
-    //   toastWithAnimation("ニックネームを入力してください。", {
-    //     type: "warn",
-    //   });
-    //   return;
-    // }
-    // if (players[newNickname]) {
-    //   toastWithAnimation("この名前はすでに使われています。", {
-    //     type: "warn",
-    //   });
-    //   return;
-    // }
-    // const updatedPlayers = {
-    //   ...players,
-    //   [newNickname]: true,
-    // };
-
-    const roomRef = ref(db, `rooms/${safeRoomId}`);
-    const newPlayer = {
-      nickname: userInfo.nickname,
-      color: userInfo.color,
-      avatarUrl: userInfo.avatarUrl,
-      joinedAt: Date.now(),
-    };
-    const updatedPlayers = {
-      ...players,
-      [userId]: newPlayer,
-    };
-
-    set(roomRef, {
-      host: host || userId,
-      players: updatedPlayers,
-      phase: "waiting",
-    }).then(() => {
-      localStorage.setItem("nickname", newNickname);
-      setNickname(userInfo.nickname);
-    });
-  };
-
-  // -----------------------------
   // ゲーム開始（ホストのみ可能）
   // -----------------------------
   const startGame = async () => {
@@ -270,7 +233,7 @@ const Room = () => {
   // 部屋を退出する
   // -----------------------------
   const leaveRoom = () => {
-    if (!nickname || !safeRoomId) return;
+    if (!userInfo || !userInfo.nickname || !safeRoomId) return;
 
     const playerRef = ref(db, `rooms/${safeRoomId}/players/${userId}`);
     remove(playerRef).then(() => {
@@ -293,6 +256,16 @@ const Room = () => {
       </div>
     );
 
+  if (!userId || !userInfo) {
+    return (
+      <div className="flex items-center justify-center h-screen text-white">
+        <span className="text-xl font-semibold animate-pulse-dots">
+          ユーザー情報を取得中
+        </span>
+      </div>
+    );
+  }
+
   // -----------------------------
   // 各フェーズごとに表示を切り替え
   // -----------------------------
@@ -301,12 +274,12 @@ const Room = () => {
       <WaitingPhase
         roomId={safeRoomId}
         players={players}
-        nickname={nickname}
+        nickname={userInfo.nickname}
         host={host}
         alreadyJoined={alreadyJoined}
         newNickname={newNickname}
         setNewNickname={setNewNickname}
-        addPlayer={addPlayer}
+        addPlayer={(nickname) => joinRoom(nickname)}
         selectedSet={selectedSet}
         setSelectedSet={setSelectedSet}
         setLevel={setLevel}
@@ -337,7 +310,8 @@ const Room = () => {
     return (
       <PlaceCardsPhase
         roomId={safeRoomId}
-        nickname={nickname}
+        userId={userInfo.userId}
+        nickname={userInfo.nickname}
         cardOrder={cardOrder}
         setCardOrder={setCardOrder}
       />
@@ -348,7 +322,8 @@ const Room = () => {
     return (
       <RevealCardsPhase
         roomId={safeRoomId}
-        nickname={nickname}
+        userId={userId}
+        nickname={userInfo.nickname}
         cardOrder={cardOrder}
         level={level}
       />

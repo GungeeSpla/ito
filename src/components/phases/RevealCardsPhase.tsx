@@ -14,6 +14,7 @@ import styles from "./PlaceCardsPhase.module.scss";
 
 interface Props {
   roomId: string;
+  userId: string;
   nickname: string;
   cardOrder: CardEntry[];
   level: number;
@@ -21,6 +22,7 @@ interface Props {
 
 const RevealCardsPhase: React.FC<Props> = ({
   roomId,
+  userId,
   nickname,
   cardOrder,
   level,
@@ -54,12 +56,12 @@ const RevealCardsPhase: React.FC<Props> = ({
   useEffect(() => {
     const hostRef = ref(db, `rooms/${roomId}/host`);
     const unsub = onValue(hostRef, (snap) => {
-      if (snap.exists() && snap.val() === nickname) {
+      if (snap.exists() && snap.val() === userId) {
         setIsHost(true);
       }
     });
     return () => unsub();
-  }, [roomId, nickname]);
+  }, [roomId, userId, nickname]);
 
   useEffect(() => {
     const revealedRef = ref(db, `rooms/${roomId}/revealedCards`);
@@ -212,17 +214,20 @@ const RevealCardsPhase: React.FC<Props> = ({
             </div>
           )}
         </div>
-
-        {/* ロビーに戻るボタン */}
-        {isHost && isComplete && (
-          <div className="absolute left-1/2 top-[calc(100%+7rem)] -translate-x-1/2">
-            <WoodyButton onClick={resetGame}>
-              <Home className="w-4 h-4 translate-y-[0.05rem]" />
-              ロビーに戻る
-            </WoodyButton>
-          </div>
-        )}
       </div>
+
+      {/* ロビーに戻るボタン */}
+      {isHost && isComplete && (
+        <div
+          className="absolute responsive-text transition duration-200
+      left-1/2 top-1/2 -translate-x-1/2 translate-y-[8em]"
+        >
+          <WoodyButton onClick={resetGame}>
+            <Home className="w-4 h-4 translate-y-[0.05rem]" />
+            ロビーに戻る
+          </WoodyButton>
+        </div>
+      )}
 
       {/* ✅ 成功演出 */}
       {status === "success" && <EmojiBurst />}

@@ -110,7 +110,7 @@ const Card: React.FC<CardProps> = ({
           {location === "hand" && hint && (
             <div
               className="absolute w-full text-center top-6 left-1/2 -translate-x-1/2 text-xs
-            text-black bg-opacity-50 px-1"
+            text-black bg-opacity-50 px-1 break-all"
             >
               {hint}
             </div>

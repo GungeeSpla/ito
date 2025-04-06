@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
 import { ref, get, set, update } from "firebase/database";
 import { db } from "@/firebase";
+import { UserInfo } from "@/types/User";
 
 const LOCAL_STORAGE_KEY = "userId";
 
-const generateUserId = () => {
-  return crypto.randomUUID(); // またはハッシュ化でもOK
-};
+const generateUserId = () => crypto.randomUUID();
 
 export const useUser = () => {
   const [userId, setUserId] = useState<string>("");
-  const [userInfo, setUserInfo] = useState<any>(null);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
+  // userIdだけ生成＆記録（登録まではしない！）
   useEffect(() => {
     let id = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (!id) {
@@ -19,45 +19,65 @@ export const useUser = () => {
       localStorage.setItem(LOCAL_STORAGE_KEY, id);
     }
     setUserId(id);
+  }, []);
 
-    const userRef = ref(db, `users/${id}`);
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (!userId) return;
 
-    get(userRef).then((snap) => {
+      const userRef = ref(db, `users/${userId}`);
       const now = Date.now();
 
+      const snap = await get(userRef);
       if (snap.exists()) {
         const existing = snap.val();
         setUserInfo(existing);
-
-        // lastActive 更新だけしておく
-        update(userRef, { lastActive: now });
-      } else {
-        // 初回登録
-        const newUser = {
-          userId: id,
-          nickname: "名無しの勇者",
-          color: "#888888",
-          avatarUrl: "",
-          createdAt: now,
-          lastActive: now,
-        };
-        set(userRef, newUser);
-        setUserInfo(newUser);
+        await update(userRef, { lastActive: now });
       }
-    });
-  }, []);
+    };
+
+    fetchUser();
+  }, [userId]);
+
+  // 必要になったら手動でユーザー登録
+  const ensureUserExists = async () => {
+    if (!userId) return;
+
+    const userRef = ref(db, `users/${userId}`);
+    const now = Date.now();
+
+    const snap = await get(userRef);
+    if (snap.exists()) {
+      const existing = snap.val();
+      setUserInfo(existing);
+      await update(userRef, { lastActive: now });
+    } else {
+      const newUser: UserInfo = {
+        userId,
+        nickname: "名無しさん",
+        color: "",
+        avatarUrl: "",
+        createdAt: now,
+        lastActive: now,
+      };
+      await set(userRef, newUser);
+      setUserInfo(newUser);
+    }
+  };
 
   const updateUserInfo = async (
-    data: Partial<Omit<any, "userId" | "createdAt">>,
+    data: Partial<Omit<UserInfo, "userId" | "createdAt">>,
   ) => {
     const userRef = ref(db, `users/${userId}`);
     await update(userRef, data);
-    setUserInfo((prev: any) => ({ ...prev, ...data }));
+    setUserInfo((prev) => ({ ...prev!, ...data }));
   };
 
   return {
     userId,
     userInfo,
+    setUserInfo,
+    ensureUserExists,
     updateUserInfo,
   };
 };

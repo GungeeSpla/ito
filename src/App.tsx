@@ -1,17 +1,19 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { db } from "@/firebase";
-import { ref, set } from "firebase/database";
+import { ref, set, get } from "firebase/database";
 import { generateUniqueRoomId } from "@/utils/generateRoomId";
 import { Rocket } from "lucide-react";
 import { toastWithAnimation } from "@/utils/toast";
 import NoticeGame from "@/components/common/NoticeGame";
+import { useUser } from "@/hooks/useUser";
 
 // ----------------------------------------
 // トップページコンポーネント：ルーム作成画面
 // ----------------------------------------
 function App() {
   const navigate = useNavigate(); // 画面遷移用フック（React Router）
+  const { userId, userInfo, updateUserInfo, ensureUserExists } = useUser();
 
   // -----------------------------
   // 状態管理
@@ -19,52 +21,96 @@ function App() {
   const [nickname, setNickname] = useState(""); // 入力されたニックネーム
   const inputRef = useRef<HTMLInputElement>(null); // 初期フォーカス用の参照
 
+  // userInfo が取得できたら nickname を初期化
+  useEffect(() => {
+    if (userInfo?.nickname) {
+      setNickname(userInfo.nickname);
+    }
+  }, [userInfo]);
+
   // -----------------------------
   // ルーム作成処理
   // -----------------------------
   const createRoom = async () => {
-    if (!nickname.trim()) {
-      toastWithAnimation("ニックネームを入力してください。", {
-        type: "error",
+    try {
+      console.log("🏁 createRoom: start");
+
+      if (!nickname.trim()) {
+        toastWithAnimation("ニックネームを入力してください。", {
+          type: "error",
+        });
+        return;
+      }
+
+      if (!userId) {
+        toastWithAnimation("ユーザーIDが取得できませんでした。", {
+          type: "error",
+        });
+        return;
+      }
+
+      // 必要なときだけユーザーを登録
+      await ensureUserExists();
+
+      // nickname 更新
+      await updateUserInfo({ nickname });
+
+      // 再取得（userInfo は非同期更新されるので注意）
+      const snap = await get(ref(db, `users/${userId}`));
+      const info = snap.val();
+
+      if (!info) {
+        toastWithAnimation("ユーザー情報が取得できませんでした。", {
+          type: "error",
+        });
+        return;
+      }
+
+      // 重複しないランダムなルームIDを生成
+      const roomId = await generateUniqueRoomId();
+
+      const newPlayer = {
+        nickname: info.nickname,
+        color: info.color,
+        avatarUrl: info.avatarUrl,
+        joinedAt: Date.now(),
+      };
+
+      // Firebase Realtime Database にルーム情報を登録
+      await set(ref(db, `rooms/${roomId}`), {
+        host: userId,
+        players: {
+          [userId]: newPlayer,
+        },
+        phase: "waiting",
       });
-      return;
+
+      setTimeout(() => {
+        toastWithAnimation("ルームを作成しました！", { type: "success" });
+        navigate(`/room/${roomId}`);
+        console.log("✅ createRoom: success", {
+          nickname: info.nickname,
+          roomId,
+        });
+      }, 300);
+    } catch (err) {
+      console.error("❌ createRoom error", err);
+      toastWithAnimation("ルームの作成に失敗しました。", { type: "error" });
     }
-
-    // 重複しないランダムなルームIDを生成
-    const roomId = await generateUniqueRoomId();
-
-    // Firebase Realtime Database にルーム情報を登録
-    await set(ref(db, `rooms/${roomId}`), {
-      host: nickname,
-      players: {
-        [nickname]: true,
-      },
-      phase: "waiting", // ゲームフェーズ初期値
-    });
-
-    // ローカルストレージにニックネーム保存（次回の自動入力用）
-    localStorage.setItem("nickname", nickname);
-
-    // フェードアウト → 画面遷移（アニメーションと同期）
-    setTimeout(() => {
-      toastWithAnimation("ルームを作成しました！", {
-        type: "success",
-      });
-      console.log("ルームを作成しました。");
-      console.log("ニックネーム:", nickname);
-      console.log("ルームID:", roomId);
-      navigate(`/room/${roomId}`);
-    }, 300); // CSS側のdurationに合わせてる
   };
 
   // -----------------------------
   // 初期処理：前回のニックネーム復元＋フォーカス
   // -----------------------------
   useEffect(() => {
-    const savedName = localStorage.getItem("nickname");
-    if (savedName) setNickname(savedName); // 初期値としてセット
-    inputRef.current?.focus(); // 入力欄にフォーカス
+    inputRef.current?.focus();
   }, []);
+  
+  useEffect(() => {
+    if (userInfo?.nickname) {
+      setNickname(userInfo.nickname);
+    }
+  }, [userInfo]);
 
   // -----------------------------
   // UI描画

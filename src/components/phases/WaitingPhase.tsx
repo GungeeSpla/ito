@@ -19,7 +19,7 @@ interface WaitingPhaseProps {
   alreadyJoined: boolean;
   newNickname: string;
   setNewNickname: (name: string) => void;
-  addPlayer: () => void;
+  addPlayer: (nickname: string) => void;
   selectedSet: string;
   setSelectedSet: React.Dispatch<
     React.SetStateAction<"normal" | "rainbow" | "classic" | "salmon" | "custom">
@@ -57,6 +57,7 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
   const [customPromptText, setCustomPromptText] = useState("");
   const [maxClearLevel, setMaxClearLevel] = useState(1);
   const { userId } = useUser();
+  const { userInfo, updateUserInfo } = useUser();
 
   // 最大クリアレベルを取得
   useEffect(() => {
@@ -101,13 +102,17 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
   }, []);
 
   // -----------------------------
-  // 初回マウント時にローカルのニックネームを自動復元
+  // 初期処理：前回のニックネーム復元＋フォーカス
   // -----------------------------
   useEffect(() => {
-    const savedName = localStorage.getItem("nickname");
-    if (savedName) setNewNickname(savedName);
     inputRef.current?.focus();
   }, []);
+
+  useEffect(() => {
+    if (userInfo?.nickname) {
+      setNewNickname(userInfo.nickname);
+    }
+  }, [userInfo]);
 
   // -----------------------------
   // 現在のページURLをクリップボードにコピー
@@ -119,7 +124,16 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
     });
   };
 
-  const isHost = nickname === host; // ホスト判定
+  const handleJoin = async () => {
+    if (!userInfo) return;
+    if (!newNickname.trim()) return;
+    if (userInfo.nickname !== newNickname) {
+      await updateUserInfo({ nickname: newNickname });
+    }
+    await addPlayer(newNickname);
+  };
+
+  const isHost = userId === host; // ホスト判定
 
   // -----------------------------
   // UI描画
@@ -215,7 +229,7 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                addPlayer();
+                handleJoin();
               }}
               className="mb-4"
             >

@@ -17,6 +17,7 @@ import cardStyles from "@/components/common/Card.module.scss";
 // -----------------------------
 interface Props {
   roomId: string;
+  userId: string;
   nickname: string;
   cardOrder: CardEntry[];
   setCardOrder: (v: CardEntry[]) => void;
@@ -24,6 +25,7 @@ interface Props {
 
 const PlaceCardsPhase: React.FC<Props> = ({
   roomId,
+  userId,
   nickname,
   cardOrder,
   setCardOrder,
@@ -59,7 +61,7 @@ const PlaceCardsPhase: React.FC<Props> = ({
   // Firebase購読系（初期化時）
   // -----------------------------
   useEffect(() => {
-    const cardRef = ref(db, `rooms/${roomId}/cards/${nickname}`);
+    const cardRef = ref(db, `rooms/${roomId}/cards/${userId}`);
     get(cardRef).then((snap) => {
       if (snap.exists()) {
         const data = snap.val();
@@ -89,7 +91,7 @@ const PlaceCardsPhase: React.FC<Props> = ({
 
     const hostRef = ref(db, `rooms/${roomId}/host`);
     get(hostRef).then((snap) => {
-      if (snap.exists() && snap.val() === nickname) {
+      if (snap.exists() && snap.val() === userId) {
         setIsHost(true);
       }
     });
@@ -174,7 +176,7 @@ const PlaceCardsPhase: React.FC<Props> = ({
 
     setMyCards((prev) => {
       const updated = prev.filter((c) => c.value !== activeCard.value);
-      const cardRef = ref(db, `rooms/${roomId}/cards/${nickname}`);
+      const cardRef = ref(db, `rooms/${roomId}/cards/${userId}`);
       set(
         cardRef,
         updated.map((v) => ({ value: v.value, hint: v.hint || "" })),
@@ -205,7 +207,7 @@ const PlaceCardsPhase: React.FC<Props> = ({
 
     setMyCards((prev) => {
       const updated = [...prev, { value: cardToRemove, hint: hintToRestore }];
-      const cardRef = ref(db, `rooms/${roomId}/cards/${nickname}`);
+      const cardRef = ref(db, `rooms/${roomId}/cards/${userId}`);
       set(
         cardRef,
         updated.map((v) => ({ value: v.value, hint: v.hint || "" })),
@@ -353,7 +355,7 @@ const PlaceCardsPhase: React.FC<Props> = ({
 
       {/* 自分の手札 */}
       <div
-        className={`${styles.handCardsArea} responsive-text w-full overflow-x-auto px-4 pt-8 pb-2 fixed bottom-0 z-10`}
+        className={`${styles.handCardsArea} responsive-text w-full overflow-x-auto pointer-events-none px-4 pt-28 pb-2 fixed bottom-0 z-10`}
       >
         <div className="h-[14em] w-full absolute left-0 bottom-0 bg-gradient-to-t from-gray-900 to-transparent" />
         <div className="w-max mx-auto flex gap-2 responsive-text-hand-card">
@@ -361,6 +363,7 @@ const PlaceCardsPhase: React.FC<Props> = ({
             {myCards.map((card) => (
               <motion.div
                 key={`hand-motion-${card.value}`}
+                className="pointer-events-auto"
                 layout
                 initial={{
                   translateY: "-2rem",
