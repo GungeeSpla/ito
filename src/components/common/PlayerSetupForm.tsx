@@ -54,7 +54,7 @@ const PlayerSetupForm: React.FC<Props> = ({
     >
       {/* ---ニックネーム--- */}
       <div>
-        <SectionTitle>ニックネーム</SectionTitle>
+        <SectionTitle className="mt-0">ニックネーム</SectionTitle>
         <input
           ref={inputRef}
           type="text"

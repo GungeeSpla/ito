@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Crown, PlayIcon, LogOut, UserPlus, Copy } from "lucide-react";
+import { Crown, PlayIcon, LogOut, XCircle, Copy } from "lucide-react";
 import { Topic } from "@/types/Topic";
 import { getRoomMaxClearLevel } from "@/utils/levelProgress";
 import WoodyButton from "@/components/common/WoodyButton";
@@ -7,6 +7,8 @@ import { toastWithAnimation } from "@/utils/toast";
 import NoticeGame from "@/components/common/NoticeGame";
 import { PlayerInfo } from "@/types/Player";
 import { useUser } from "@/hooks/useUser";
+import PlayerSetupForm from "@/components/common/PlayerSetupForm";
+import SectionTitle from "@/components/common/SectionTitle";
 
 // -----------------------------
 // Props 型定義
@@ -16,8 +18,6 @@ interface WaitingPhaseProps {
   players: Record<string, PlayerInfo>;
   host: string;
   alreadyJoined: boolean;
-  newNickname: string;
-  setNewNickname: (name: string) => void;
   addPlayer: (nickname: string) => void;
   selectedSet: string;
   setSelectedSet: React.Dispatch<
@@ -39,8 +39,6 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
   players,
   host,
   alreadyJoined,
-  newNickname,
-  setNewNickname,
   addPlayer,
   selectedSet,
   setSelectedSet,
@@ -56,6 +54,31 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
   const [maxClearLevel, setMaxClearLevel] = useState(1);
   const { userId } = useUser();
   const { userInfo, updateUserInfo } = useUser();
+  const [nickname, setNickname] = useState("");
+  const [color, setColor] = useState("#EF4444");
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [userAvatarUrl, setUserAvatarUrl] = useState("");
+  const [showOptions, setShowOptions] = useState(() => {
+    return localStorage.getItem("showOptions") === "true";
+  });
+  const [joinLoading, setJoinLoading] = useState(false);
+  const presetColors = [
+    "#EF4444",
+    "#F97316",
+    "#EAB308",
+    "#22C55E",
+    "#14B8A6",
+    "#06B6D4",
+    "#3B82F6",
+    "#8B5CF6",
+    "#EC4899",
+    "#7F1D1D",
+    "#5C4033",
+    "#064E3B",
+    "#1E3A8A",
+    "#4C1D95",
+    "#475569",
+  ];
 
   // 最大クリアレベルを取得
   useEffect(() => {
@@ -107,8 +130,10 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
   }, []);
 
   useEffect(() => {
-    if (userInfo?.nickname) {
-      setNewNickname(userInfo.nickname);
+    if (userInfo) {
+      if (userInfo.nickname) setNickname(userInfo.nickname);
+      if (userInfo.color) setColor(userInfo.color);
+      if (userInfo.avatarUrl) setUserAvatarUrl(userInfo.avatarUrl);
     }
   }, [userInfo]);
 
@@ -122,13 +147,92 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
     });
   };
 
+  // -----------------------------
+  // プロフィール画像をアップロード・変換する処理
+  // -----------------------------
+  const uploadAvatarImage = async (
+    file: File,
+    userId: string,
+  ): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        img.src = reader.result as string;
+      };
+
+      img.onload = async () => {
+        const canvas = document.createElement("canvas");
+        const size = 256;
+        canvas.width = size;
+        canvas.height = size;
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return reject("Canvas unsupported");
+
+        ctx.clearRect(0, 0, size, size);
+
+        const ratio = Math.min(size / img.width, size / img.height);
+        const x = (size - img.width * ratio) / 2;
+        const y = (size - img.height * ratio) / 2;
+
+        ctx.drawImage(img, x, y, img.width * ratio, img.height * ratio);
+
+        canvas.toBlob(async (blob) => {
+          if (!blob) return reject("Blob generation failed");
+
+          const formData = new FormData();
+          formData.append("avatar", blob, `${userId}.png`);
+          formData.append("userId", userId);
+
+          try {
+            const res = await fetch("https://ito.gungee.jp/upload-avatar.php", {
+              method: "POST",
+              body: formData,
+            });
+
+            const data = await res.json();
+            if (data.success && data.url) {
+              resolve(data.url);
+            } else {
+              reject("Upload failed: " + data.message);
+            }
+          } catch (err) {
+            reject("Upload error: " + err);
+          }
+        }, "image/png");
+      };
+
+      reader.onerror = (err) => reject(err);
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleJoin = async () => {
-    if (!userInfo) return;
-    if (!newNickname.trim()) return;
-    if (userInfo.nickname !== newNickname) {
-      await updateUserInfo({ nickname: newNickname });
+    if (!userInfo || !nickname.trim()) return;
+    setJoinLoading(true);
+
+    try {
+      let avatarUrl = userAvatarUrl;
+      if (avatarFile) {
+        try {
+          avatarUrl = await uploadAvatarImage(avatarFile, userId);
+        } catch (e) {
+          console.warn("画像アップロードに失敗しました", e);
+          toastWithAnimation("画像のアップロードに失敗しました。", {
+            type: "warn",
+          });
+        }
+      }
+
+      await updateUserInfo({ nickname, color, avatarUrl });
+      await addPlayer(nickname);
+    } catch (e) {
+      toastWithAnimation("参加に失敗しました", { type: "error" });
+    } finally {
+      setJoinLoading(false);
     }
-    await addPlayer(newNickname);
   };
 
   const isHost = userId === host; // ホスト判定
@@ -182,75 +286,63 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
         {/*-------- 設定画面 --------*/}
         <div
           className="
-          bg-white/70 backdrop-blur-sm text-black p-6 my-6 rounded-xl shadow-md
+          bg-black/70 backdrop-blur-sm text-white p-6 my-6 rounded-md shadow-md
           w-full max-w-md animate-fade-in relative mx-auto"
         >
           {/* プレイヤー一覧 */}
           <div className="mb-4">
-            <div className="flex items-center gap-2 mb-2">
-              <p className="bg-white text-black text-xs px-2 py-1 rounded mx-auto">
-                参加者一覧
-              </p>
-            </div>
-            <ul className="space-y-1">
-              {Object.entries(players).map(([id, player]) => (
-                <li key={id} className="text-sm">
-                  {player.nickname}
-                  {id === host && (
-                    <Crown
-                      size={16}
-                      className="inline text-yellow-700 ml-1 relative -top-0.5"
-                    />
-                  )}
-                  <span className="text-black text-xs">
-                    {id === userId && "（You）"}
-                  </span>
-                  {isHost && id !== host && (
-                    <span className="text-xs">
-                      （
-                      <button
-                        onClick={() => removePlayer(id)}
-                        className="text-red-600 text-xs hover:underline cursor-pointer p-0 bg-transparent border-none"
-                      >
-                        追放
-                      </button>
-                      ）
+            <SectionTitle className="mt-0">参加者一覧</SectionTitle>
+            <ul className="grid grid-cols-2 gap-y-2 text-left">
+              {Object.entries(players)
+                .sort(([, a], [, b]) => (a.joinedAt ?? 0) - (b.joinedAt ?? 0)) // ←ここで参加順ソート
+                .map(([id, player]) => (
+                  <li key={id} className="text-sm">
+                    {player.nickname}
+                    {id === host && (
+                      <Crown
+                        size={16}
+                        className="inline text-yellow-700 ml-1 relative top-[-0.05rem]"
+                      />
+                    )}
+                    <span className="text-black text-xs">
+                      {id === userId && "（You）"}
                     </span>
-                  )}
-                </li>
-              ))}
+                    {isHost && id !== host && (
+                      <span
+                        onClick={() => removePlayer(id)}
+                        title={`${player.nickname} をキック`}
+                      >
+                        <XCircle
+                          size={16}
+                          className="cursor-pointer inline text-red-600 hover:text-red-400 ml-1 relative top-[-0.05rem]"
+                        />
+                      </span>
+                    )}
+                  </li>
+                ))}
             </ul>
           </div>
 
           {/* 参加フォーム or メッセージ */}
           {!alreadyJoined && (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleJoin();
-              }}
-              className="mb-4"
-            >
-              <input
-                ref={inputRef}
-                type="text"
-                value={newNickname}
-                onChange={(e) => setNewNickname(e.target.value)}
-                placeholder="ニックネームを入力"
-                className="w-full p-2 border border-gray-700 bg-white text-black rounded
-                mb-2 text-center placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+            <div className="mb-4">
+              <PlayerSetupForm
+                mode="join"
+                nickname={nickname}
+                setNickname={setNickname}
+                color={color}
+                setColor={setColor}
+                avatarFile={avatarFile}
+                setAvatarFile={setAvatarFile}
+                onSubmit={handleJoin}
+                loading={joinLoading}
+                showOptions={showOptions}
+                setShowOptions={setShowOptions}
+                presetColors={presetColors}
+                userAvatarUrl={userAvatarUrl}
+                setUserAvatarUrl={setUserAvatarUrl}
               />
-              <button
-                type="submit"
-                disabled={!newNickname.trim()}
-                className="flex items-center justify-center gap-1.5
-                w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-500 transition
-                disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <UserPlus className="w-4 h-4" />
-                参加する
-              </button>
-            </form>
+            </div>
           )}
 
           {/* ホスト用設定UI */}
@@ -258,7 +350,7 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
             <div className="space-y-4">
               {/* お題セット選択 */}
               <div>
-                <label className="block mb-1">お題セット</label>
+                <SectionTitle>お題セット</SectionTitle>
                 <select
                   value={selectedSet}
                   onChange={(e) =>
@@ -300,7 +392,7 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
 
               {/* レベル選択 */}
               <div>
-                <label className="block mb-1">レベル</label>
+                <SectionTitle>レベル</SectionTitle>
                 <select
                   value={level}
                   onChange={(e) => setLevel(Number(e.target.value))}

@@ -40,7 +40,7 @@ const NoticeGame: React.FC = () => {
           itoレインボーのルールは説明しませんので、既プレイの方や実物をお持ちの方と一緒に遊んでくださいませ。
         </li>
       </ul>
-      <div className="text-center">
+      <div className="text-center mt-2">
         <AppVersion />
       </div>
     </div>
