@@ -3,10 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { db } from "@/firebase";
 import { ref, set, get } from "firebase/database";
 import { generateUniqueRoomId } from "@/utils/generateRoomId";
-import { Rocket } from "lucide-react";
 import { toastWithAnimation } from "@/utils/toast";
 import NoticeGame from "@/components/common/NoticeGame";
 import { useUser } from "@/hooks/useUser";
+import PlayerSetupForm from "@/components/common/PlayerSetupForm";
+import NameSVG from "@/components/common/NameSVG";
 
 // ----------------------------------------
 // トップページコンポーネント：ルーム作成画面
@@ -19,9 +20,18 @@ function App() {
   // 状態管理
   // -----------------------------
   const [nickname, setNickname] = useState(""); // 入力されたニックネーム
-  const [color, setColor] = useState("#888888"); // ユーザーカラー
+  const [color, setColor] = useState("#EF4444"); // ユーザーカラー
   const [avatarFile, setAvatarFile] = useState<File | null>(null); // プロフィ―ル画像
+  const [userAvatarUrl, setUserAvatarUrl] = useState<string>("");
+  const [showOptions, setShowOptions] = useState<boolean>(() => {
+    return localStorage.getItem("showOptions") === "true";
+  });
+  const [userLoading, setUserLoading] = useState(true);
+  const [roomLoading, setRoomLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null); // 初期フォーカス用の参照
+  useEffect(() => {
+    localStorage.setItem("showOptions", String(showOptions));
+  }, [showOptions]);
 
   // -----------------------------
   // プロフィール画像をアップロード・変換する処理
@@ -90,6 +100,7 @@ function App() {
   // -----------------------------
   const createRoom = async () => {
     try {
+      setRoomLoading(true);
       console.log("createRoom: start");
 
       if (!userId) {
@@ -114,9 +125,12 @@ function App() {
       // 必要なときだけユーザーを登録
       await ensureUserExists();
 
-      // nickname 更新
-      const updateData: any = { nickname, color };
-      if (avatarUrl) updateData.avatarUrl = avatarUrl;
+      // 更新用データ
+      const updateData: any = {
+        nickname,
+        color,
+        avatarUrl,
+      };
       await updateUserInfo(updateData);
 
       // 再取得（userInfo は非同期更新されるので注意）
@@ -172,10 +186,40 @@ function App() {
 
   useEffect(() => {
     if (userInfo) {
+      if (userInfo.avatarUrl) setUserAvatarUrl(userInfo.avatarUrl);
       if (userInfo.nickname) setNickname(userInfo.nickname);
       if (userInfo.color) setColor(userInfo.color);
+      setTimeout(() => {
+        setUserLoading(false);
+      }, 100);
     }
   }, [userInfo]);
+
+  useEffect(() => {
+    if (userAvatarUrl || avatarFile) {
+      setTimeout(() => {
+        setUserLoading(false);
+      }, 100);
+    }
+  }, [userAvatarUrl, avatarFile]);
+
+  const presetColors = [
+    "#EF4444", // 赤
+    "#F97316", // オレンジ
+    "#EAB308", // 黄
+    "#22C55E", // 緑
+    "#14B8A6", // ティール
+    "#06B6D4", // シアン
+    "#3B82F6", // 青
+    "#8B5CF6", // 紫
+    "#EC4899", // ピンク
+    "#7F1D1D", // ワインレッド
+    "#5C4033", // チョコブラウン
+    "#064E3B", // ディープグリーン
+    "#1E3A8A", // ネイビーブルー
+    "#4C1D95", // ダークプラム
+    "#475569", // スレートブルー
+  ];
 
   // -----------------------------
   // UI描画
@@ -186,109 +230,63 @@ function App() {
       <div key="ito-header" className="relative h-12"></div>
 
       {/* コンテンツ */}
-      <div className="relative w-full text-center px-4">
+      <div className="relative w-full text-center px-4 overflow-hidden">
         {/*-------- 見出し --------*/}
-        <h2 className="text-3xl font-bold text-shadow-md mt-0 mb-4">
-          itoレインボーオンライン
-        </h2>
+        <h2 className="text-3xl font-bold text-shadow-md mt-0 mb-4">¡†。</h2>
         <p className="text-center text-white text-shadow-md my-6">
           <span>ニックネームを入力して、ルームを作成してください。</span>
         </p>
 
+        {!userLoading && (
+          <div
+            className="preview-card absolute bottom-1/2 right-4 w-32 h-44 rounded-sm border-2 shadow-xl
+          flex items-center justify-center z-0 transition
+          transform rotate-[-6deg] pointer-events-none"
+            style={{ backgroundColor: color }}
+          >
+            {avatarFile || userAvatarUrl ? (
+              <img
+                src={
+                  avatarFile ? URL.createObjectURL(avatarFile) : userAvatarUrl
+                }
+                alt="アバター"
+                className="w-28 h-auto"
+              />
+            ) : (
+              <div />
+            )}
+            <NameSVG
+              text={nickname}
+              style={{
+                position: "absolute",
+                bottom: "0",
+              }}
+            />
+          </div>
+        )}
+
         {/*-------- 設定画面 --------*/}
         <div
           className="
-          bg-white/70 backdrop-blur-sm text-black p-6 my-6 rounded-xl shadow-md
+          bg-black/70 backdrop-blur-sm text-black p-6 my-6 rounded-md shadow-md
           w-full max-w-md animate-fade-in relative mx-auto"
         >
-          {/* 入力フォーム */}
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              createRoom();
-            }}
-            className="space-y-6"
-          >
-            {/* ニックネーム */}
-            <div>
-              <label className="block text-sm font-medium mb-1 text-gray-100">
-                ニックネーム
-              </label>
-              <input
-                ref={inputRef}
-                type="text"
-                placeholder="ここにニックネームを入力"
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
-                className="w-full p-2.5 rounded-md border border-gray-400 bg-white text-black text-center
-                 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
-            </div>
-
-            {/* ユーザーカラー */}
-            <div className="flex items-center gap-3">
-              <label className="text-sm text-gray-100">カラー</label>
-              <input
-                type="color"
-                value={color}
-                onChange={(e) => setColor(e.target.value)}
-                className="w-8 h-8 rounded-md border border-gray-300"
-              />
-            </div>
-
-            {/* アバター画像アップロード */}
-            <div>
-              <label className="block text-sm mb-1 text-gray-100">
-                プロフィール画像（任意）
-              </label>
-
-              {/* 隠したinput */}
-              <input
-                id="avatar-upload"
-                type="file"
-                accept="image/*"
-                style={{ display: "none" }}
-                onChange={(e) => setAvatarFile(e.target.files?.[0] || null)}
-              />
-
-              {/* カスタムボタン */}
-              <button
-                type="button"
-                className="px-3 py-1 bg-gray-200 text-black text-sm rounded hover:bg-gray-300 transition"
-                onClick={() =>
-                  document.getElementById("avatar-upload")?.click()
-                }
-              >
-                画像を選ぶ
-              </button>
-
-              {/* プレビュー表示 */}
-              {(avatarFile || userInfo?.avatarUrl) && (
-                <div className="mt-3">
-                  <img
-                    src={
-                      avatarFile
-                        ? URL.createObjectURL(avatarFile)
-                        : userInfo?.avatarUrl || ""
-                    }
-                    alt="プロフィール画像プレビュー"
-                    className="w-16 h-16 object-cover rounded border border-gray-300"
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* 作成ボタン */}
-            <button
-              type="submit"
-              disabled={!nickname.trim()}
-              className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-500 transition
-               disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
-            >
-              <Rocket className="w-4 h-4" />
-              ルームを作成
-            </button>
-          </form>
+          <PlayerSetupForm
+            mode="create"
+            nickname={nickname}
+            setNickname={setNickname}
+            color={color}
+            setColor={setColor}
+            avatarFile={avatarFile}
+            setAvatarFile={setAvatarFile}
+            onSubmit={createRoom}
+            loading={roomLoading}
+            showOptions={showOptions}
+            setShowOptions={setShowOptions}
+            presetColors={presetColors}
+            userAvatarUrl={userAvatarUrl}
+            setUserAvatarUrl={setUserAvatarUrl}
+          />
         </div>
 
         {/*-------- 注意書き --------*/}

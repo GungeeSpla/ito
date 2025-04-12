@@ -26,6 +26,12 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+main {
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
 /* --------------------------------------------
   aタグの見た目
 -------------------------------------------- */
@@ -156,6 +162,27 @@ button:focus-visible {
 
   .responsive-text-hand-card {
     font-size: 1.5rem;
+  }
+}
+
+/* --------------------------------------------
+  設定のリアルタイムプレビュー
+-------------------------------------------- */
+
+.preview-card {
+  animation: preview-card-in ease-out 1000ms forwards;
+}
+
+
+@keyframes preview-card-in {
+  from {
+    opacity: 0;
+    transform: translateX(2rem) rotate(6deg);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0rem) rotate(-6deg);
   }
 }
 

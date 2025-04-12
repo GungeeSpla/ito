@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 interface NameSVGProps {
   text: string;
   className?: string;
+  style?: React.CSSProperties;
 }
 
 const MAX_WIDTH = 100;
@@ -10,7 +11,7 @@ const MAX_HEIGHT = 40;
 const MAX_FONT_SIZE = 10;
 const MIN_FONT_SIZE = 1;
 
-const NameSVG: React.FC<NameSVGProps> = ({ text, className }) => {
+const NameSVG: React.FC<NameSVGProps> = ({ text, className, style }) => {
   const [fontSize, setFontSize] = useState(16);
 
   useEffect(() => {
@@ -53,7 +54,7 @@ const NameSVG: React.FC<NameSVGProps> = ({ text, className }) => {
   }, [text]);
 
   return (
-    <svg className={className} width="100%" viewBox="0 0 100 41">
+    <svg className={className} width="100%" style={style} viewBox="0 0 100 41">
       <text
         x="50"
         y={MAX_HEIGHT}
