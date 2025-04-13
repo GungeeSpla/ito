@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { db } from "@/firebase";
 import { ref, set, get } from "firebase/database";
+import { deleteRoomsByHost } from "@/utils/deleteRoomsByHost";
 import { generateUniqueRoomId } from "@/utils/generateRoomId";
 import { toastWithAnimation } from "@/utils/toast";
 import NoticeGame from "@/components/common/NoticeGame";
@@ -121,6 +122,9 @@ function App() {
           });
         }
       }
+
+      // 同一ユーザーが作っていた古い部屋を削除
+      await deleteRoomsByHost(userId);
 
       // 必要なときだけユーザーを登録
       await ensureUserExists();
