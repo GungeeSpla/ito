@@ -39,7 +39,7 @@ const PlayerSetupForm: React.FC<Props> = ({
   const [customColor, setCustomColor] = useState("#1F1F1F");
   const actionLabel = mode === "create" ? "ルームを作成" : "ルームに参加";
   useEffect(() => {
-    if (!presetColors.includes(color)) {
+    if (!presetColors.includes(color) && color !== "transparent") {
       setCustomColor(color);
     }
   }, [color, presetColors]);

@@ -20,7 +20,7 @@ function App() {
   // 状態管理
   // -----------------------------
   const [nickname, setNickname] = useState(""); // 入力されたニックネーム
-  const [color, setColor] = useState("#EF4444"); // ユーザーカラー
+  const [color, setColor] = useState("transparent"); // ユーザーカラー
   const [avatarFile, setAvatarFile] = useState<File | null>(null); // プロフィ―ル画像
   const [userAvatarUrl, setUserAvatarUrl] = useState<string>("");
   const [showOptions, setShowOptions] = useState<boolean>(() => {
@@ -291,6 +291,20 @@ function App() {
 
         {/*-------- 注意書き --------*/}
         <NoticeGame />
+
+        {import.meta.env.DEV && (
+          <button
+            onClick={() => {
+              ["showOptions", "userId", "volume", "nickname"].forEach((k) =>
+                localStorage.removeItem(k),
+              );
+              location.reload();
+            }}
+            className="fixed left-1 bottom-1 z-50 bg-red-600 text-white px-3 py-1 rounded shadow-md"
+          >
+            Reset localStorage
+          </button>
+        )}
       </div>
     </div>
   );

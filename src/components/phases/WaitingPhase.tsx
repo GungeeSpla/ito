@@ -55,7 +55,7 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
   const { userId } = useUser();
   const { userInfo, updateUserInfo } = useUser();
   const [nickname, setNickname] = useState("");
-  const [color, setColor] = useState("#EF4444");
+  const [color, setColor] = useState("transparent");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [userAvatarUrl, setUserAvatarUrl] = useState("");
   const [showOptions, setShowOptions] = useState(() => {
