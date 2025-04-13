@@ -22,7 +22,7 @@ interface CardProps {
   onClearHint?: () => void;
   hint?: string;
   className?: string;
-  face?: string;
+  avatarUrl?: string;
   color?: string;
 }
 
@@ -63,7 +63,7 @@ const Card: React.FC<CardProps> = ({
   onClearHint,
   hint,
   className,
-  face,
+  avatarUrl,
   color = "#ff9900",
 }) => {
   useEffect(() => {
@@ -133,8 +133,11 @@ const Card: React.FC<CardProps> = ({
           title={isMine && typeof value === "number" ? `${value}` : ""}
         >
           <div className={styles.dot} />
-          {face ? (
-            <div className={styles.face} />
+          {avatarUrl ? (
+            <div
+              className={styles.face}
+              style={{ backgroundImage: `url(${avatarUrl})` }}
+            />
           ) : (
             <HintSVG
               className={styles.hintSvg}
@@ -149,7 +152,8 @@ const Card: React.FC<CardProps> = ({
       {/*--- たとえワードのフキダシ ---*/}
       {location === "field" &&
         hint &&
-        ((face && mode === "place") || (mode === "reveal" && revealed)) && (
+        ((avatarUrl && mode === "place") ||
+          (mode === "reveal" && revealed)) && (
           <div className={styles.speechBubble}>
             {hint}
             <div className={styles.tail} />

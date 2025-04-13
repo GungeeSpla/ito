@@ -11,6 +11,7 @@ import FallingText from "@/components/common/FallingText";
 import styles from "./PlaceCardsPhase.module.scss";
 import { placeSound } from "@/utils/sounds";
 import cardStyles from "@/components/common/Card.module.scss";
+import { UserInfo } from "@/types/UserInfo";
 
 // -----------------------------
 // 型定義
@@ -21,6 +22,7 @@ interface Props {
   nickname: string;
   cardOrder: CardEntry[];
   setCardOrder: (v: CardEntry[]) => void;
+  userInfoMap: Record<string, UserInfo>;
 }
 
 const PlaceCardsPhase: React.FC<Props> = ({
@@ -29,6 +31,7 @@ const PlaceCardsPhase: React.FC<Props> = ({
   nickname,
   cardOrder,
   setCardOrder,
+  userInfoMap,
 }) => {
   const [myCards, setMyCards] = useState<{ value: number; hint?: string }[]>(
     [],
@@ -164,10 +167,14 @@ const PlaceCardsPhase: React.FC<Props> = ({
     await runTransaction(orderRef, (currentOrder) => {
       const newOrder = Array.isArray(currentOrder) ? [...currentOrder] : [];
       const filtered = newOrder.filter(
-        (c: CardEntry) => !(c.name === nickname && c.card === activeCard.value),
+        (c: CardEntry) =>
+          !(
+            userInfoMap[c.userId]?.nickname === nickname &&
+            c.card === activeCard.value
+          ),
       );
       filtered.splice(insertIndex, 0, {
-        name: nickname,
+        userId,
         card: activeCard.value,
         hint: cardData.hint || "",
       });
@@ -193,7 +200,8 @@ const PlaceCardsPhase: React.FC<Props> = ({
 
     let hintToRestore = "";
     const found = cardOrder.find(
-      (c) => c.name === nickname && c.card === cardToRemove,
+      (c) =>
+        userInfoMap[c.userId]?.nickname === nickname && c.card === cardToRemove,
     );
     if (found?.hint) {
       hintToRestore = found.hint;
@@ -201,7 +209,11 @@ const PlaceCardsPhase: React.FC<Props> = ({
 
     await runTransaction(orderRef, (currentOrder) =>
       currentOrder.filter(
-        (c: CardEntry) => !(c.name === nickname && c.card === cardToRemove),
+        (c: CardEntry) =>
+          !(
+            userInfoMap[c.userId]?.nickname === nickname &&
+            c.card === cardToRemove
+          ),
       ),
     );
 
@@ -292,10 +304,10 @@ const PlaceCardsPhase: React.FC<Props> = ({
         {/* 出されたカード */}
         <AnimatePresence initial={false}>
           {cardOrder.map((entry, index) => {
-            const isMine = entry.name === nickname;
+            const isMine = userInfoMap[entry.userId]?.nickname === nickname;
             return (
               <motion.div
-                key={`${entry.name}-${entry.card}`}
+                key={`${userInfoMap[entry.userId]?.nickname}-${entry.card}`}
                 initial={{
                   opacity: 0,
                   translateY: isMine ? "2em" : "-2em",
@@ -313,9 +325,11 @@ const PlaceCardsPhase: React.FC<Props> = ({
               >
                 <Card
                   value={entry.card}
-                  name={entry.name}
+                  name={userInfoMap[entry.userId]?.nickname}
+                  color={userInfoMap[entry.userId]?.color}
+                  avatarUrl={userInfoMap[entry.userId]?.avatarUrl}
                   revealed={false}
-                  isMine={entry.name === nickname}
+                  isMine={userInfoMap[entry.userId]?.nickname === nickname}
                   mode="place"
                   location="field"
                   onClick={

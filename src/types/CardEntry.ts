@@ -1,5 +1,5 @@
 export interface CardEntry {
-  name: string;
+  userId: string;
   card: number;
   hint?: string;
 }

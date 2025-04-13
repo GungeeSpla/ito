@@ -26,6 +26,7 @@ import PlaceCardsPhase from "@/components/phases/PlaceCardsPhase";
 import RevealCardsPhase from "@/components/phases/RevealCardsPhase";
 import { useDealCards } from "@/hooks/useDealCards";
 import { useJoinRoom } from "@/hooks/useJoinRoom";
+import { UserInfo } from "@/types/UserInfo";
 
 // --------------------------------------------
 // ルーム画面（/room/:roomId）
@@ -67,12 +68,38 @@ const Room = () => {
     setPlayers,
     setHost,
   });
-
   useEffect(() => {
     if (!roomId) {
       navigate("/", { replace: true });
     }
   }, [roomId, navigate]);
+  const [userInfoMap, setUserInfoMap] = useState<Record<string, UserInfo>>({});
+  useEffect(() => {
+    const fetchUserInfoMap = async () => {
+      const snapshot = await get(ref(db, "users"));
+      if (!snapshot.exists()) return;
+
+      const users = snapshot.val();
+      const map: Record<string, UserInfo> = {};
+      Object.keys(players).forEach((userId) => {
+        const user = users[userId];
+        if (user && user.nickname) {
+          map[userId] = {
+            userId,
+            nickname: user.nickname,
+            color: user.color,
+            avatarUrl: user.avatarUrl,
+            createdAt: user.createdAt,
+            lastActive: user.lastActive,
+          };
+        }
+      });
+      setUserInfoMap(map);
+    };
+    if (Object.keys(players).length > 0) {
+      fetchUserInfoMap();
+    }
+  }, [players]);
 
   // お題の再抽選
   const onRefreshTopics = async () => {
@@ -310,6 +337,7 @@ const Room = () => {
         nickname={userInfo.nickname}
         cardOrder={cardOrder}
         setCardOrder={setCardOrder}
+        userInfoMap={userInfoMap}
       />
     );
   }
@@ -322,6 +350,7 @@ const Room = () => {
         nickname={userInfo.nickname}
         cardOrder={cardOrder}
         level={level}
+        userInfoMap={userInfoMap}
       />
     );
   }

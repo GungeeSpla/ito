@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ref, get, set, update } from "firebase/database";
 import { db } from "@/firebase";
-import { UserInfo } from "@/types/User";
+import { UserInfo } from "@/types/UserInfo";
 
 const LOCAL_STORAGE_KEY = "userId";
 
