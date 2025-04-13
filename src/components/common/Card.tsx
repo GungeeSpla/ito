@@ -59,6 +59,10 @@ const Card: React.FC<CardProps> = ({
       key={`card-${value}`}
       className={`${styles.card} ${playerClass} ${className} ${isActive ? styles.active : ""}`}
       onClick={onClick}
+      style={{
+        pointerEvents:
+          value === 0 || (mode === "place" && !isMine) ? "none" : undefined,
+      }}
     >
       {/*--- カードの表面と裏面を包括 ---*/}
       <div
