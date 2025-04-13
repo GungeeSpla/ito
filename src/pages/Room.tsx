@@ -37,7 +37,6 @@ const Room = () => {
   const { userId, userInfo, ensureUserExists } = useUser();
   if (!roomId) return null;
   const safeRoomId = roomId ?? "";
-  const [newNickname, setNewNickname] = useState("");
   const [players, setPlayers] = useState<Record<string, PlayerInfo>>({});
   const [host, setHost] = useState("");
   const [loading, setLoading] = useState(true);
@@ -275,8 +274,6 @@ const Room = () => {
         players={players}
         host={host}
         alreadyJoined={alreadyJoined}
-        newNickname={newNickname}
-        setNewNickname={setNewNickname}
         addPlayer={(nickname) => joinRoom(nickname)}
         selectedSet={selectedSet}
         setSelectedSet={setSelectedSet}
@@ -294,6 +291,7 @@ const Room = () => {
     return (
       <ChooseTopicPhase
         isHost={isHost}
+        nickname={userInfo.nickname}
         chooseTopic={chooseTopic}
         onRefreshTopics={onRefreshTopics}
       />

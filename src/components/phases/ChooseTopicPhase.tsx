@@ -22,12 +22,14 @@ interface Props {
   isHost: boolean; // 現在のプレイヤーがホストかどうか
   chooseTopic: (topic: Topic) => void; // お題が確定した時に呼ばれるコールバック
   onRefreshTopics: () => void; // お題を再抽選する処理
+  nickname: string;
 }
 
 const ChooseTopicPhase: React.FC<Props> = ({
   isHost,
   chooseTopic,
   onRefreshTopics,
+  nickname,
 }) => {
   const [selectedTitle, setSelectedTitle] = useState<string | null>(null); // 選択されたお題タイトル
   const [votes, setVotes] = useState<Record<string, string>>({}); // 各プレイヤーの投票情報
@@ -37,7 +39,6 @@ const ChooseTopicPhase: React.FC<Props> = ({
   ); // 同票時の処理
   const [showProposalModal, setShowProposalModal] = useState(false); // お題提案モーダル表示
   const [customTopics, setCustomTopics] = useState<Topic[]>([]); // カスタムお題一覧
-  const nickname = localStorage.getItem("nickname") || "";
   const roomId = window.location.pathname.split("/").pop(); // ルームIDをURLから取得
   const [hasChosen, setHasChosen] = useState(false); // お題が選ばれたかどうか
   const [topicOptions, setTopicOptions] = useState<Topic[]>([]); // お題候補一覧
