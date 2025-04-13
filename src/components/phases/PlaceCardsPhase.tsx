@@ -276,35 +276,15 @@ const PlaceCardsPhase: React.FC<Props> = ({
       )}
 
       {/* 場のカード */}
-      <div className={`${styles.playedCardsArea} responsive-text`}>
-        {/* ゼロ */}
-        <div className="flex items-center gap-2">
-          <Card value={0} location="field" name="" />
-          {activeCard?.source === "hand" && (
-            <button
-              className="
-                  flex items-center justify-center gap-0.5
-                  text-xs bg-blue-600 text-white px-1 py-3 rounded 
-                  hover:bg-blue-500 transition writing-vertical"
-              onClick={() => handleInsertCard(0)}
-            >
-              <ArrowDownCircle className="w-3 h-3 translate-x-[0.05rem]" />
-              ここに出す
-            </button>
-          )}
-        </div>
-
-        {/* 出されたカード */}
-        <CardArea
-          mode="place"
-          cardOrder={cardOrder}
-          players={players}
-          nickname={nickname}
-          activeCard={activeCard}
-          onInsertCard={handleInsertCard}
-          onRemoveCard={handleRemoveCard}
-        />
-      </div>
+      <CardArea
+        mode="place"
+        cardOrder={cardOrder}
+        players={players}
+        nickname={nickname}
+        activeCard={activeCard}
+        onInsertCard={handleInsertCard}
+        onRemoveCard={handleRemoveCard}
+      />
 
       {isHost && allPlaced && (
         <div

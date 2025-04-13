@@ -170,49 +170,36 @@ const RevealCardsPhase: React.FC<Props> = ({
         </p>
       </div>
 
-      {/* カード配置 */}
-      <div
-        className={styles.playedCardsArea}
-        style={{ animation: "none", opacity: 1 }}
-      >
-        <div className="flex flex-wrap gap-2 justify-center items-start">
-          {/* 基準カード */}
-          <Card value={0} name="" />
+      {/* プレイヤーカード */}
+      <CardArea
+        mode="reveal"
+        cardOrder={cardOrder}
+        players={players}
+        nickname={nickname}
+        revealedCards={revealedCards}
+        onRevealCard={(card) => {
+          const revealedRef = ref(db, `rooms/${roomId}/revealedCards`);
+          set(revealedRef, [...revealedCards, card]);
+        }}
+        onFlipComplete={handleFlipComplete}
+      />
 
-          {/* プレイヤーカード */}
-          <CardArea
-            mode="reveal"
-            cardOrder={cardOrder}
-            players={players}
-            nickname={nickname}
-            revealedCards={revealedCards}
-            onRevealCard={(card) => {
-              const revealedRef = ref(db, `rooms/${roomId}/revealedCards`);
-              set(revealedRef, [...revealedCards, card]);
-            }}
-            onFlipComplete={handleFlipComplete}
-          />
-        </div>
-
-        <div className="absolute left-1/2 top-[calc(100%+40px)] -translate-x-1/2">
-          {status === "success" && (
-            <div className="mb-4 text-green-400 font-bold text-2xl">
-              ✅ 成功！
-            </div>
-          )}
-          {status === "fail" && (
-            <div className="mb-4 text-red-400 font-bold text-2xl">
-              ❌ 失敗！
-            </div>
-          )}
-        </div>
+      <div className="absolute left-1/2 top-[calc(100%+40px)] -translate-x-1/2">
+        {status === "success" && (
+          <div className="mb-4 text-green-400 font-bold text-2xl">
+            ✅ 成功！
+          </div>
+        )}
+        {status === "fail" && (
+          <div className="mb-4 text-red-400 font-bold text-2xl">❌ 失敗！</div>
+        )}
       </div>
 
       {/* ロビーに戻るボタン */}
       {isHost && isComplete && (
         <div
           className="absolute responsive-text transition duration-200
-      left-1/2 top-1/2 -translate-x-1/2 translate-y-[8em]"
+      left-1/2 top-1/2 -translate-x-1/2 translate-y-[10em]"
         >
           <WoodyButton onClick={resetGame}>
             <Home className="w-4 h-4 translate-y-[0.05rem]" />

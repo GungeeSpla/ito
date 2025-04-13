@@ -4,6 +4,7 @@ import { CardEntry } from "@/types/CardEntry";
 import { PlayerInfo } from "@/types/PlayerInfo";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowDownCircle } from "lucide-react";
+import styles from "@/components/phases/PlaceCardsPhase.module.scss";
 
 interface Props {
   mode: "place" | "reveal";
@@ -31,7 +32,30 @@ const CardArea: React.FC<Props> = ({
   onFlipComplete,
 }) => {
   return (
-    <div className="flex flex-wrap gap-2 items-start justify-center">
+    <div
+      className={`${styles.playedCardsArea} responsive-text`}
+      style={{
+        animation: mode === "reveal" ? "none" : undefined,
+        opacity: mode === "reveal" ? 1 : undefined,
+      }}
+    >
+      {/* ゼロ */}
+      <div className="flex items-center gap-2">
+        <Card value={0} location="field" name="" />
+        {onInsertCard && activeCard?.source === "hand" && (
+          <button
+            className="
+              flex items-center justify-center gap-0.5
+              text-xs bg-blue-600 text-white px-1 py-3 rounded 
+              hover:bg-blue-500 transition writing-vertical"
+            onClick={() => onInsertCard(0)}
+          >
+            <ArrowDownCircle className="w-3 h-3 translate-x-[0.05rem]" />
+            ここに出す
+          </button>
+        )}
+      </div>
+
       {/* 出されたカード */}
       <AnimatePresence initial={false}>
         {cardOrder.map((entry, index) => {
