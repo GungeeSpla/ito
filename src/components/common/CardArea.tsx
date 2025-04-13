@@ -60,10 +60,15 @@ const CardArea: React.FC<Props> = ({
                 location="field"
                 onClick={
                   mode === "place" && isMine && onRemoveCard
-                    ? () => onRemoveCard(entry.card)
+                    ? undefined
                     : mode === "reveal" && !isRevealed && onRevealCard
                       ? () => onRevealCard(entry.card)
                       : undefined
+                }
+                onReturnToHand={
+                  mode === "place" && isMine && onRemoveCard
+                    ? () => onRemoveCard(entry.card)
+                    : undefined
                 }
                 onFlipComplete={onFlipComplete}
               />

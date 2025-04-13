@@ -63,6 +63,7 @@ const NameSVG: React.FC<NameSVGProps> = ({ text, className, style }) => {
     }
 
     document.body.removeChild(tempSvg);
+    console.log(bestSize);
     fontSizeCache.set(text, bestSize);
 
     if (isMounted.current) {
@@ -79,7 +80,7 @@ const NameSVG: React.FC<NameSVGProps> = ({ text, className, style }) => {
       <text
         x="50"
         y={MAX_HEIGHT}
-        fontSize={fontSize}
+        fontSize={fontSize ?? 10}
         fontWeight="bold"
         fill="white"
         stroke="black"

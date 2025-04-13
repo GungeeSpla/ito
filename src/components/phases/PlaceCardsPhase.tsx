@@ -309,7 +309,7 @@ const PlaceCardsPhase: React.FC<Props> = ({
       {isHost && allPlaced && (
         <div
           className="absolute responsive-text transition duration-200
-            left-1/2 top-1/2 -translate-x-1/2 translate-y-[8em]"
+            left-1/2 top-1/2 -translate-x-1/2 translate-y-[10em]"
         >
           <WoodyButton onClick={proceedToReveal}>
             <Eye className="w-4 h-4 translate-y-[0.1rem]" />

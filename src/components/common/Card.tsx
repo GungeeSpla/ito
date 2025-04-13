@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Pencil, Eraser } from "lucide-react";
+import { Pencil, Eraser, ArrowDownLeft } from "lucide-react";
 import NameSVG from "@/components/common/NameSVG";
 import HintSVG from "@/components/common/HintSVG";
 import NumberSVG from "@/components/common/NumberSVG";
@@ -24,6 +24,7 @@ interface CardProps {
   className?: string;
   avatarUrl?: string;
   color?: string;
+  onReturnToHand?: () => void;
 }
 
 const Card: React.FC<CardProps> = ({
@@ -41,7 +42,8 @@ const Card: React.FC<CardProps> = ({
   hint,
   className,
   avatarUrl,
-  color = "#ff9900",
+  color,
+  onReturnToHand,
 }) => {
   useEffect(() => {
     if (revealed && typeof value === "number" && onFlipComplete) {
@@ -56,17 +58,12 @@ const Card: React.FC<CardProps> = ({
 
   return (
     <div
-      key={`card-${value}`}
-      className={`${styles.card} ${playerClass} ${className} ${isActive ? styles.active : ""}`}
+      className={`${styles.card} ${playerClass} ${className} ${isActive ? styles.active : ""}
+        ${mode === "place" ? styles.placeCard : styles.revealCard}`}
       onClick={onClick}
-      style={{
-        pointerEvents:
-          value === 0 || (mode === "place" && !isMine) ? "none" : undefined,
-      }}
     >
       {/*--- カードの表面と裏面を包括 ---*/}
       <div
-        key={`card-${value}-omoteura`}
         className={`
           relative w-full h-full transition-transform duration-500
           ${revealed ? "rotate-y-0" : "rotate-y-180"}
@@ -78,7 +75,6 @@ const Card: React.FC<CardProps> = ({
       >
         {/*--- カードの表面 ---*/}
         <div
-          key={`card-${value}-omote`}
           className={`${styles.cardFore}
             ${location === "hand" ? styles.handCard : ""}
             ${isActive ? styles.activeHandCard : ""}
@@ -104,7 +100,6 @@ const Card: React.FC<CardProps> = ({
 
         {/*--- カードの裏面 ---*/}
         <div
-          key={`card-${value}-ura`}
           className={`${styles.cardBack} ito-card-back
             absolute w-full h-full rounded 
             text-black flex flex-col justify-center items-center
@@ -126,17 +121,12 @@ const Card: React.FC<CardProps> = ({
             />
           ) : (
             <HintSVG
-              key={`card-${value}-ura-hint`}
               className={styles.hintSvg}
               text={hint || ""}
               // text="あああああああああああああああああああああああああああああああ！！！！！！！！！！！（ﾌﾞﾘﾌﾞﾘﾌﾞﾘﾌﾞﾘｭﾘｭﾘｭﾘｭﾘｭﾘｭ！！！！！！ﾌﾞﾂﾁﾁﾌﾞﾌﾞﾌﾞﾁﾁﾁﾁﾌﾞﾘﾘｲﾘﾌﾞﾌﾞﾌﾞﾌﾞｩｩｩｩｯｯｯ！！！！！！！ ）"
             />
           )}
-          <NameSVG
-            key={`card-${value}-ura-name`}
-            className={styles.nameSvg}
-            text={name || ""}
-          />
+          <NameSVG className={styles.nameSvg} text={name || ""} />
         </div>
       </div>
 
@@ -178,20 +168,36 @@ const Card: React.FC<CardProps> = ({
         </div>
       )}
 
-      {/*--- 自分のカードなら下に数字を表示 ---*/}
-      {isMine && typeof value === "number" && (
-        <div
-          className="absolute bottom-[-1.6rem] left-1/2 -translate-x-1/2 text-white text-sm font-bold
-            text-center w-12"
-          style={{
-            background:
-              "linear-gradient(to right, rgba(0,0,0,0.1), rgba(0,0,0,0.5), rgba(0,0,0,0.1))",
-            borderRadius: "4px",
-          }}
-        >
-          {value}
+      {/*--- 手札に戻すボタン ---*/}
+      {location === "field" && mode === "place" && isMine && (
+        <div className="absolute bottom-[-1.7rem] left-1 flex gap-1">
+          <button
+            title="手札に戻す"
+            onClick={onReturnToHand}
+            className="text-white hover:bg-yellow-500 hover:border-yellow-600 text-xs bg-zinc-700 p-0.5 rounded-md"
+          >
+            <ArrowDownLeft size={16} />
+          </button>
         </div>
       )}
+
+      {/*--- 下に数字を表示 ---*/}
+      {location === "field" &&
+        mode === "place" &&
+        isMine &&
+        typeof value === "number" && (
+          <div
+            className="absolute bottom-[-1.6rem] left-1/2 -translate-x-1/2 text-white text-sm font-bold
+            text-center w-12"
+            style={{
+              background:
+                "linear-gradient(to right, rgba(0,0,0,0.1), rgba(0,0,0,0.5), rgba(0,0,0,0.1))",
+              borderRadius: "4px",
+            }}
+          >
+            {value}
+          </div>
+        )}
     </div>
   );
 };
