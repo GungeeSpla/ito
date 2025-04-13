@@ -12,6 +12,7 @@ import styles from "./PlaceCardsPhase.module.scss";
 import { placeSound } from "@/utils/sounds";
 import cardStyles from "@/components/common/Card.module.scss";
 import { PlayerInfo } from "@/types/PlayerInfo";
+import CardArea from "@/components/common/CardArea";
 
 // -----------------------------
 // 型定義
@@ -294,57 +295,15 @@ const PlaceCardsPhase: React.FC<Props> = ({
         </div>
 
         {/* 出されたカード */}
-        <AnimatePresence initial={false}>
-          {cardOrder.map((entry, index) => {
-            const isMine = players[entry.userId]?.nickname === nickname;
-            return (
-              <motion.div
-                key={`${players[entry.userId]?.nickname}-${entry.card}`}
-                initial={{
-                  opacity: 0,
-                  translateY: isMine ? "2em" : "-2em",
-                }}
-                animate={{
-                  opacity: 1,
-                  translateY: "0em",
-                }}
-                exit={{
-                  opacity: 0,
-                  translateY: isMine ? "2em" : "-2em",
-                }}
-                transition={{ duration: 0.2 }}
-                className="flex items-center gap-2"
-              >
-                <Card
-                  value={entry.card}
-                  name={players[entry.userId]?.nickname}
-                  color={players[entry.userId]?.color}
-                  avatarUrl={players[entry.userId]?.avatarUrl}
-                  revealed={false}
-                  isMine={players[entry.userId]?.nickname === nickname}
-                  mode="place"
-                  location="field"
-                  onClick={
-                    isMine ? () => handleRemoveCard(entry.card) : undefined
-                  }
-                  hint={entry.hint}
-                />
-                {activeCard?.source === "hand" && (
-                  <button
-                    className="
-                      flex items-center justify-center gap-0.5  
-                      text-xs bg-blue-600 text-white px-1 py-3 rounded
-                      hover:bg-blue-500 transition writing-vertical"
-                    onClick={() => handleInsertCard(index + 1)}
-                  >
-                    <ArrowDownCircle className="w-3 h-3 translate-x-[0.05rem]" />
-                    ここに出す
-                  </button>
-                )}
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
+        <CardArea
+          mode="place"
+          cardOrder={cardOrder}
+          players={players}
+          nickname={nickname}
+          activeCard={activeCard}
+          onInsertCard={handleInsertCard}
+          onRemoveCard={handleRemoveCard}
+        />
       </div>
 
       {isHost && allPlaced && (

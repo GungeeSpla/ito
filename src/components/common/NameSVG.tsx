@@ -74,8 +74,6 @@ const NameSVG: React.FC<NameSVGProps> = ({ text, className, style }) => {
     };
   }, [text]);
 
-  if (fontSize === null) return null;
-
   return (
     <svg className={className} width="100%" style={style} viewBox="0 0 100 41">
       <text

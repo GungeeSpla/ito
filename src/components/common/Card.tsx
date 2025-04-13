@@ -56,11 +56,13 @@ const Card: React.FC<CardProps> = ({
 
   return (
     <div
+      key={`card-${value}`}
       className={`${styles.card} ${playerClass} ${className} ${isActive ? styles.active : ""}`}
       onClick={onClick}
     >
       {/*--- カードの表面と裏面を包括 ---*/}
       <div
+        key={`card-${value}-omoteura`}
         className={`
           relative w-full h-full transition-transform duration-500
           ${revealed ? "rotate-y-0" : "rotate-y-180"}
@@ -72,6 +74,7 @@ const Card: React.FC<CardProps> = ({
       >
         {/*--- カードの表面 ---*/}
         <div
+          key={`card-${value}-omote`}
           className={`${styles.cardFore}
             ${location === "hand" ? styles.handCard : ""}
             ${isActive ? styles.activeHandCard : ""}
@@ -86,7 +89,7 @@ const Card: React.FC<CardProps> = ({
           )}
           {location === "hand" && hint && (
             <div
-              className="absolute w-full text-center top-6 left-1/2 -translate-x-1/2 text-xs
+              className="absolute w-full text-center top-6 left-1/2 -translate-x-1/2 text-sm
             text-black bg-opacity-50 px-1 break-all"
             >
               {hint}
@@ -97,6 +100,7 @@ const Card: React.FC<CardProps> = ({
 
         {/*--- カードの裏面 ---*/}
         <div
+          key={`card-${value}-ura`}
           className={`${styles.cardBack} ito-card-back
             absolute w-full h-full rounded 
             text-black flex flex-col justify-center items-center
@@ -118,12 +122,17 @@ const Card: React.FC<CardProps> = ({
             />
           ) : (
             <HintSVG
+              key={`card-${value}-ura-hint`}
               className={styles.hintSvg}
               text={hint || ""}
               // text="あああああああああああああああああああああああああああああああ！！！！！！！！！！！（ﾌﾞﾘﾌﾞﾘﾌﾞﾘﾌﾞﾘｭﾘｭﾘｭﾘｭﾘｭﾘｭ！！！！！！ﾌﾞﾂﾁﾁﾌﾞﾌﾞﾌﾞﾁﾁﾁﾁﾌﾞﾘﾘｲﾘﾌﾞﾌﾞﾌﾞﾌﾞｩｩｩｩｯｯｯ！！！！！！！ ）"
             />
           )}
-          <NameSVG className={styles.nameSvg} text={name || ""} />
+          <NameSVG
+            key={`card-${value}-ura-name`}
+            className={styles.nameSvg}
+            text={name || ""}
+          />
         </div>
       </div>
 
@@ -168,4 +177,4 @@ const Card: React.FC<CardProps> = ({
   );
 };
 
-export default Card;
+export default React.memo(Card);

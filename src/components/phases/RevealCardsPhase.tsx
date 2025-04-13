@@ -12,6 +12,7 @@ import { updateRoomMaxClearLevel } from "@/utils/levelProgress";
 import { flipSound, successSound, failSound } from "@/utils/sounds";
 import styles from "./PlaceCardsPhase.module.scss";
 import { PlayerInfo } from "@/types/PlayerInfo";
+import CardArea from "@/components/common/CardArea";
 
 interface Props {
   roomId: string;
@@ -179,32 +180,18 @@ const RevealCardsPhase: React.FC<Props> = ({
           <Card value={0} name="" />
 
           {/* プレイヤーカード */}
-          {cardOrder.map((entry, index) => {
-            const isRevealed = revealedCards.includes(entry.card);
-
-            return (
-              <Card
-                key={index}
-                value={isRevealed ? entry.card : "?"}
-                name={players[entry.userId]?.nickname}
-                color={players[entry.userId]?.color}
-                avatarUrl={players[entry.userId]?.avatarUrl}
-                mode="reveal"
-                revealed={isRevealed}
-                onClick={() => {
-                  if (!isRevealed) {
-                    const revealedRef = ref(
-                      db,
-                      `rooms/${roomId}/revealedCards`,
-                    );
-                    set(revealedRef, [...revealedCards, entry.card]);
-                  }
-                }}
-                hint={entry.hint}
-                onFlipComplete={handleFlipComplete}
-              />
-            );
-          })}
+          <CardArea
+            mode="reveal"
+            cardOrder={cardOrder}
+            players={players}
+            nickname={nickname}
+            revealedCards={revealedCards}
+            onRevealCard={(card) => {
+              const revealedRef = ref(db, `rooms/${roomId}/revealedCards`);
+              set(revealedRef, [...revealedCards, card]);
+            }}
+            onFlipComplete={handleFlipComplete}
+          />
         </div>
 
         <div className="absolute left-1/2 top-[calc(100%+40px)] -translate-x-1/2">
