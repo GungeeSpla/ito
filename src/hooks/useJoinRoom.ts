@@ -14,7 +14,6 @@ interface UseJoinRoomProps {
 export const useJoinRoom = ({
   roomId,
   userId,
-  userInfo,
   players,
   setPlayers,
   setHost,
@@ -22,7 +21,11 @@ export const useJoinRoom = ({
   const alreadyJoined = !!players[userId];
 
   const joinRoom = async (nicknameOverride?: string) => {
-    const nickname = nicknameOverride?.trim() || userInfo.nickname;
+    const userRef = ref(db, `users/${userId}`);
+    const userSnap = await get(userRef);
+    const latestUserInfo = userSnap.val() || {};
+
+    const nickname = nicknameOverride?.trim() || latestUserInfo.nickname;
 
     await update(ref(db, `users/${userId}`), {
       nickname,
@@ -34,8 +37,8 @@ export const useJoinRoom = ({
 
     const newPlayer: PlayerInfo = {
       nickname,
-      color: userInfo.color,
-      avatarUrl: userInfo.avatarUrl,
+      color: latestUserInfo.color ?? "transparent",
+      avatarUrl: latestUserInfo.avatarUrl ?? "",
       joinedAt: Date.now(),
     };
 

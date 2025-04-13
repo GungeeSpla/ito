@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ref, onValue, set } from "firebase/database";
 import { db } from "@/firebase";
-import Card from "@/components/common/Card";
 import EmojiBurst from "@/components/common/EmojiBurst";
 import FailBurst from "@/components/common/FailBurst";
 import { CardEntry } from "@/types/CardEntry";
@@ -10,7 +9,6 @@ import WoodyButton from "@/components/common/WoodyButton";
 import ClickOrTouch from "@/components/common/ClickOrTouch";
 import { updateRoomMaxClearLevel } from "@/utils/levelProgress";
 import { flipSound, successSound, failSound } from "@/utils/sounds";
-import styles from "./PlaceCardsPhase.module.scss";
 import { PlayerInfo } from "@/types/PlayerInfo";
 import CardArea from "@/components/common/CardArea";
 

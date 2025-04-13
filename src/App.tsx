@@ -243,12 +243,15 @@ function App() {
           <span>ニックネームを入力して、ルームを作成してください。</span>
         </p>
 
-        {!userLoading && (
+        {!!0 && !userLoading && (
           <div
             className="preview-card absolute bottom-1/2 right-4 w-32 h-44 rounded-sm border-2 shadow-xl
           flex items-center justify-center z-0 transition
           transform rotate-[-6deg] pointer-events-none"
-            style={{ backgroundColor: color }}
+            style={{
+              backgroundColor:
+                color && color !== "transparent" ? color : "#EF4444",
+            }}
           >
             {avatarFile || userAvatarUrl ? (
               <img

@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import Card from "@/components/common/Card";
 import EditHintModal from "@/components/common/EditHintModal";
 import { CardEntry } from "@/types/CardEntry";
-import { ArrowDownCircle, Eye, Home, RefreshCcw } from "lucide-react";
+import { Eye, Home, RefreshCcw } from "lucide-react";
 import WoodyButton from "@/components/common/WoodyButton";
 import FallingText from "@/components/common/FallingText";
 import styles from "./PlaceCardsPhase.module.scss";
