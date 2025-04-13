@@ -5,7 +5,7 @@ import { getRoomMaxClearLevel } from "@/utils/levelProgress";
 import WoodyButton from "@/components/common/WoodyButton";
 import { toastWithAnimation } from "@/utils/toast";
 import NoticeGame from "@/components/common/NoticeGame";
-import { PlayerInfo } from "@/types/Player";
+import { PlayerInfo } from "@/types/PlayerInfo";
 import { useUser } from "@/hooks/useUser";
 import PlayerSetupForm from "@/components/common/PlayerSetupForm";
 import SectionTitle from "@/components/common/SectionTitle";

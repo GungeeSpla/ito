@@ -1,6 +1,6 @@
 import { ref, get, update } from "firebase/database";
 import { db } from "@/firebase";
-import { PlayerInfo } from "@/types/Player";
+import { PlayerInfo } from "@/types/PlayerInfo";
 
 interface UseJoinRoomProps {
   roomId: string;

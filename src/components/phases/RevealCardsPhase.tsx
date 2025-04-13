@@ -11,7 +11,7 @@ import ClickOrTouch from "@/components/common/ClickOrTouch";
 import { updateRoomMaxClearLevel } from "@/utils/levelProgress";
 import { flipSound, successSound, failSound } from "@/utils/sounds";
 import styles from "./PlaceCardsPhase.module.scss";
-import { UserInfo } from "@/types/UserInfo";
+import { PlayerInfo } from "@/types/PlayerInfo";
 
 interface Props {
   roomId: string;
@@ -19,7 +19,7 @@ interface Props {
   nickname: string;
   cardOrder: CardEntry[];
   level: number;
-  userInfoMap: Record<string, UserInfo>;
+  players: Record<string, PlayerInfo>;
 }
 
 const RevealCardsPhase: React.FC<Props> = ({
@@ -28,7 +28,7 @@ const RevealCardsPhase: React.FC<Props> = ({
   nickname,
   cardOrder,
   level,
-  userInfoMap,
+  players,
 }) => {
   const [revealedCards, setRevealedCards] = useState<number[]>([]);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
@@ -186,9 +186,9 @@ const RevealCardsPhase: React.FC<Props> = ({
               <Card
                 key={index}
                 value={isRevealed ? entry.card : "?"}
-                name={userInfoMap[entry.userId]?.nickname}
-                color={userInfoMap[entry.userId]?.color}
-                avatarUrl={userInfoMap[entry.userId]?.avatarUrl}
+                name={players[entry.userId]?.nickname}
+                color={players[entry.userId]?.color}
+                avatarUrl={players[entry.userId]?.avatarUrl}
                 mode="reveal"
                 revealed={isRevealed}
                 onClick={() => {

@@ -170,13 +170,13 @@ function App() {
       setTimeout(() => {
         toastWithAnimation("ルームを作成しました！", { type: "success" });
         navigate(`/room/${roomId}`);
-        console.log("✅ createRoom: success", {
+        console.log("createRoom: success", {
           nickname: info.nickname,
           roomId,
         });
       }, 300);
     } catch (err) {
-      console.error("❌ createRoom error", err);
+      console.error("createRoom error", err);
       toastWithAnimation("ルームの作成に失敗しました。", { type: "error" });
     }
   };

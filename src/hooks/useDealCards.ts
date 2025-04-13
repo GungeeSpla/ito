@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { ref, set, child } from "firebase/database";
 import { db } from "../firebase";
-import { PlayerInfo } from "@/types/Player";
+import { PlayerInfo } from "@/types/PlayerInfo";
 
 interface UseDealCardsProps {
   phase: string;

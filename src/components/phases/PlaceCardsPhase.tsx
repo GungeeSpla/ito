@@ -11,7 +11,7 @@ import FallingText from "@/components/common/FallingText";
 import styles from "./PlaceCardsPhase.module.scss";
 import { placeSound } from "@/utils/sounds";
 import cardStyles from "@/components/common/Card.module.scss";
-import { UserInfo } from "@/types/UserInfo";
+import { PlayerInfo } from "@/types/PlayerInfo";
 
 // -----------------------------
 // 型定義
@@ -22,7 +22,7 @@ interface Props {
   nickname: string;
   cardOrder: CardEntry[];
   setCardOrder: (v: CardEntry[]) => void;
-  userInfoMap: Record<string, UserInfo>;
+  players: Record<string, PlayerInfo>;
 }
 
 const PlaceCardsPhase: React.FC<Props> = ({
@@ -31,7 +31,7 @@ const PlaceCardsPhase: React.FC<Props> = ({
   nickname,
   cardOrder,
   setCardOrder,
-  userInfoMap,
+  players,
 }) => {
   const [myCards, setMyCards] = useState<{ value: number; hint?: string }[]>(
     [],
@@ -40,7 +40,6 @@ const PlaceCardsPhase: React.FC<Props> = ({
     source: "hand" | "field";
     value: number;
   } | null>(null);
-  const [players, setPlayers] = useState<Record<string, boolean>>({});
   const [isHost, setIsHost] = useState(false);
   const [level, setLevel] = useState<number>(1);
   const [topic, setTopic] = useState<{
@@ -84,12 +83,6 @@ const PlaceCardsPhase: React.FC<Props> = ({
       }
       prevCardCountRef.current = newOrder.length;
       setCardOrder(newOrder);
-    });
-
-    const playersRef = ref(db, `rooms/${roomId}/players`);
-    onValue(playersRef, (snap) => {
-      const data = snap.val();
-      if (data && typeof data === "object") setPlayers(data);
     });
 
     const hostRef = ref(db, `rooms/${roomId}/host`);
@@ -169,7 +162,7 @@ const PlaceCardsPhase: React.FC<Props> = ({
       const filtered = newOrder.filter(
         (c: CardEntry) =>
           !(
-            userInfoMap[c.userId]?.nickname === nickname &&
+            players[c.userId]?.nickname === nickname &&
             c.card === activeCard.value
           ),
       );
@@ -201,7 +194,7 @@ const PlaceCardsPhase: React.FC<Props> = ({
     let hintToRestore = "";
     const found = cardOrder.find(
       (c) =>
-        userInfoMap[c.userId]?.nickname === nickname && c.card === cardToRemove,
+        players[c.userId]?.nickname === nickname && c.card === cardToRemove,
     );
     if (found?.hint) {
       hintToRestore = found.hint;
@@ -211,8 +204,7 @@ const PlaceCardsPhase: React.FC<Props> = ({
       currentOrder.filter(
         (c: CardEntry) =>
           !(
-            userInfoMap[c.userId]?.nickname === nickname &&
-            c.card === cardToRemove
+            players[c.userId]?.nickname === nickname && c.card === cardToRemove
           ),
       ),
     );
@@ -304,10 +296,10 @@ const PlaceCardsPhase: React.FC<Props> = ({
         {/* 出されたカード */}
         <AnimatePresence initial={false}>
           {cardOrder.map((entry, index) => {
-            const isMine = userInfoMap[entry.userId]?.nickname === nickname;
+            const isMine = players[entry.userId]?.nickname === nickname;
             return (
               <motion.div
-                key={`${userInfoMap[entry.userId]?.nickname}-${entry.card}`}
+                key={`${players[entry.userId]?.nickname}-${entry.card}`}
                 initial={{
                   opacity: 0,
                   translateY: isMine ? "2em" : "-2em",
@@ -325,11 +317,11 @@ const PlaceCardsPhase: React.FC<Props> = ({
               >
                 <Card
                   value={entry.card}
-                  name={userInfoMap[entry.userId]?.nickname}
-                  color={userInfoMap[entry.userId]?.color}
-                  avatarUrl={userInfoMap[entry.userId]?.avatarUrl}
+                  name={players[entry.userId]?.nickname}
+                  color={players[entry.userId]?.color}
+                  avatarUrl={players[entry.userId]?.avatarUrl}
                   revealed={false}
-                  isMine={userInfoMap[entry.userId]?.nickname === nickname}
+                  isMine={players[entry.userId]?.nickname === nickname}
                   mode="place"
                   location="field"
                   onClick={

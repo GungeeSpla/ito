@@ -18,7 +18,7 @@ import { selectRandomTopics } from "@/utils/selectRandomTopics";
 import { toastWithAnimation } from "@/utils/toast";
 import { CardEntry } from "@/types/CardEntry";
 import { useUser } from "@/hooks/useUser";
-import { PlayerInfo } from "@/types/Player";
+import { PlayerInfo } from "@/types/PlayerInfo";
 import WaitingPhase from "@/components/phases/WaitingPhase";
 import ChooseTopicPhase from "@/components/phases/ChooseTopicPhase";
 import DealCardsPhase from "@/components/phases/DealCardsPhase";
@@ -26,7 +26,7 @@ import PlaceCardsPhase from "@/components/phases/PlaceCardsPhase";
 import RevealCardsPhase from "@/components/phases/RevealCardsPhase";
 import { useDealCards } from "@/hooks/useDealCards";
 import { useJoinRoom } from "@/hooks/useJoinRoom";
-import { UserInfo } from "@/types/UserInfo";
+import { assignColorToPlayers } from "@/utils/assignColorToPlayers";
 
 // --------------------------------------------
 // ルーム画面（/room/:roomId）
@@ -73,33 +73,6 @@ const Room = () => {
       navigate("/", { replace: true });
     }
   }, [roomId, navigate]);
-  const [userInfoMap, setUserInfoMap] = useState<Record<string, UserInfo>>({});
-  useEffect(() => {
-    const fetchUserInfoMap = async () => {
-      const snapshot = await get(ref(db, "users"));
-      if (!snapshot.exists()) return;
-
-      const users = snapshot.val();
-      const map: Record<string, UserInfo> = {};
-      Object.keys(players).forEach((userId) => {
-        const user = users[userId];
-        if (user && user.nickname) {
-          map[userId] = {
-            userId,
-            nickname: user.nickname,
-            color: user.color,
-            avatarUrl: user.avatarUrl,
-            createdAt: user.createdAt,
-            lastActive: user.lastActive,
-          };
-        }
-      });
-      setUserInfoMap(map);
-    };
-    if (Object.keys(players).length > 0) {
-      fetchUserInfoMap();
-    }
-  }, [players]);
 
   // お題の再抽選
   const onRefreshTopics = async () => {
@@ -207,6 +180,8 @@ const Room = () => {
       }
     });
 
+    await assignColorToPlayers(roomId, players);
+
     const updates = {
       cardOrder: [],
       cards: {},
@@ -214,7 +189,6 @@ const Room = () => {
       host,
       level,
       phase: "chooseTopic",
-      players,
       revealedCards: [],
       selectedTopic: {},
       usedTopics: usedTopics,
@@ -223,7 +197,6 @@ const Room = () => {
       topicOptions: randomTopics,
       votes: {},
     };
-
     update(ref(db, `rooms/${safeRoomId}`), updates);
 
     console.log("ゲームを開始します。");
@@ -337,7 +310,7 @@ const Room = () => {
         nickname={userInfo.nickname}
         cardOrder={cardOrder}
         setCardOrder={setCardOrder}
-        userInfoMap={userInfoMap}
+        players={players}
       />
     );
   }
@@ -350,7 +323,7 @@ const Room = () => {
         nickname={userInfo.nickname}
         cardOrder={cardOrder}
         level={level}
-        userInfoMap={userInfoMap}
+        players={players}
       />
     );
   }
