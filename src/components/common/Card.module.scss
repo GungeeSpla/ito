@@ -17,6 +17,10 @@
   }
 }
 
+.handCard {
+  cursor: pointer;
+}
+
 // 選択中のカード
 .active {
   translate: 0em -0.5em;

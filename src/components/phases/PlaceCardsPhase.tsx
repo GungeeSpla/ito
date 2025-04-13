@@ -347,7 +347,7 @@ const PlaceCardsPhase: React.FC<Props> = ({
                 <Card
                   key={`hand-${card.value}`}
                   value={card.value}
-                  mode="reveal"
+                  mode="place"
                   location="hand"
                   isActive={activeCard?.value === card.value}
                   onClick={(e) => {

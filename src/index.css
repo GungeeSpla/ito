@@ -68,7 +68,9 @@ body {
   min-height: 100vh;
 }
 
-.bg-gradient {
+.bg-gradient,
+.bg-gradient-fail,
+.bg-gradient-success {
   min-width: 100vw;
   min-height: 100vh;
   position: fixed;
@@ -78,6 +80,21 @@ body {
   background: radial-gradient(circle at center,
       transparent 60%,
       rgba(0, 0, 0, 0.5) 100%);
+}
+
+.bg-gradient-fail {
+  z-index: 0;
+  background: radial-gradient(circle at center,
+      transparent 60%,
+      rgba(255, 0, 0, 0.2) 100%);
+}
+
+.bg-gradient-success {
+  z-index: 0;
+  mix-blend-mode: screen;
+  background: radial-gradient(circle at center,
+      transparent 60%,
+      rgba(176, 240, 2, 0.2) 100%);
 }
 
 /* --------------------------------------------

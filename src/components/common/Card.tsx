@@ -59,7 +59,8 @@ const Card: React.FC<CardProps> = ({
   return (
     <div
       className={`${styles.card} ${playerClass} ${className} ${isActive ? styles.active : ""}
-        ${mode === "place" ? styles.placeCard : styles.revealCard}`}
+        ${mode === "place" ? styles.placeCard : styles.revealCard}
+        ${location === "hand" ? styles.handCard : ""}`}
       onClick={onClick}
     >
       {/*--- カードの表面と裏面を包括 ---*/}
@@ -84,7 +85,7 @@ const Card: React.FC<CardProps> = ({
           style={{ backfaceVisibility: "hidden" }}
         >
           <div className={styles.dot} />
-          {(mode === "reveal" || value === 0) && (
+          {(mode === "reveal" || value === 0 || location === "hand") && (
             <NumberSVG className={styles.numberSvg} value={value} />
           )}
           {location === "hand" && hint && (

@@ -223,9 +223,11 @@ const RevealCardsPhase: React.FC<Props> = ({
 
       {/* ✅ 成功演出 */}
       {status === "success" && <EmojiBurst />}
+      {status === "success" && <div className="bg-gradient-success"></div>}
 
       {/* ❌ 失敗演出 */}
       {status === "fail" && <FailBurst />}
+      {status === "fail" && <div className="bg-gradient-fail"></div>}
     </div>
   );
 };
