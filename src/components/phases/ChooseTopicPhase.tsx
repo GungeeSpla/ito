@@ -202,7 +202,7 @@ const ChooseTopicPhase: React.FC<Props> = ({
 
       if (topVotes.length > 1 && tiebreakMethod === "host") {
         const message = isHost
-          ? "同票なのでホストが決めてください！"
+          ? "同票なのでホストのあなたが決めてください！"
           : "同票なのでホストに決めてもらいます。";
         toastWithAnimation(message, {
           duration: 5000,

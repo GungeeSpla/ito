@@ -26,29 +26,6 @@ interface CardProps {
   color?: string;
 }
 
-// -----------------------------
-// プレイヤー名から背景色クラスを決定するユーティリティ
-// -----------------------------
-const getPlayerColorClass = (name: string | undefined): string => {
-  if (!name) return "bg-gray-400";
-  const colors = [
-    "bg-red-400",
-    "bg-blue-400",
-    "bg-green-400",
-    "bg-yellow-400",
-    "bg-purple-400",
-    "bg-pink-400",
-    "bg-teal-400",
-    "bg-orange-400",
-  ];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const index = Math.abs(hash) % colors.length;
-  return colors[index];
-};
-
 const Card: React.FC<CardProps> = ({
   value,
   name,
@@ -123,12 +100,13 @@ const Card: React.FC<CardProps> = ({
           className={`${styles.cardBack} ito-card-back
             absolute w-full h-full rounded 
             text-black flex flex-col justify-center items-center
-            backface-hidden rotate-y-180 ${getPlayerColorClass(name)}
+            backface-hidden rotate-y-180
           `}
           style={{
             backfaceVisibility: "hidden",
             transform: "rotateY(180deg)",
-            backgroundColor: color,
+            backgroundColor:
+              color && color !== "transparent" ? color : "#EF4444",
           }}
           title={isMine && typeof value === "number" ? `${value}` : ""}
         >

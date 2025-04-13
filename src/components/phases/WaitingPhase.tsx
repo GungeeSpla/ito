@@ -304,7 +304,7 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
                         className="inline text-yellow-700 ml-1 relative top-[-0.05rem]"
                       />
                     )}
-                    <span className="text-black text-xs">
+                    <span className="text-white text-xs">
                       {id === userId && "（You）"}
                     </span>
                     {isHost && id !== host && (
