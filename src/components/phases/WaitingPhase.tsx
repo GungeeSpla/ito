@@ -263,7 +263,7 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
       <div className="relative w-full text-center px-4">
         {/*-------- 見出し --------*/}
         <h2 className="text-3xl font-bold text-shadow-md mt-0 mb-4">
-          itoレインボーオンライン
+          数字の大きさを感覚でたとえて言葉にするゲーム
         </h2>
         <p className="text-center text-white text-shadow-md my-6">
           {!alreadyJoined ? (
@@ -274,7 +274,7 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
                 <span>
                   フレンドにルームURLに伝えましょう。
                   <br />
-                  2人以上集まったらゲームを開始できます。
+                  2人以上になったらゲームを開始できます。
                 </span>
               ) : (
                 <span>ホストのゲーム開始を待っています。</span>
