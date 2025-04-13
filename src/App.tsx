@@ -129,7 +129,7 @@ function App() {
       const updateData: any = {
         nickname,
         color,
-        avatarUrl,
+        ...(avatarFile && { avatarUrl }),
       };
       await updateUserInfo(updateData);
 
