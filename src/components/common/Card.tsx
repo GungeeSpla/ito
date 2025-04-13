@@ -177,6 +177,21 @@ const Card: React.FC<CardProps> = ({
           </div>
         </div>
       )}
+
+      {/*--- 自分のカードなら下に数字を表示 ---*/}
+      {isMine && typeof value === "number" && (
+        <div
+          className="absolute bottom-[-1.6rem] left-1/2 -translate-x-1/2 text-white text-sm font-bold
+            text-center w-12"
+          style={{
+            background:
+              "linear-gradient(to right, rgba(0,0,0,0.1), rgba(0,0,0,0.5), rgba(0,0,0,0.1))",
+            borderRadius: "4px",
+          }}
+        >
+          {value}
+        </div>
+      )}
     </div>
   );
 };
