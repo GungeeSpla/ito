@@ -5,7 +5,11 @@ import { UserInfo } from "@/types/UserInfo";
 
 const LOCAL_STORAGE_KEY = "userId";
 
-const generateUserId = () => crypto.randomUUID();
+const generateUserId = () => {
+  return typeof crypto !== "undefined" && crypto.randomUUID
+    ? crypto.randomUUID()
+    : Math.random().toString(36).substring(2) + Date.now().toString(36);
+};
 
 export const useUser = () => {
   const [userId, setUserId] = useState<string>("");

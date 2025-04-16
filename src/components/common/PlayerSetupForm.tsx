@@ -79,7 +79,7 @@ const PlayerSetupForm: React.FC<Props> = ({
       {showOptions && (
         <div className="animate-fade-in-down transition-opacity duration-300 opacity-100">
           {/* ---プレイヤーカラー--- */}
-          <SectionTitle>プレイヤーカラー</SectionTitle>
+          <SectionTitle>プレイヤーカラー（任意）</SectionTitle>
           {presetColors.length > 0 && (
             <div>
               {/* カラーパレット */}
