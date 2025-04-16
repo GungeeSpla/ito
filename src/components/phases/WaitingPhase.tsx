@@ -9,6 +9,7 @@ import { PlayerInfo } from "@/types/PlayerInfo";
 import { useUser } from "@/hooks/useUser";
 import PlayerSetupForm from "@/components/common/PlayerSetupForm";
 import SectionTitle from "@/components/common/SectionTitle";
+import { copyToClipboard } from "@/utils/clipboard";
 
 // -----------------------------
 // Props 型定義
@@ -140,13 +141,18 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
   // -----------------------------
   // 現在のページURLをクリップボードにコピー
   // -----------------------------
-  const handleCopyUrl = () => {
-    navigator.clipboard.writeText(window.location.href);
-    toastWithAnimation("ルームURLをコピーしました！", {
-      type: "success",
-    });
+  const handleCopyUrl = async () => {
+    try {
+      await copyToClipboard(window.location.href);
+      toastWithAnimation("ルームURLをコピーしました！", {
+        type: "success",
+      });
+    } catch (err) {
+      toastWithAnimation("コピーに失敗しました。", {
+        type: "error",
+      });
+    }
   };
-
   // -----------------------------
   // プロフィール画像をアップロード・変換する処理
   // -----------------------------
