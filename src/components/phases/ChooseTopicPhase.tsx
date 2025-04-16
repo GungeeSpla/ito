@@ -17,6 +17,7 @@ import WoodyButton from "@/components/common/WoodyButton";
 import ClickOrTouch from "../common/ClickOrTouch";
 import { toastWithAnimation } from "@/utils/toast";
 import styles from "./ChooseTopicPhase.module.scss";
+import { logInfo, logWarn } from "@/utils/logger";
 
 interface Props {
   isHost: boolean; // 現在のプレイヤーがホストかどうか
@@ -75,12 +76,12 @@ const ChooseTopicPhase: React.FC<Props> = ({
         setHasChosen(true);
         setSelectedTitle(topic.title);
         exitTimeoutRef.current = setTimeout(() => {
-          console.log("安全装置によってお題を選択しました:", topic);
+          logWarn(`安全装置によってお題を選択しました: ${topic.title}`);
           if (isHost) {
             chooseTopic(topic);
           }
           exitCalled.current = true;
-        }, 800);
+        }, 1000);
       }
     };
 
@@ -301,7 +302,7 @@ const ChooseTopicPhase: React.FC<Props> = ({
                     (t) => t.title === selectedTitle,
                   );
                   if (selected) {
-                    console.log("お題を選択しました:", selected);
+                    logInfo(`お題を選択しました: ${selected.title}`);
                     if (isHost) {
                       chooseTopic(selected);
                     }

@@ -63,7 +63,6 @@ const NameSVG: React.FC<NameSVGProps> = ({ text, className, style }) => {
     }
 
     document.body.removeChild(tempSvg);
-    console.log(bestSize);
     fontSizeCache.set(text, bestSize);
 
     if (isMounted.current) {

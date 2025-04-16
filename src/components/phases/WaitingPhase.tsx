@@ -10,6 +10,7 @@ import { useUser } from "@/hooks/useUser";
 import PlayerSetupForm from "@/components/common/PlayerSetupForm";
 import SectionTitle from "@/components/common/SectionTitle";
 import { copyToClipboard } from "@/utils/clipboard";
+import { logInfo, logError } from "@/utils/logger";
 
 // -----------------------------
 // Props 型定義
@@ -80,6 +81,26 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
     "#4C1D95",
     "#475569",
   ];
+  const prevPlayersRef = useRef<Record<string, PlayerInfo>>({});
+  useEffect(() => {
+    const prev = prevPlayersRef.current;
+    const curr = players;
+    if (Object.keys(prev).length !== 0) {
+      const added = Object.keys(curr).filter((id) => !prev[id]);
+      const removed = Object.keys(prev).filter((id) => !curr[id]);
+      if (added.length) {
+        logInfo("プレイヤーが参加しました。", {
+          名前: added.map((id) => curr[id]?.nickname ?? id).join(", "),
+        });
+      }
+      if (removed.length) {
+        logInfo("プレイヤーが退出しました。", {
+          名前: removed.map((id) => prev[id]?.nickname ?? id).join(", "),
+        });
+      }
+    }
+    prevPlayersRef.current = players;
+  }, [players]);
 
   // 最大クリアレベルを取得
   useEffect(() => {
@@ -225,7 +246,7 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
         try {
           avatarUrl = await uploadAvatarImage(avatarFile, userId);
         } catch (e) {
-          console.warn("画像アップロードに失敗しました", e);
+          logError("画像アップロードに失敗しました", e);
           toastWithAnimation("画像のアップロードに失敗しました。", {
             type: "warn",
           });

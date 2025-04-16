@@ -13,6 +13,7 @@ import { placeSound } from "@/utils/sounds";
 import cardStyles from "@/components/common/Card.module.scss";
 import { PlayerInfo } from "@/types/PlayerInfo";
 import CardArea from "@/components/common/CardArea";
+import { logInfo } from "@/utils/logger";
 
 // -----------------------------
 // 型定義
@@ -51,6 +52,7 @@ const PlaceCardsPhase: React.FC<Props> = ({
   const [editingValue, setEditingValue] = useState<number | null>(null);
   const prevCardCountRef = useRef(0);
   const [initialRender, setInitialRender] = useState(true);
+  const prevOrderRef = useRef<CardEntry[]>([]);
 
   // 初回マウント時にだけ true にする
   useEffect(() => {
@@ -64,6 +66,7 @@ const PlaceCardsPhase: React.FC<Props> = ({
   // Firebase購読系（初期化時）
   // -----------------------------
   useEffect(() => {
+    // カード情報
     const cardRef = ref(db, `rooms/${roomId}/cards/${userId}`);
     get(cardRef).then((snap) => {
       if (snap.exists()) {
@@ -75,17 +78,48 @@ const PlaceCardsPhase: React.FC<Props> = ({
       }
     });
 
+    // 場のカードの監視
     const orderRef = ref(db, `rooms/${roomId}/cardOrder`);
-    onValue(orderRef, (snap) => {
+    const unsubscribe = onValue(orderRef, (snap) => {
+      // 場のカードの配列
       const data = snap.val();
       const newOrder = Array.isArray(data) ? [...data] : [];
+      const prevOrder = prevOrderRef.current;
+
+      //
+      const added = newOrder.filter(
+        (n) =>
+          !prevOrder.some((p) => p.userId === n.userId && p.card === n.card),
+      );
+      const removed = prevOrder.filter(
+        (p) =>
+          !newOrder.some((n) => n.userId === p.userId && n.card === p.card),
+      );
+
+      for (const a of added) {
+        const name = players[a.userId]?.nickname || a.userId;
+        logInfo(`${name} がカードを出しました。`);
+      }
+
+      for (const r of removed) {
+        const name = players[r.userId]?.nickname || r.userId;
+        logInfo(`${name} がカードを取り下げました。`);
+      }
+
+      // 前回の値よりもカードが増えているならカード配置サウンドを鳴らす
       if (newOrder.length > prevCardCountRef.current) {
         placeSound.play();
       }
+
+      // 前回の値として記憶
       prevCardCountRef.current = newOrder.length;
+      prevOrderRef.current = newOrder;
+
+      // cardOrderに代入
       setCardOrder(newOrder);
     });
 
+    // ホスト
     const hostRef = ref(db, `rooms/${roomId}/host`);
     get(hostRef).then((snap) => {
       if (snap.exists() && snap.val() === userId) {
@@ -93,15 +127,19 @@ const PlaceCardsPhase: React.FC<Props> = ({
       }
     });
 
+    // レベル
     const levelRef = ref(db, `rooms/${roomId}/level`);
     onValue(levelRef, (snap) => {
       if (snap.exists()) setLevel(snap.val());
     });
 
+    // お題
     const topicRef = ref(db, `rooms/${roomId}/topic`);
     onValue(topicRef, (snap) => {
       if (snap.exists()) setTopic(snap.val());
     });
+
+    return () => unsubscribe();
   }, [roomId, nickname]);
 
   // -----------------------------
@@ -113,13 +151,15 @@ const PlaceCardsPhase: React.FC<Props> = ({
       if (e.target.closest("." + cardStyles.handCard)) {
         return;
       }
-      console.log("カードの選択を解除しました。");
+      if (activeCard) {
+        logInfo("カードの選択を解除しました。");
+      }
       setActiveCard(null);
     };
 
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
-  }, []);
+  }, [activeCard]);
 
   // -----------------------------
   // 手札を配り直す
@@ -331,7 +371,7 @@ const PlaceCardsPhase: React.FC<Props> = ({
                   location="hand"
                   isActive={activeCard?.value === card.value}
                   onClick={(e) => {
-                    console.log("カードを選択しました:", card.value);
+                    logInfo(`カードを選択しました: ${card.value}`);
                     e.stopPropagation();
                     setActiveCard({ source: "hand", value: card.value });
                   }}

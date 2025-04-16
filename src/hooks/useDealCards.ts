@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { ref, set, child } from "firebase/database";
 import { db } from "../firebase";
 import { PlayerInfo } from "@/types/PlayerInfo";
+import { logError } from "@/utils/logger";
 
 interface UseDealCardsProps {
   phase: string;
@@ -29,7 +30,7 @@ export const useDealCards = ({
         .slice(0, totalCards);
 
       if (shuffledNumbers.length < totalCards) {
-        console.error("カードが足りません！");
+        logError("カードが足りません。");
         return;
       }
 

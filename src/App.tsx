@@ -9,6 +9,9 @@ import NoticeGame from "@/components/common/NoticeGame";
 import { useUser } from "@/hooks/useUser";
 import PlayerSetupForm from "@/components/common/PlayerSetupForm";
 import NameSVG from "@/components/common/NameSVG";
+import { logInfo, logSuccess, logError } from "@/utils/logger";
+import { deleteOldRooms } from "@/utils/deleteOldRooms";
+import { deleteOldUsers } from "@/utils/deleteOldUsers";
 
 // ----------------------------------------
 // トップページコンポーネント：ルーム作成画面
@@ -102,9 +105,16 @@ function App() {
   const createRoom = async () => {
     try {
       setRoomLoading(true);
-      console.log("createRoom: start");
+
+      logInfo("データベースのクリーンアップをしています…");
+      deleteOldRooms();
+      deleteOldUsers();
+      logInfo("データベースのクリーンアップが完了しました。");
+
+      logInfo("ルームを作成しています…");
 
       if (!userId) {
+        logError("ユーザーIDが取得できませんでした。");
         toastWithAnimation("ユーザーIDが取得できませんでした。", {
           type: "error",
         });
@@ -116,7 +126,7 @@ function App() {
         try {
           avatarUrl = await uploadAvatarImage(avatarFile, userId);
         } catch (e) {
-          console.warn("画像アップロードに失敗しました", e);
+          logError("画像のアップロードに失敗しました。", e);
           toastWithAnimation("画像のアップロードに失敗しました。", {
             type: "warn",
           });
@@ -170,13 +180,10 @@ function App() {
       setTimeout(() => {
         toastWithAnimation("ルームを作成しました！", { type: "success" });
         navigate(`/room/${roomId}`);
-        console.log("createRoom: success", {
-          nickname: info.nickname,
-          roomId,
-        });
+        logSuccess("ルームの作成に成功しました。", { roomId });
       }, 300);
     } catch (err) {
-      console.error("createRoom error", err);
+      logSuccess("ルームの作成に失敗しました。", err);
       toastWithAnimation("ルームの作成に失敗しました。", { type: "error" });
     }
   };

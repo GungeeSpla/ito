@@ -1,8 +1,11 @@
 import { get, ref, remove } from "firebase/database";
 import { db } from "@/firebase";
+import { logInfo, logWarn, logSuccess } from "@/utils/logger";
 
 // 古いユーザーを削除（1ヶ月非アクティブ）＋アバターも削除
 export const deleteOldUsers = async () => {
+  logInfo("古いユーザーを削除しています…");
+
   const usersRef = ref(db, "users");
   const snap = await get(usersRef);
   const users = snap.val() ?? {};
@@ -24,16 +27,16 @@ export const deleteOldUsers = async () => {
             body: JSON.stringify({ userId }),
           });
         } catch (err) {
-          console.warn(`アバター削除失敗: ${userId}`, err);
+          logWarn(`アバター画像の削除に失敗しました: ${userId}`, err);
         }
       }
 
       // users/{userId} を削除
       try {
         await remove(ref(db, `users/${userId}`));
-        console.log(`ユーザー削除: ${userId}`);
+        logSuccess(`ユーザーを削除しました: ${userId}`);
       } catch (err) {
-        console.warn(`ユーザー削除失敗: ${userId}`, err);
+        logWarn(`ユーザーの削除に失敗しました: ${userId}`, err);
       }
     }
   });

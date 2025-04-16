@@ -12,8 +12,6 @@ import {
 import { db } from "@/firebase";
 import { Topic } from "@/types/Topic";
 import { topics } from "@/data/topics";
-import { deleteOldRooms } from "@/utils/deleteOldRooms";
-import { deleteOldUsers } from "@/utils/deleteOldUsers";
 import { selectRandomTopics } from "@/utils/selectRandomTopics";
 import { toastWithAnimation } from "@/utils/toast";
 import { CardEntry } from "@/types/CardEntry";
@@ -27,6 +25,7 @@ import RevealCardsPhase from "@/components/phases/RevealCardsPhase";
 import { useDealCards } from "@/hooks/useDealCards";
 import { useJoinRoom } from "@/hooks/useJoinRoom";
 import { assignColorToPlayers } from "@/utils/assignColorToPlayers";
+import { logSuccess, logError, logInfo } from "@/utils/logger";
 
 // --------------------------------------------
 // ルーム画面（/room/:roomId）
@@ -86,20 +85,22 @@ const Room = () => {
       customTopics,
     );
     await set(ref(db, `rooms/${safeRoomId}/topicOptions`), randomTopics);
+    logInfo("お題を再抽選しました。", {
+      お題候補: randomTopics.map((t) => t.title).join(", "),
+    });
   };
 
   // -----------------------------
   // 初期化＆リアルタイム監視（DBの値が変わるたびに再描画）
   // -----------------------------
   useEffect(() => {
-    deleteOldRooms();
-    deleteOldUsers();
 
     // 初回読み取り：ルームが存在するかチェック
     const roomRef = ref(db, `rooms/${safeRoomId}`);
     get(roomRef)
       .then((snap) => {
         if (!snap.exists()) {
+          logError("ルームが存在しません。");
           toastWithAnimation("ルームが存在しません。", {
             type: "error",
           });
@@ -115,7 +116,7 @@ const Room = () => {
         toastWithAnimation("初期化に失敗しました。", {
           type: "error",
         });
-        console.error("初期読み込み失敗", err);
+        logError("初期化に失敗しました。", err);
         setLoading(false);
       });
 
@@ -199,10 +200,14 @@ const Room = () => {
     };
     update(ref(db, `rooms/${safeRoomId}`), updates);
 
-    console.log("ゲームを開始します。");
-    console.log("- カテゴリ:", selectedSet);
-    console.log("- レベル:", level);
-    console.log("- お題候補:", randomTopics);
+    logSuccess("ゲームを開始します。", {
+      お題カテゴリ: selectedSet,
+      プレイヤー: Object.values(players)
+        .map((p) => p.nickname)
+        .join(", "),
+      レベル: level,
+      お題候補: randomTopics.map((t) => t.title).join(", "),
+    });
   };
 
   // -----------------------------
