@@ -37,9 +37,9 @@ const VolumeControl: React.FC = () => {
 
   // 音量に応じてアイコン切替
   const getVolumeIcon = () => {
-    if (volume === 0) return <VolumeX size={16} className="absolute" />;
-    if (volume <= 0.49) return <Volume1 size={16} className="absolute" />;
-    return <Volume2 size={16} className="absolute" />;
+    if (volume === 0) return <VolumeX size={16} />;
+    if (volume <= 0.49) return <Volume1 size={16} />;
+    return <Volume2 size={16} />;
   };
 
   return (
