@@ -1,5 +1,4 @@
-// components/VolumeControl.tsx
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Howler } from "howler";
 import * as Slider from "@radix-ui/react-slider";
 import { Volume1, Volume2, VolumeX } from "lucide-react";
@@ -11,10 +10,11 @@ const VolumeControl: React.FC = () => {
   const [showSlider, setShowSlider] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const hideTimeout = useRef<NodeJS.Timeout | null>(null);
-  const storedVolume = localStorage.getItem(VOLUME_STORAGE_KEY);
+  const sliderRef = useRef<HTMLDivElement | null>(null);
 
   // 初回：localStorageから読み込み
   useEffect(() => {
+    const storedVolume = localStorage.getItem(VOLUME_STORAGE_KEY);
     if (storedVolume) {
       const vol = parseFloat(storedVolume);
       setVolume(vol);
@@ -35,17 +35,47 @@ const VolumeControl: React.FC = () => {
     hideTimeout.current = setTimeout(() => setShowSlider(false), 3000);
   };
 
-  // 音量に応じてアイコン切替
   const getVolumeIcon = () => {
     if (volume === 0) return <VolumeX size={16} />;
     if (volume <= 0.49) return <Volume1 size={16} />;
     return <Volume2 size={16} />;
   };
 
+  // スクロール防止ロジック（スマホ用）
+  const preventScroll = useCallback((e: TouchEvent) => {
+    e.preventDefault();
+  }, []);
+
+  useEffect(() => {
+    const el = sliderRef.current;
+    if (!el) return;
+
+    const handleTouchStart = () => {
+      document.body.addEventListener("touchmove", preventScroll, {
+        passive: false,
+      });
+    };
+    const handleTouchEnd = () => {
+      document.body.removeEventListener("touchmove", preventScroll);
+    };
+
+    el.addEventListener("touchstart", handleTouchStart);
+    el.addEventListener("touchend", handleTouchEnd);
+    el.addEventListener("touchcancel", handleTouchEnd);
+
+    return () => {
+      el.removeEventListener("touchstart", handleTouchStart);
+      el.removeEventListener("touchend", handleTouchEnd);
+      el.removeEventListener("touchcancel", handleTouchEnd);
+      document.body.removeEventListener("touchmove", preventScroll);
+    };
+  }, [preventScroll]);
+
   return (
     <div className="fixed bottom-4 right-4 z-50">
       <div className="relative flex flex-col items-center">
         <div
+          ref={sliderRef}
           className={`
             ${showSlider ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"}
             transition-all duration-300 origin-bottom bg-white/50 w-8 rounded-full
@@ -71,7 +101,7 @@ const VolumeControl: React.FC = () => {
                 </Slider.Track>
                 <Slider.Thumb
                   className="block w-4 h-4 bg-white border border-gray-500 rounded-full shadow
-                hover:bg-gray-200 focus:outline-none transition"
+                  hover:bg-gray-200 focus:outline-none transition"
                   aria-label="Volume"
                 />
               </Slider.Root>
@@ -80,7 +110,6 @@ const VolumeControl: React.FC = () => {
           <div className="w-2 h-2" />
         </div>
 
-        {/* スピーカーアイコン（クリックでスライダー表示） */}
         <button
           onClick={triggerSliderTemporaryDisplay}
           className="w-8 h-8 p-0 m-0 bg-white/80 text-gray-800 rounded-full shadow grid place-items-center

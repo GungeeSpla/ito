@@ -394,7 +394,7 @@ const ChooseTopicPhase: React.FC<Props> = ({
           </div>
 
           {isHost && (
-            <div className="mt-4 text-white text-shadow-md text-center">
+            <div className="my-4 text-white text-shadow-md text-center">
               <label className="mr-2">同票時の決定方法：</label>
               <select
                 value={tiebreakMethod}

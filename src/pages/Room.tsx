@@ -90,12 +90,8 @@ const Room = () => {
     });
   };
 
-  // -----------------------------
   // 初期化＆リアルタイム監視（DBの値が変わるたびに再描画）
-  // -----------------------------
   useEffect(() => {
-
-    // 初回読み取り：ルームが存在するかチェック
     const roomRef = ref(db, `rooms/${safeRoomId}`);
     get(roomRef)
       .then((snap) => {
@@ -149,14 +145,10 @@ const Room = () => {
     };
   }, [roomId, navigate]);
 
-  // -----------------------------
-  // フェーズ: dealCards のときカードを配る
-  // -----------------------------
+  // カードを配る
   useDealCards({ phase, isHost, players, roomId: safeRoomId, level });
 
-  // -----------------------------
   // ゲーム開始（ホストのみ可能）
-  // -----------------------------
   const startGame = async () => {
     if (!isHost) return;
 
@@ -247,9 +239,19 @@ const Room = () => {
     });
   };
 
+  // フェーズ変更時にページ最上部にスクロール
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }, 100); // DOM切り替え後に
+    return () => clearTimeout(timeout);
+  }, [phase]);
+
   // -----------------------------
-  // ロード中はプレースホルダーを表示
+  // 各フェーズごとに表示を切り替え
   // -----------------------------
+
+  // ロード中
   if (loading)
     return (
       <div className="flex items-center justify-center h-screen text-white">
@@ -259,6 +261,7 @@ const Room = () => {
       </div>
     );
 
+  // ユーザー情報取得中
   if (!userId || !userInfo) {
     return (
       <div className="flex items-center justify-center h-screen text-white">
@@ -269,9 +272,7 @@ const Room = () => {
     );
   }
 
-  // -----------------------------
-  // 各フェーズごとに表示を切り替え
-  // -----------------------------
+  // 待機フェーズ
   if (phase === "waiting") {
     return (
       <WaitingPhase
@@ -292,6 +293,7 @@ const Room = () => {
     );
   }
 
+  // お題選択フェーズ
   if (phase === "chooseTopic") {
     return (
       <ChooseTopicPhase
@@ -303,10 +305,12 @@ const Room = () => {
     );
   }
 
+  // 配布フェーズ
   if (phase === "dealCards") {
     return <DealCardsPhase isHost={isHost} />;
   }
 
+  // プレイフェーズ
   if (phase === "placeCards") {
     return (
       <PlaceCardsPhase
@@ -320,6 +324,7 @@ const Room = () => {
     );
   }
 
+  // 結果確認フェーズ
   if (phase === "revealCards") {
     return (
       <RevealCardsPhase
