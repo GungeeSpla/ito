@@ -31,24 +31,28 @@ const EditHintModal: React.FC<Props> = ({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md w-[90vw] p-4 rounded bg-white shadow-lg z-50 fixed left-1/2 -translate-x-1/2 top-1/4 sm:top-1/2 sm:-translate-y-1/2">
         <DialogHeader>
           <DialogTitle>たとえワードを入力</DialogTitle>
           <DialogDescription>
             数値をたとえるワードを入力できます。
           </DialogDescription>
         </DialogHeader>
+
         <Textarea
           value={hint}
           onChange={(e) => setHint(e.target.value)}
           placeholder="例：お父さんの靴下"
           className="h-24"
         />
-        <DialogFooter className="mt-4">
-          <Button variant="outline" onClick={onClose}>
+
+        <DialogFooter className="mt-4 flex flex-row gap-2 justify-end">
+          <Button variant="outline" onClick={onClose} className="flex-1">
             キャンセル
           </Button>
-          <Button onClick={() => onSubmit(hint)}>決定</Button>
+          <Button onClick={() => onSubmit(hint)} className="flex-1">
+            決定
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
