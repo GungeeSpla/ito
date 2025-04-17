@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,7 +10,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
+// Propsの型
 type Props = {
   open: boolean;
   onClose: () => void;
@@ -22,16 +24,24 @@ const ProposalModal: React.FC<Props> = ({ open, onClose, onSubmit }) => {
   const [min, setMin] = useState("");
   const [max, setMax] = useState("");
 
+  // モーダルが開いたときにスクロール位置をトップに戻す（スマホ対策）
+  useEffect(() => {
+    if (open) {
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+      }, 50);
+    }
+  }, [open]);
+
   const handleSubmit = () => {
     if (!title.trim()) return;
 
-    const topic = {
+    onSubmit({
       title: title.trim(),
       min: min.trim(),
       max: max.trim(),
-    };
+    });
 
-    onSubmit(topic);
     setTitle("");
     setMin("");
     setMax("");
@@ -47,18 +57,23 @@ const ProposalModal: React.FC<Props> = ({ open, onClose, onSubmit }) => {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent
+        className="p-4 rounded bg-white shadow-lg z-50 fixed left-1/2 -translate-x-1/2 
+          sm:max-w-md w-[90vw]
+          top-[1rem]    sm:top-1/2
+          translate-y-0 sm:-translate-y-1/2"
+      >
         <DialogHeader>
           <DialogTitle>お題を提案する</DialogTitle>
           <DialogDescription>
-            タイトルは必須です。1と100の意味は省略できます。
+            タイトルは必須。1と100の意味は省略できます。
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-4">
           <div>
             <Label htmlFor="title">タイトル</Label>
-            <Input
+            <Textarea
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -89,11 +104,13 @@ const ProposalModal: React.FC<Props> = ({ open, onClose, onSubmit }) => {
           </div>
         </div>
 
-        <DialogFooter className="mt-4">
-          <Button variant="outline" onClick={handleCancel}>
+        <DialogFooter className="mt-4 flex flex-row gap-2 justify-end">
+          <Button variant="outline" onClick={handleCancel} className="flex-1">
             キャンセル
           </Button>
-          <Button onClick={handleSubmit}>決定</Button>
+          <Button onClick={handleSubmit} className="flex-1">
+            決定
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

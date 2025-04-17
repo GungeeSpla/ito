@@ -24,3 +24,8 @@ export const placeSound = new Howl({
   src: ["/sounds/place.mp3"],
   volume: 1,
 });
+
+export const returnSound = new Howl({
+  src: ["/sounds/return.mp3"],
+  volume: 1,
+});

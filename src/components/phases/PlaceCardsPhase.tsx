@@ -9,7 +9,7 @@ import { Eye, Home, RefreshCcw } from "lucide-react";
 import WoodyButton from "@/components/common/WoodyButton";
 import FallingText from "@/components/common/FallingText";
 import styles from "./PlaceCardsPhase.module.scss";
-import { placeSound } from "@/utils/sounds";
+import { placeSound, returnSound } from "@/utils/sounds";
 import cardStyles from "@/components/common/Card.module.scss";
 import { PlayerInfo } from "@/types/PlayerInfo";
 import CardArea from "@/components/common/CardArea";
@@ -109,6 +109,11 @@ const PlaceCardsPhase: React.FC<Props> = ({
       // 前回の値よりもカードが増えているならカード配置サウンドを鳴らす
       if (newOrder.length > prevCardCountRef.current) {
         placeSound.play();
+      }
+
+      // 前回の値よりもカードが増えているならカード配置サウンドを鳴らす
+      if (newOrder.length < prevCardCountRef.current) {
+        returnSound.play();
       }
 
       // 前回の値として記憶

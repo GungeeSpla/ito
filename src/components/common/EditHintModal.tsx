@@ -31,7 +31,12 @@ const EditHintModal: React.FC<Props> = ({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="sm:max-w-md w-[90vw] p-4 rounded bg-white shadow-lg z-50 fixed left-1/2 -translate-x-1/2 top-1/4 sm:top-1/2 sm:-translate-y-1/2">
+      <DialogContent
+        className="p-4 rounded bg-white shadow-lg z-50 fixed left-1/2 -translate-x-1/2
+          sm:max-w-md w-[90vw]
+          top-[1rem]    sm:top-1/2
+          translate-y-0 sm:-translate-y-1/2"
+      >
         <DialogHeader>
           <DialogTitle>たとえワードを入力</DialogTitle>
           <DialogDescription>

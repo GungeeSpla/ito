@@ -268,7 +268,7 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
   // UI描画
   // -----------------------------
   return (
-    <div className="relative min-h-screen text-white">
+    <div className="relative min-h-screen text-white overflow-x-hidden">
       {/* ヘッダー */}
       <div key="ito-header" className="relative h-12">
         {/* 中断ボタン */}
@@ -290,7 +290,7 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
       <div className="relative w-full text-center px-4">
         {/*-------- 見出し --------*/}
         <h2 className="text-3xl font-bold text-shadow-md mt-0 mb-4">
-          数字の大きさを言葉でたとえて価値観を共有するゲーム
+          数字の大きさを言葉でたとえて価値観を比べるゲーム
         </h2>
         <p className="text-center text-white text-shadow-md my-6">
           {!alreadyJoined ? (

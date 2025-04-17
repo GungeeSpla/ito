@@ -81,7 +81,7 @@ const ChooseTopicPhase: React.FC<Props> = ({
             chooseTopic(topic);
           }
           exitCalled.current = true;
-        }, 1000);
+        }, 800);
       }
     };
 
@@ -293,84 +293,86 @@ const ChooseTopicPhase: React.FC<Props> = ({
 
         <div className="max-w-3xl mx-auto flex items-center justify-center text-white px-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <AnimatePresence
-              onExitComplete={() => {
-                if (exitCalled.current) return;
-                exitCalled.current = true;
-                if (selectedTitle) {
-                  const selected = [...topicOptions, ...customTopics].find(
-                    (t) => t.title === selectedTitle,
-                  );
-                  if (selected) {
-                    logInfo(`お題を選択しました: ${selected.title}`);
-                    if (isHost) {
-                      chooseTopic(selected);
-                    }
-                    if (exitTimeoutRef.current) {
-                      clearTimeout(exitTimeoutRef.current);
+            {!exitCalled.current && (
+              <AnimatePresence
+                onExitComplete={() => {
+                  if (exitCalled.current) return;
+                  exitCalled.current = true;
+                  if (selectedTitle) {
+                    const selected = [...topicOptions, ...customTopics].find(
+                      (t) => t.title === selectedTitle,
+                    );
+                    if (selected) {
+                      logInfo(`お題を選択しました: ${selected.title}`);
+                      if (isHost) {
+                        chooseTopic(selected);
+                      }
+                      if (exitTimeoutRef.current) {
+                        clearTimeout(exitTimeoutRef.current);
+                      }
                     }
                   }
-                }
-              }}
-            >
-              {visibleTopics.map((t, index) => {
-                const voteCount = Object.values(votes).filter(
-                  (v) => v === t.title,
-                ).length;
-                const isVoted = votes[nickname] === t.title;
-                const isChosen =
-                  selectedTitle !== null && selectedTitle === t.title;
-                return (
-                  <motion.div
-                    key={t.title}
-                    initial={false}
-                    exit={
-                      hasChosen
-                        ? isChosen
-                          ? { opacity: 0, scale: 1.2 }
-                          : { opacity: 0, scale: 0.95 }
-                        : {}
-                    }
-                    transition={{ duration: 0.5, ease: "easeOut" }}
-                    layout
-                    onClick={() => handleVote(t.title)}
-                    className={`${styles.topicCard}
-                    ${isVoted ? "bg-blue-100 border-blue-500" : "bg-white border-gray-300"} 
-                    ${!hasChosen ? "fadeIn" : "fadeOut"}
-                    pb-8 relative bg-white text-black rounded-xl p-4 text-center transition border border-gray-300`}
-                    style={{ animationDelay: `${400 + index * 100}ms` }}
-                    title="これに投票する"
-                  >
-                    <h3 className="text-lg font-semibold mb-2">{t.title}</h3>
-                    <div className="my-4">
-                      <div className="grid grid-cols-2 text-xs text-gray-800">
-                        <div className="text-left">1 {t.min}</div>
-                        <div className="text-right">{t.max} 100</div>
+                }}
+              >
+                {visibleTopics.map((t, index) => {
+                  const voteCount = Object.values(votes).filter(
+                    (v) => v === t.title,
+                  ).length;
+                  const isVoted = votes[nickname] === t.title;
+                  const isChosen =
+                    selectedTitle !== null && selectedTitle === t.title;
+                  return (
+                    <motion.div
+                      key={t.title}
+                      initial={false}
+                      exit={
+                        hasChosen
+                          ? isChosen
+                            ? { opacity: 0, scale: 1.2 }
+                            : { opacity: 0, scale: 0.95 }
+                          : {}
+                      }
+                      transition={{ duration: 0.5, ease: "easeOut" }}
+                      layout
+                      onClick={() => handleVote(t.title)}
+                      className={`${styles.topicCard}
+                  ${isVoted ? "bg-blue-100 border-blue-500" : "bg-white border-gray-300"} 
+                  ${!hasChosen ? "fadeIn" : "fadeOut"}
+                  pb-8 relative bg-white text-black rounded-xl p-4 text-center transition border border-gray-300`}
+                      style={{ animationDelay: `${400 + index * 100}ms` }}
+                      title="これに投票する"
+                    >
+                      <h3 className="text-lg font-semibold mb-2">{t.title}</h3>
+                      <div className="my-4">
+                        <div className="grid grid-cols-2 text-xs text-gray-800">
+                          <div className="text-left">1 {t.min}</div>
+                          <div className="text-right">{t.max} 100</div>
+                        </div>
+                        <div className="h-[2px] bg-gray-900 mt-1"></div>
                       </div>
-                      <div className="h-[2px] bg-gray-900 mt-1"></div>
-                    </div>
-                    <p className="text-sm text-gray-900 mb-2">
-                      票: {voteCount} {isVoted && <span>（投票済み）</span>}
-                    </p>
-                    {isHost && (
-                      <div className="flex justify-center">
-                        <button
-                          title="これにする"
-                          className={styles.forceChooseButton}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleForceChoose(t.title);
-                          }}
-                        >
-                          <CheckCircle2 className="w-3 h-3 translate-y-[0.05rem]" />
-                          これにする
-                        </button>
-                      </div>
-                    )}
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
+                      <p className="text-sm text-gray-900 mb-2">
+                        票: {voteCount} {isVoted && <span>（投票済み）</span>}
+                      </p>
+                      {isHost && (
+                        <div className="flex justify-center">
+                          <button
+                            title="これにする"
+                            className={styles.forceChooseButton}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleForceChoose(t.title);
+                            }}
+                          >
+                            <CheckCircle2 className="w-3 h-3 translate-y-[0.05rem]" />
+                            これにする
+                          </button>
+                        </div>
+                      )}
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+            )}
           </div>
         </div>
 
