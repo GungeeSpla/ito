@@ -2,18 +2,18 @@ import React, { useEffect, useRef, useState } from "react";
 import { ref, get, set, onValue, runTransaction } from "firebase/database";
 import { db } from "@/firebase";
 import { AnimatePresence, motion } from "framer-motion";
-import Card from "@/components/common/Card";
-import EditHintModal from "@/components/common/EditHintModal";
+import Card from "@/components/common/card/Card";
+import EditHintModal from "@/components/ui/EditHintModal";
 import { CardEntry } from "@/types/CardEntry";
 import { Eye, Home, RefreshCcw } from "lucide-react";
-import WoodyButton from "@/components/common/WoodyButton";
-import FallingText from "@/components/common/FallingText";
+import WoodyButton from "@/components/ui/WoodyButton";
+import FallingText from "@/components/common/effects/FallingText";
 import styles from "./PlaceCardsPhase.module.scss";
-import { placeSound, returnSound } from "@/utils/sounds";
-import cardStyles from "@/components/common/Card.module.scss";
+import { placeSound, returnSound } from "@/utils/ui/sounds";
+import cardStyles from "@/components/common/card/Card.module.scss";
 import { PlayerInfo } from "@/types/PlayerInfo";
-import CardArea from "@/components/common/CardArea";
-import { logInfo } from "@/utils/logger";
+import CardArea from "@/components/common/card/CardArea";
+import { logInfo } from "@/utils/core/logger";
 
 // -----------------------------
 // 型定義

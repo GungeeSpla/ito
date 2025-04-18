@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { ref, set, child } from "firebase/database";
 import { db } from "../firebase";
 import { PlayerInfo } from "@/types/PlayerInfo";
-import { logError } from "@/utils/logger";
+import { logError } from "@/utils/core/logger";
 
 interface UseDealCardsProps {
   phase: string;

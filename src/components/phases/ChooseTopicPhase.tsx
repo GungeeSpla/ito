@@ -11,13 +11,13 @@ import {
   off,
 } from "firebase/database";
 import { db } from "@/firebase";
-import ProposalModal from "@/components/common/ProposalModal";
+import ProposalModal from "@/components/ui/ProposalModal";
 import { RefreshCw, PlusCircle, CheckCircle2, Home } from "lucide-react";
-import WoodyButton from "@/components/common/WoodyButton";
-import ClickOrTouch from "../common/ClickOrTouch";
-import { toastWithAnimation } from "@/utils/toast";
+import WoodyButton from "@/components/ui/WoodyButton";
+import ClickOrTouch from "../common/others/ClickOrTouch";
+import { toastWithAnimation } from "@/utils/ui/toast";
 import styles from "./ChooseTopicPhase.module.scss";
-import { logInfo, logWarn } from "@/utils/logger";
+import { logInfo, logWarn } from "@/utils/core/logger";
 
 interface Props {
   isHost: boolean; // 現在のプレイヤーがホストかどうか

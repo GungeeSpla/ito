@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Crown, PlayIcon, LogOut, XCircle, Copy } from "lucide-react";
 import { Topic } from "@/types/Topic";
-import { getRoomMaxClearLevel } from "@/utils/levelProgress";
-import WoodyButton from "@/components/common/WoodyButton";
-import { toastWithAnimation } from "@/utils/toast";
-import NoticeGame from "@/components/common/NoticeGame";
+import { getRoomMaxClearLevel } from "@/utils/gameLogic/levelProgress";
+import WoodyButton from "@/components/ui/WoodyButton";
+import { toastWithAnimation } from "@/utils/ui/toast";
+import NoticeGame from "@/components/common/others/NoticeGame";
 import { PlayerInfo } from "@/types/PlayerInfo";
 import { useUser } from "@/hooks/useUser";
-import PlayerSetupForm from "@/components/common/PlayerSetupForm";
-import SectionTitle from "@/components/common/SectionTitle";
-import { copyToClipboard } from "@/utils/clipboard";
-import { logInfo, logError } from "@/utils/logger";
+import PlayerSetupForm from "@/components/ui/PlayerSetupForm";
+import SectionTitle from "@/components/ui/SectionTitle";
+import { copyToClipboard } from "@/utils/core/clipboard";
+import { logInfo, logError } from "@/utils/core/logger";
 
 // -----------------------------
 // Props 型定義

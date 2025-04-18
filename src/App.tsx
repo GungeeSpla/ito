@@ -2,16 +2,16 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { db } from "@/firebase";
 import { ref, set, get } from "firebase/database";
-import { deleteRoomsByHost } from "@/utils/deleteRoomsByHost";
-import { generateUniqueRoomId } from "@/utils/generateRoomId";
-import { toastWithAnimation } from "@/utils/toast";
-import NoticeGame from "@/components/common/NoticeGame";
+import { deleteRoomsByHost } from "@/utils/gameLogic/deleteRoomsByHost";
+import { generateUniqueRoomId } from "@/utils/gameLogic/generateRoomId";
+import { toastWithAnimation } from "@/utils/ui/toast";
+import NoticeGame from "@/components/common/others/NoticeGame";
 import { useUser } from "@/hooks/useUser";
-import PlayerSetupForm from "@/components/common/PlayerSetupForm";
-import NameSVG from "@/components/common/NameSVG";
-import { logInfo, logSuccess, logError } from "@/utils/logger";
-import { deleteOldRooms } from "@/utils/deleteOldRooms";
-import { deleteOldUsers } from "@/utils/deleteOldUsers";
+import PlayerSetupForm from "@/components/ui/PlayerSetupForm";
+import NameSVG from "@/components/common/effects/NameSVG";
+import { logInfo, logSuccess, logError } from "@/utils/core/logger";
+import { deleteOldRooms } from "@/utils/gameLogic/deleteOldRooms";
+import { deleteOldUsers } from "@/utils/gameLogic/deleteOldUsers";
 
 // ----------------------------------------
 // トップページコンポーネント：ルーム作成画面

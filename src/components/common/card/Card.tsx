@@ -1,9 +1,9 @@
 import React, { useEffect } from "react";
 import { Pencil, Eraser, ArrowDownLeft } from "lucide-react";
-import NameSVG from "@/components/common/NameSVG";
-import HintSVG from "@/components/common/HintSVG";
-import NumberSVG from "@/components/common/NumberSVG";
-import styles from "@/components/common/Card.module.scss";
+import NameSVG from "@/components/common/effects/NameSVG";
+import HintSVG from "@/components/common/effects/HintSVG";
+import NumberSVG from "@/components/common/effects/NumberSVG";
+import styles from "./Card.module.scss";
 
 // -----------------------------
 // Props型：カード1枚の情報

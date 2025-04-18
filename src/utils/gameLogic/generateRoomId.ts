@@ -2,8 +2,8 @@
 // ランダムな単語リストをインポート（形容詞・色・動物）
 // ex: happy-blue-elephant みたいなIDを作るため
 // ------------------------------------------------------
-import { adjectives, colors, animals } from "./words";
-import { db } from "../firebase";
+import { adjectives, colors, animals } from "../../data/urlWords";
+import { db } from "../../firebase";
 import { get, ref } from "firebase/database";
 
 // ------------------------------------------------------

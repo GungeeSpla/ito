@@ -1,7 +1,7 @@
 import React from "react";
 import { Home } from "lucide-react";
-import WoodyButton from "@/components/common/WoodyButton";
-import { dealSound } from "@/utils/sounds";
+import WoodyButton from "@/components/ui/WoodyButton";
+import { dealSound } from "@/utils/ui/sounds";
 
 interface Props {
   isHost: boolean;

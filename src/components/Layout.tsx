@@ -1,7 +1,7 @@
 import React from "react";
 import { Outlet } from "react-router-dom"; // ページ遷移とルーティング用
 import { Toaster } from "sonner";
-import VolumeControl from "@/components/common/VolumeControl";
+import VolumeControl from "@/components/ui/VolumeControl";
 
 // ------------------------------------------------
 // アプリ全体の共通レイアウトコンポーネント

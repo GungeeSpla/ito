@@ -12,8 +12,8 @@ import {
 import { db } from "@/firebase";
 import { Topic } from "@/types/Topic";
 import { topics } from "@/data/topics";
-import { selectRandomTopics } from "@/utils/selectRandomTopics";
-import { toastWithAnimation } from "@/utils/toast";
+import { selectRandomTopics } from "@/utils/gameLogic/selectRandomTopics";
+import { toastWithAnimation } from "@/utils/ui/toast";
 import { CardEntry } from "@/types/CardEntry";
 import { useUser } from "@/hooks/useUser";
 import { PlayerInfo } from "@/types/PlayerInfo";
@@ -24,8 +24,8 @@ import PlaceCardsPhase from "@/components/phases/PlaceCardsPhase";
 import RevealCardsPhase from "@/components/phases/RevealCardsPhase";
 import { useDealCards } from "@/hooks/useDealCards";
 import { useJoinRoom } from "@/hooks/useJoinRoom";
-import { assignColorToPlayers } from "@/utils/assignColorToPlayers";
-import { logSuccess, logError, logInfo } from "@/utils/logger";
+import { assignColorToPlayers } from "@/utils/gameLogic/assignColorToPlayers";
+import { logSuccess, logError, logInfo } from "@/utils/core/logger";
 
 // --------------------------------------------
 // ルーム画面（/room/:roomId）

@@ -1,6 +1,6 @@
 import { get, ref, remove } from "firebase/database";
 import { db } from "@/firebase";
-import { logInfo, logWarn, logSuccess } from "@/utils/logger";
+import { logInfo, logWarn, logSuccess } from "@/utils/core/logger";
 
 // 古いユーザーを削除（1ヶ月非アクティブ）＋アバターも削除
 export const deleteOldUsers = async () => {

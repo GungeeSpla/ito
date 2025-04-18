@@ -1,4 +1,4 @@
-import { Topic } from "../types/Topic";
+import { Topic } from "../../types/Topic";
 
 export const selectRandomTopics = (
   allTopics: Topic[],

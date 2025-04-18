@@ -1,6 +1,6 @@
 import { db } from "@/firebase";
 import { ref, get, remove } from "firebase/database";
-import { logInfo, logSuccess } from "@/utils/logger";
+import { logInfo, logSuccess } from "@/utils/core/logger";
 
 /**
  * 最終更新から一定時間経過したルームを削除する

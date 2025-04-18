@@ -1,5 +1,5 @@
 import React from "react";
-import Card from "@/components/common/Card";
+import Card from "@/components/common/card/Card";
 import { CardEntry } from "@/types/CardEntry";
 import { PlayerInfo } from "@/types/PlayerInfo";
 import { motion, AnimatePresence } from "framer-motion";

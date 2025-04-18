@@ -1,6 +1,6 @@
 import { ref, update } from "firebase/database";
 import { db } from "@/firebase";
-import { COLOR_PALETTE } from "@/utils/colors";
+import { COLOR_PALETTE } from "@/utils/ui/colors";
 
 export const assignColorToPlayers = async (
   roomId: string,

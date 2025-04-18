@@ -1,16 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ref, onValue, set } from "firebase/database";
 import { db } from "@/firebase";
-import EmojiBurst from "@/components/common/EmojiBurst";
-import FailBurst from "@/components/common/FailBurst";
+import EmojiBurst from "@/components/common/effects/EmojiBurst";
+import FailBurst from "@/components/common/effects/FailBurst";
 import { CardEntry } from "@/types/CardEntry";
 import { Undo2, Home } from "lucide-react";
-import WoodyButton from "@/components/common/WoodyButton";
-import ClickOrTouch from "@/components/common/ClickOrTouch";
-import { updateRoomMaxClearLevel } from "@/utils/levelProgress";
-import { flipSound, successSound, failSound } from "@/utils/sounds";
+import WoodyButton from "@/components/ui/WoodyButton";
+import ClickOrTouch from "@/components/common/others/ClickOrTouch";
+import { updateRoomMaxClearLevel } from "@/utils/gameLogic/levelProgress";
+import { flipSound, successSound, failSound } from "@/utils/ui/sounds";
 import { PlayerInfo } from "@/types/PlayerInfo";
-import CardArea from "@/components/common/CardArea";
+import CardArea from "@/components/common/card/CardArea";
 
 interface Props {
   roomId: string;

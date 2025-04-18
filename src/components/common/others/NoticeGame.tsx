@@ -1,6 +1,6 @@
 import React from "react";
 import { ExternalLink } from "lucide-react";
-import AppVersion from "@/components/common/AppVersion";
+import AppVersion from "@/components/common/others/AppVersion";
 
 const NoticeGame: React.FC = () => {
   return (

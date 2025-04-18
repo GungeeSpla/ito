@@ -7,7 +7,7 @@ import {
   orderByChild,
   equalTo,
 } from "firebase/database";
-import { logInfo, logSuccess } from "@/utils/logger";
+import { logInfo, logSuccess } from "@/utils/core/logger";
 
 /**
  * 同一ユーザーがホストを務めている古いルームをすべて削除する。
