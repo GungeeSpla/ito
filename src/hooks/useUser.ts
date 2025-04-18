@@ -58,7 +58,7 @@ export const useUser = () => {
     } else {
       const newUser: UserInfo = {
         userId,
-        nickname: "名無しさん",
+        nickname: "",
         color: "",
         avatarUrl: "",
         createdAt: now,

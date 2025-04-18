@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import SectionTitle from "./SectionTitle";
 import { Rocket } from "lucide-react";
 
@@ -17,6 +17,7 @@ interface Props {
   presetColors?: string[];
   userAvatarUrl: string;
   setUserAvatarUrl: (url: string) => void;
+  inputRef: React.RefObject<HTMLInputElement | null>;
 }
 
 const PlayerSetupForm: React.FC<Props> = ({
@@ -34,8 +35,8 @@ const PlayerSetupForm: React.FC<Props> = ({
   presetColors = [],
   userAvatarUrl,
   setUserAvatarUrl,
+  inputRef,
 }) => {
-  const inputRef = useRef<HTMLInputElement>(null);
   const [customColor, setCustomColor] = useState("#1F1F1F");
   const actionLabel = mode === "create" ? "ルームを作成" : "ルームに参加";
   useEffect(() => {

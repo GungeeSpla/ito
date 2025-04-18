@@ -302,6 +302,7 @@ function App() {
             presetColors={presetColors}
             userAvatarUrl={userAvatarUrl}
             setUserAvatarUrl={setUserAvatarUrl}
+            inputRef={inputRef}
           />
         </div>
 

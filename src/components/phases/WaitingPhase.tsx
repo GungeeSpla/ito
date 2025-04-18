@@ -368,6 +368,7 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
                 presetColors={presetColors}
                 userAvatarUrl={userAvatarUrl}
                 setUserAvatarUrl={setUserAvatarUrl}
+                inputRef={inputRef}
               />
             </div>
           )}

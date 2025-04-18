@@ -58,7 +58,7 @@ const Room = () => {
     userId,
     userInfo: {
       ...userInfo,
-      nickname: userInfo?.nickname ?? "名無しさん",
+      nickname: userInfo?.nickname ?? "",
       color: userInfo?.color ?? "",
       avatarUrl: userInfo?.avatarUrl ?? "",
       joinedAt: Date.now(),
