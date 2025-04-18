@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="608.55457"
+   height="608.55457"
+   viewBox="0 0 608.55457 608.55457"
+   version="1.1"
+   id="svg950"
+   inkscape:version="1.3.2 (091e20e, 2023-11-25, custom)"
+   sodipodi:docname="ito-icon-inkscape.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview952"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="px"
+     showgrid="false"
+     inkscape:zoom="0.093205493"
+     inkscape:cx="-4098.4709"
+     inkscape:cy="547.17805"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="-8"
+     inkscape:window-y="-2"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs947">
+    <linearGradient
+       id="linearGradient15"
+       inkscape:collect="always">
+      <stop
+         style="stop-color:#1700ff;stop-opacity:1;"
+         offset="0"
+         id="stop15" />
+      <stop
+         style="stop-color:#ff00ac;stop-opacity:1;"
+         offset="1"
+         id="stop16" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient15"
+       id="linearGradient16"
+       x1="-38.334091"
+       y1="235.19915"
+       x2="570.22047"
+       y2="235.19915"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <g
+     inkscape:label="レイヤー"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(38.334091,69.078133)">
+    <rect
+       style="fill:url(#linearGradient16);fill-opacity:1;stroke:none;stroke-width:40;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:3.3;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
+       id="rect14"
+       width="608.55457"
+       height="608.55457"
+       x="-38.334091"
+       y="-69.078133"
+       inkscape:label="背景" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:40;stroke-linecap:square;stroke-miterlimit:3.3;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
+       d="M 21.229023,0 H 143.27119 l 4.9e-4,122.04217 H 21.229023"
+       id="path1"
+       sodipodi:nodetypes="cccc"
+       inkscape:label="コ" />
+    <path
+       id="path3"
+       style="fill:none;stroke:#ffffff;stroke-width:40;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:3.3;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
+       d="M 204.9221,61.02109 H 326.96428 M 204.9221,0 v 122.04217"
+       inkscape:label="ト" />
+    <path
+       id="path7"
+       style="fill:none;stroke:#ffffff;stroke-width:40;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:3.3;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
+       d="m 461.36927,0 -10e-6,11.13436 M 510.65737,0 l -1e-5,11.13436 m 1e-5,110.90781 -1e-5,-61.00972 M 388.61519,0 l 4.9e-4,122.04217"
+       sodipodi:nodetypes="cccccccc"
+       inkscape:label="バ" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:40;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:3.3;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
+       d="m 21.229023,356.35613 v 119.41099 h 66.38558 V 356.35613 Z"
+       id="path9"
+       sodipodi:nodetypes="ccccc"
+       inkscape:label="0" />
+    <path
+       id="path11"
+       style="fill:none;stroke:#ffffff;stroke-width:40;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:3.3;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
+       d="M 249.65678,475.76712 V 356.35613 h -18.18653 m 82.30124,0 v 119.41099 h 66.38558 V 356.35613 Z m 130.50029,0 v 119.41099 h 66.38558 V 356.35613 Z"
+       inkscape:label="100" />
+    <path
+       id="path14"
+       style="fill:none;stroke:#ffffff;stroke-width:40;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:3.3;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
+       d="m 388.61568,209.01221 v 47.31831 m -245.344,-47.31831 v 47.31831 m 122.67151,-47.31831 v 47.31831 M 510.65736,209.01221 H 21.229023 v 64.37388 M 510.65736,209.01221 v 64.37388"
+       inkscape:label="スケール" />
+  </g>
+</svg>
