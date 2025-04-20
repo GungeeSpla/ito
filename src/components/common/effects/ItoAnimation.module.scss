@@ -23,7 +23,7 @@ $color: white;
   width: 7em;
 
   &[animation-index="0"] {
-    animation: animating0 3s ease-out infinite;
+    animation: animating0 3s ease-out 1;
     @keyframes animating0 {
       0% {
       }
@@ -50,10 +50,10 @@ $color: white;
   opacity: 0;
 
   &.animating {
-    animation: fadeInOut 3s ease-out infinite;
+    animation: fadeInOut 3s ease-out 1;
 
     .head {
-      animation: head 3s ease-out infinite;
+      animation: head 3s ease-out 1;
       @keyframes head {
         0% {
         }
@@ -137,10 +137,10 @@ $color: white;
   opacity: 0;
 
   &.animating {
-    animation: fadeInOut 3s ease-out infinite;
+    animation: fadeInOut 3s ease-out 1;
 
     .base {
-      animation: base 3s ease-out infinite;
+      animation: base 3s ease-out 1;
       @keyframes base {
         0% {
           width: 0em;
@@ -155,7 +155,7 @@ $color: white;
     }
 
     .bone2 {
-      animation: bone2 3s ease-out infinite;
+      animation: bone2 3s ease-out 1;
       @keyframes bone2 {
         0% {
           left: 0em;
@@ -170,7 +170,7 @@ $color: white;
     }
 
     .bone3 {
-      animation: bone3 3s ease-out infinite;
+      animation: bone3 3s ease-out 1;
       @keyframes bone3 {
         0% {
           left: 0em;
@@ -185,7 +185,7 @@ $color: white;
     }
 
     .bone4 {
-      animation: bone4 3s ease-out infinite;
+      animation: bone4 3s ease-out 1;
       @keyframes bone4 {
         0% {
           left: 0em;
@@ -200,7 +200,7 @@ $color: white;
     }
 
     .bone5 {
-      animation: bone5 3s ease-out infinite;
+      animation: bone5 3s ease-out 1;
       @keyframes bone5 {
         0% {
           left: 0em;
@@ -215,7 +215,7 @@ $color: white;
     }
 
     .number {
-      animation: number 3s ease-out infinite;
+      animation: number 3s ease-out 1;
       @keyframes number {
         0% {
           left: -3.4em;
@@ -299,10 +299,10 @@ $color: white;
   opacity: 0;
 
   &.animating {
-    animation: fadeInOut 3s ease-out infinite;
+    animation: fadeInOut 3s ease-out 1;
 
     .bar {
-      animation: bar 3s ease-out infinite;
+      animation: bar 3s ease-out 1;
       @keyframes bar {
         0% {
           height: 0em;
