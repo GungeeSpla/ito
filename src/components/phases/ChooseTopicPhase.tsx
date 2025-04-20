@@ -336,9 +336,8 @@ const ChooseTopicPhase: React.FC<Props> = ({
                       layout
                       onClick={() => handleVote(t.title)}
                       className={`${styles.topicCard}
-                  ${isVoted ? "bg-blue-100 border-blue-500" : "bg-white border-gray-300"} 
-                  ${!hasChosen ? "fadeIn" : "fadeOut"}
-                  pb-8 relative bg-white text-black rounded-xl p-4 text-center transition border border-gray-300`}
+                        ${!hasChosen ? "fadeIn" : "fadeOut"}
+                        pb-8 relative bg-white text-black rounded-xl p-4 text-center transition border border-gray-300`}
                       style={{ animationDelay: `${400 + index * 100}ms` }}
                       title="これに投票する"
                     >
