@@ -11,6 +11,7 @@ import PlayerSetupForm from "@/components/ui/PlayerSetupForm";
 import SectionTitle from "@/components/ui/SectionTitle";
 import { copyToClipboard } from "@/utils/core/clipboard";
 import { logInfo, logError } from "@/utils/core/logger";
+import ItoAnimation from "@/components/common/effects/ItoAnimation";
 
 // -----------------------------
 // Props 型定義
@@ -115,6 +116,7 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
   const parseCustomPrompts = (text: string): Topic[] => {
     const seenTitles = new Set<string>();
     return text
+      .replace(/\t/g, ",")
       .split("\n")
       .map((line) => line.trim())
       .filter((line) => line !== "")
@@ -278,10 +280,6 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
               <Copy className="w-3 h-3" />
               ルームURLをコピー
             </WoodyButton>
-            <WoodyButton onClick={leaveRoom}>
-              <LogOut className="w-3 h-3" />
-              ルームから退出する
-            </WoodyButton>
           </div>
         )}
       </div>
@@ -395,8 +393,8 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
                   focus:outline-none focus:ring-2 focus:ring-blue-400"
                 >
                   <option value="rainbow">レインボー</option>
-                  <option value="normal">通常</option>
-                  <option value="classic">クラシック</option>
+                  {/* <option value="normal">通常</option> */}
+                  {/* <option value="classic">クラシック</option> */}
                   <option value="salmon">サーモンラン</option>
                   <option value="custom">カスタム</option>
                 </select>
@@ -404,9 +402,7 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
 
               {selectedSet === "custom" && isHost && (
                 <div>
-                  <label className="block mb-1">
-                    カスタムお題セット（カンマ区切りで記述）
-                  </label>
+                  <label className="block mb-1">カスタムお題セット</label>
                   <textarea
                     value={customPromptText}
                     onChange={(e) => setCustomPromptText(e.target.value)}
@@ -415,6 +411,7 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
                     className="w-full p-2 bg-white text-black rounded resize-y
                       focus:outline-none focus:ring-2 focus:ring-blue-400"
                   />
+                  <p className="text-sm">（カンマもしくはタブ区切りで記述）</p>
                 </div>
               )}
 

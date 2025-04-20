@@ -9,6 +9,7 @@ import NoticeGame from "@/components/common/others/NoticeGame";
 import { useUser } from "@/hooks/useUser";
 import PlayerSetupForm from "@/components/ui/PlayerSetupForm";
 import NameSVG from "@/components/common/effects/NameSVG";
+import ItoAnimation from "@/components/common/effects/ItoAnimation";
 import { logInfo, logSuccess, logError } from "@/utils/core/logger";
 import { deleteOldRooms } from "@/utils/gameLogic/deleteOldRooms";
 import { deleteOldUsers } from "@/utils/gameLogic/deleteOldUsers";
@@ -237,12 +238,12 @@ function App() {
   // -----------------------------
   return (
     <div className="relative min-h-screen text-white">
-      {/* ヘッダー */}
-      <div key="ito-header" className="relative h-12"></div>
+      {/* アニメーション */}
+      <ItoAnimation />
 
       {/* コンテンツ */}
       <div className="relative w-full text-center px-4 overflow-hidden">
-        {/*-------- 見出し --------*/}
+        {/* 見出し */}
         <h2 className="text-3xl font-bold text-shadow-md mt-0 mb-4">
           数字の大きさを言葉でたとえて価値観を比べるゲーム
         </h2>
@@ -281,7 +282,7 @@ function App() {
           </div>
         )}
 
-        {/*-------- 設定画面 --------*/}
+        {/* 設定画面 */}
         <div
           className="
           bg-black/70 backdrop-blur-sm text-black p-6 my-6 rounded-md shadow-md
@@ -306,9 +307,10 @@ function App() {
           />
         </div>
 
-        {/*-------- 注意書き --------*/}
+        {/* 注意書き */}
         <NoticeGame />
 
+        {/* 開発中のみローカルストレージリセットボタン */}
         {import.meta.env.DEV && (
           <button
             onClick={() => {

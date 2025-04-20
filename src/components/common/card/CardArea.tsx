@@ -45,12 +45,12 @@ const CardArea: React.FC<Props> = ({
         {onInsertCard && activeCard?.source === "hand" && (
           <button
             className="
-              flex items-center justify-center gap-0.5
-              text-xs bg-blue-600 text-white px-1 py-3 rounded 
-              hover:bg-blue-500 transition writing-vertical"
+              flex flex-col items-center justify-center gap-0.5
+              text-xs bg-blue-600 text-white py-2 rounded 
+              hover:bg-blue-500 transition w-4 px-3"
             onClick={() => onInsertCard(0)}
           >
-            <ArrowDownCircle className="w-3 h-3 translate-x-[0.05rem]" />
+            <ArrowDownCircle className="w-3 h-3 translate-x-[0rem]" />
             ここに出す
           </button>
         )}
@@ -101,9 +101,9 @@ const CardArea: React.FC<Props> = ({
                 onInsertCard && (
                   <button
                     className="
-                      flex items-center justify-center gap-0.5
-                      text-xs bg-blue-600 text-white px-1 py-3 rounded 
-                      hover:bg-blue-500 transition writing-vertical"
+                      flex flex-col items-center justify-center gap-0.5
+                      text-xs bg-blue-600 text-white py-2 rounded 
+                      hover:bg-blue-500 transition w-4 px-3"
                     onClick={() => onInsertCard(index + 1)}
                   >
                     <ArrowDownCircle className="w-3 h-3 translate-x-[0.05rem]" />
