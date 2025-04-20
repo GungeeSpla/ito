@@ -40,7 +40,7 @@ const CardArea: React.FC<Props> = ({
       }}
     >
       {/* ゼロ */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 pointer-events-auto">
         <Card value={0} location="field" name="" />
         {onInsertCard && activeCard?.source === "hand" && (
           <button
@@ -70,7 +70,7 @@ const CardArea: React.FC<Props> = ({
               animate={{ opacity: 1, translateY: "0em" }}
               exit={{ opacity: 0, translateY: isMine ? "2em" : "-2em" }}
               transition={{ duration: 0.2 }}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 pointer-events-auto"
             >
               <Card
                 value={mode === "reveal" && !isRevealed ? "?" : entry.card}
