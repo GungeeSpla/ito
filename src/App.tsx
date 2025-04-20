@@ -122,6 +122,7 @@ function App() {
         return;
       }
 
+      // アバター画像のアップロード
       let avatarUrl = "";
       if (avatarFile) {
         try {
@@ -131,6 +132,26 @@ function App() {
           toastWithAnimation("画像のアップロードに失敗しました。", {
             type: "warn",
           });
+        }
+      }
+
+      // アバター画像の削除
+      let avatarDeleted = false;
+      if (userInfo?.avatarUrl && !avatarFile && !userAvatarUrl) {
+        try {
+          await fetch("https://ito.gungee.jp/delete-avatar.php", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ userId }),
+          });
+          setUserAvatarUrl("");
+          userInfo.avatarUrl = "";
+          avatarDeleted = true;
+          logInfo("サーバー上の画像も削除しました。");
+        } catch (err) {
+          logError("サーバー上の画像の削除に失敗しました。", err);
         }
       }
 
@@ -146,6 +167,9 @@ function App() {
         color,
         ...(avatarFile && { avatarUrl }),
       };
+      if (avatarDeleted) {
+        updateData.avatarUrl = "";
+      }
       await updateUserInfo(updateData);
 
       // 再取得（userInfo は非同期更新されるので注意）
