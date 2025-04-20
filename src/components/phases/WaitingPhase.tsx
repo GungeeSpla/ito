@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Crown, PlayIcon, LogOut, XCircle, Copy } from "lucide-react";
+import { Crown, PlayIcon, XCircle, Copy } from "lucide-react";
 import { Topic } from "@/types/Topic";
 import { getRoomMaxClearLevel } from "@/utils/gameLogic/levelProgress";
 import WoodyButton from "@/components/ui/WoodyButton";
@@ -11,7 +11,6 @@ import PlayerSetupForm from "@/components/ui/PlayerSetupForm";
 import SectionTitle from "@/components/ui/SectionTitle";
 import { copyToClipboard } from "@/utils/core/clipboard";
 import { logInfo, logError } from "@/utils/core/logger";
-import ItoAnimation from "@/components/common/effects/ItoAnimation";
 
 // -----------------------------
 // Props 型定義
@@ -30,7 +29,6 @@ interface WaitingPhaseProps {
   setLevel: (level: number) => void;
   startGame: () => void;
   removePlayer: (playerName: string) => void;
-  leaveRoom: () => void;
   setCustomTopics: (topics: Topic[]) => void;
 }
 
@@ -49,7 +47,6 @@ const WaitingPhase: React.FC<WaitingPhaseProps> = ({
   setLevel,
   startGame,
   removePlayer,
-  leaveRoom,
   setCustomTopics,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null); // ニックネーム入力にフォーカスする用

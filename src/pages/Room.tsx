@@ -224,21 +224,6 @@ const Room = () => {
     remove(playerRef);
   };
 
-  // -----------------------------
-  // 部屋を退出する
-  // -----------------------------
-  const leaveRoom = () => {
-    if (!userInfo || !userInfo.nickname || !safeRoomId) return;
-
-    const playerRef = ref(db, `rooms/${safeRoomId}/players/${userId}`);
-    remove(playerRef).then(() => {
-      toastWithAnimation("ルームを退出しました。", {
-        type: "success",
-      });
-      navigate("/");
-    });
-  };
-
   // フェーズ変更時にページ最上部にスクロール
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -287,7 +272,6 @@ const Room = () => {
         startGame={startGame}
         level={level}
         removePlayer={removePlayer}
-        leaveRoom={leaveRoom}
         setCustomTopics={setCustomTopics}
       />
     );
