@@ -133,6 +133,7 @@ const ChooseTopicPhase: React.FC<Props> = ({
 
   // お題再抽選
   const handleRefreshTopics = async () => {
+    exitCalled.current = false;
     await remove(ref(db, `rooms/${roomId}/customTopics`));
     await onRefreshTopics();
   };
