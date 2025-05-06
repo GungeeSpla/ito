@@ -10,6 +10,7 @@ interface Props {
   mode: "place" | "reveal";
   cardOrder: CardEntry[];
   players: Record<string, PlayerInfo>;
+  myUserId: string;
   nickname: string;
   activeCard?: { source: "hand" | "field"; value: number } | null;
   revealedCards?: number[];
@@ -23,7 +24,7 @@ const CardArea: React.FC<Props> = ({
   mode,
   cardOrder,
   players,
-  nickname,
+  myUserId,
   activeCard,
   revealedCards = [],
   onInsertCard,
@@ -60,7 +61,7 @@ const CardArea: React.FC<Props> = ({
       <AnimatePresence initial={false}>
         {cardOrder.map((entry, index) => {
           const player = players[entry.userId];
-          const isMine = player?.nickname === nickname;
+          const isMine = entry.userId === myUserId;
           const isRevealed = revealedCards.includes(entry.card);
 
           return (

@@ -325,6 +325,7 @@ const PlaceCardsPhase: React.FC<Props> = ({
         mode="place"
         cardOrder={cardOrder}
         players={players}
+        myUserId={userId}
         nickname={nickname}
         activeCard={activeCard}
         onInsertCard={handleInsertCard}
