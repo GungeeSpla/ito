@@ -7,6 +7,13 @@
   clip-path: inset(0 0 100% 0);
   opacity: 0;
   animation: riseUpClip 500ms 1300ms ease-out forwards;
+
+  &.noAnim {
+    animation: none !important;
+    transform: translateY(0);
+    clip-path: inset(0 0 0 0);
+    opacity: 1;
+  }
 }
 
 .scaleBar {
@@ -14,6 +21,12 @@
   clip-path: inset(0 50% 0 50%);
   opacity: 0;
   animation: revealFromCenter 500ms 1000ms ease-out forwards;
+
+  &.noAnim {
+    animation: none !important;
+    clip-path: inset(0 0 0 0);
+    opacity: 1;
+  }
 }
 
 .playedCardsArea {

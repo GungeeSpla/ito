@@ -11,6 +11,7 @@ import { updateRoomMaxClearLevel } from "@/utils/gameLogic/levelProgress";
 import { flipSound, successSound, failSound } from "@/utils/ui/sounds";
 import { PlayerInfo } from "@/types/PlayerInfo";
 import CardArea from "@/components/common/card/CardArea";
+import styles from "./PlaceCardsPhase.module.scss";
 
 interface Props {
   roomId: string;
@@ -19,6 +20,7 @@ interface Props {
   cardOrder: CardEntry[];
   level: number;
   players: Record<string, PlayerInfo>;
+  topic: { title: string; min: string; max: string } | null;
 }
 
 const RevealCardsPhase: React.FC<Props> = ({
@@ -28,6 +30,7 @@ const RevealCardsPhase: React.FC<Props> = ({
   cardOrder,
   level,
   players,
+  topic,
 }) => {
   const [revealedCards, setRevealedCards] = useState<number[]>([]);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
@@ -154,19 +157,27 @@ const RevealCardsPhase: React.FC<Props> = ({
         )}
       </div>
 
-      {/* タイトルとステータス */}
-      <div className="relative w-full text-center max-w-xl mx-auto">
-        <h2 className="text-3xl font-bold text-shadow-md mt-0 mb-4">
-          カードをめくろう！
-        </h2>
-        <p className="text-center text-white text-shadow-md my-6">
-          カードを好きな順番で
-          <ClickOrTouch />
-          してめくりましょう。
-          <br />
-          （だれでもめくれます）
-        </p>
-      </div>
+      {/* お題表示 */}
+      {topic && (
+        <div className="relative w-full text-center max-w-xl mx-auto">
+          <h2 className="text-3xl font-bold text-shadow-md mt-0 mb-4">
+            お題：{topic.title}
+          </h2>
+          <div
+            className={`${styles.scaleDescription} ${styles.noAnim} max-w-md mx-auto`}
+          >
+            <div
+              className={`${styles.scaleText} ${styles.noAnim} grid grid-cols-2 font-bold text-white`}
+            >
+              <div className="text-left text-shadow-sm">1 {topic.min}</div>
+              <div className="text-right text-shadow-sm">{topic.max} 100</div>
+            </div>
+            <div
+              className={`${styles.scaleBar} ${styles.noAnim} box-shadow-md h-[2px] bg-white mt-1`}
+            ></div>
+          </div>
+        </div>
+      )}
 
       {/* プレイヤーカード */}
       <CardArea
@@ -174,6 +185,7 @@ const RevealCardsPhase: React.FC<Props> = ({
         cardOrder={cardOrder}
         players={players}
         nickname={nickname}
+        myUserId={userId}
         revealedCards={revealedCards}
         onRevealCard={(card) => {
           const revealedRef = ref(db, `rooms/${roomId}/revealedCards`);
@@ -182,29 +194,35 @@ const RevealCardsPhase: React.FC<Props> = ({
         onFlipComplete={handleFlipComplete}
       />
 
-      <div className="absolute left-1/2 top-[calc(100%+40px)] -translate-x-1/2">
+      <div className="absolute left-1/2 top-[calc(50%+40px)] -translate-x-1/2"></div>
+
+      {/* ロビーに戻るボタン */}
+      <div
+        className="absolute responsive-text transition duration-200
+      left-1/2 top-1/2 -translate-x-1/2 translate-y-[8em]"
+      >
         {status === "success" && (
-          <div className="mb-4 text-green-400 font-bold text-2xl">
-            ✅ 成功！
+          <div className="mb-4 text-green-400 text-center font-bold text-2xl">
+            成功！
           </div>
         )}
         {status === "fail" && (
-          <div className="mb-4 text-red-400 font-bold text-2xl">❌ 失敗！</div>
+          <div className="mb-4 text-red-400 text-center font-bold text-2xl">
+            ❌ 失敗！
+          </div>
         )}
-      </div>
-
-      {/* ロビーに戻るボタン */}
-      {isHost && isComplete && (
-        <div
-          className="absolute responsive-text transition duration-200
-      left-1/2 top-1/2 -translate-x-1/2 translate-y-[10em]"
-        >
+        {status !== "success" && status !== "fail" && (
+          <div className="mb-4 text-white text-center text-shadow-sm font-bold text-2xl">
+            カードをめくろう！
+          </div>
+        )}
+        {isHost && isComplete && (
           <WoodyButton onClick={resetGame}>
             <Home className="w-4 h-4 translate-y-[0.05rem]" />
             ロビーに戻る
           </WoodyButton>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* ✅ 成功演出 */}
       {status === "success" && <EmojiBurst />}

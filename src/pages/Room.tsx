@@ -44,6 +44,7 @@ const Room = () => {
   const [selectedSet, setSelectedSet] = useState<
     "normal" | "rainbow" | "classic" | "salmon" | "custom"
   >("rainbow");
+  const [topic, setTopic] = useState<Topic | null>(null);
   const [level, setLevel] = useState<number>(1);
   const isHost = userId === host;
   const [cardOrder, setCardOrder] = useState<CardEntry[]>([]);
@@ -72,6 +73,15 @@ const Room = () => {
       navigate("/", { replace: true });
     }
   }, [roomId, navigate]);
+
+  // お題を取得
+  useEffect(() => {
+    const topicRef = ref(db, `rooms/${safeRoomId}/topic`);
+    const unsub = onValue(topicRef, (snap) => {
+      if (snap.exists()) setTopic(snap.val());
+    });
+    return () => unsub();
+  }, [safeRoomId]);
 
   // お題の再抽選
   const onRefreshTopics = async () => {
@@ -304,6 +314,7 @@ const Room = () => {
         cardOrder={cardOrder}
         setCardOrder={setCardOrder}
         players={players}
+        topic={topic}
       />
     );
   }
@@ -318,6 +329,7 @@ const Room = () => {
         cardOrder={cardOrder}
         level={level}
         players={players}
+        topic={topic}
       />
     );
   }

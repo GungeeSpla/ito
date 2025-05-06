@@ -25,6 +25,7 @@ interface Props {
   cardOrder: CardEntry[];
   setCardOrder: (v: CardEntry[]) => void;
   players: Record<string, PlayerInfo>;
+  topic: { title: string; min: string; max: string } | null;
 }
 
 const PlaceCardsPhase: React.FC<Props> = ({
@@ -34,6 +35,7 @@ const PlaceCardsPhase: React.FC<Props> = ({
   cardOrder,
   setCardOrder,
   players,
+  topic,
 }) => {
   const [myCards, setMyCards] = useState<{ value: number; hint?: string }[]>(
     [],
@@ -44,11 +46,6 @@ const PlaceCardsPhase: React.FC<Props> = ({
   } | null>(null);
   const [isHost, setIsHost] = useState(false);
   const [level, setLevel] = useState<number>(1);
-  const [topic, setTopic] = useState<{
-    title: string;
-    min: string;
-    max: string;
-  } | null>(null);
   const [editingValue, setEditingValue] = useState<number | null>(null);
   const prevCardCountRef = useRef(0);
   const [initialRender, setInitialRender] = useState(true);
@@ -136,12 +133,6 @@ const PlaceCardsPhase: React.FC<Props> = ({
     const levelRef = ref(db, `rooms/${roomId}/level`);
     onValue(levelRef, (snap) => {
       if (snap.exists()) setLevel(snap.val());
-    });
-
-    // お題
-    const topicRef = ref(db, `rooms/${roomId}/topic`);
-    onValue(topicRef, (snap) => {
-      if (snap.exists()) setTopic(snap.val());
     });
 
     return () => unsubscribe();
