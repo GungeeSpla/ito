@@ -21,6 +21,7 @@ import {
   AVATAR_MAX_BYTES,
   PROTOCOL_VERSION,
   ROOM_ID_PATTERN,
+  ROOM_ID_SUFFIX_CHARS,
   SECRET_PATTERN,
   type Ack,
   type CreateRoomResponse,
@@ -43,6 +44,12 @@ export interface ServerOptions {
   createLimitPerHour?: number;
   uploadLimitPerHour?: number;
   roomsMax?: number;
+  /** 1 つの接続元から同時に張れる Socket.io の接続の数 */
+  socketsPerIpMax?: number;
+  /** 1 つの接続元が 10 分間に試せる、存在しない部屋への接続の数。超えると 10 分間つなげない (部屋の総当たり対策) */
+  notFoundPerTenMinutes?: number;
+  /** アバター画像の合計の容量の上限 */
+  avatarsMaxBytes?: number;
   log?: (message: string) => void;
 }
 
@@ -56,6 +63,8 @@ interface Room {
 interface SocketData {
   roomId: string;
   playerId: string;
+  /** 接続元。同時接続の数を数えるのに使う */
+  ip: string;
 }
 
 const AVATAR_TTL_MS = 60 * 24 * 60 * 60 * 1000;
@@ -68,20 +77,35 @@ export const playerIdOf = (secret: string): string => createHash('sha256').updat
 
 const env = (): Env => ({ now: Date.now(), randomInt: (max) => randomInt(max) });
 
-/** 1 時間ごとに数え直す、接続元ごとの回数の上限 */
-function hourlyLimit(limit: number) {
+/** 一定の時間ごとに数え直す、接続元ごとの回数の上限 */
+function windowLimit(limit: number, windowMs = 60 * 60 * 1000) {
   const counts = new Map<string, number>();
-  const timer = setInterval(() => counts.clear(), 60 * 60 * 1000);
+  const timer = setInterval(() => counts.clear(), windowMs);
   timer.unref();
   return {
+    /** 上限の前なら数えて true */
     allow(key: string | undefined): boolean {
       const count = counts.get(key ?? '') ?? 0;
       if (count >= limit) return false;
       counts.set(key ?? '', count + 1);
       return true;
     },
+    /** 数えるだけ (失敗した回数など) */
+    hit: (key: string | undefined) => counts.set(key ?? '', (counts.get(key ?? '') ?? 0) + 1),
+    /** 上限に達しているか */
+    reached: (key: string | undefined) => (counts.get(key ?? '') ?? 0) >= limit,
     stop: () => clearInterval(timer),
   };
+}
+
+const LOOPBACK = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
+
+/** Socket.io の接続元の IP。Nginx 経由なら、Nginx が最後に足した X-Forwarded-For を使う (利用者が書いた分は使わない) */
+function clientIpOf(socket: Socket): string {
+  const address = socket.handshake.address;
+  const forwarded = socket.handshake.headers['x-forwarded-for'];
+  if (!LOOPBACK.has(address) || typeof forwarded !== 'string') return address;
+  return forwarded.split(',').at(-1)?.trim() || address;
 }
 
 export async function startServer(options: ServerOptions): Promise<{ port: number; close: () => Promise<void> }> {
@@ -93,6 +117,9 @@ export async function startServer(options: ServerOptions): Promise<{ port: numbe
     createLimitPerHour = 30,
     uploadLimitPerHour = 30,
     roomsMax = 5000,
+    socketsPerIpMax = 30,
+    notFoundPerTenMinutes = 20,
+    avatarsMaxBytes = 1024 * 1024 * 1024,
     log = console.log,
   } = options;
   const roomsDir = join(dataDir, 'rooms');
@@ -154,10 +181,12 @@ export async function startServer(options: ServerOptions): Promise<{ port: numbe
     }
   }
 
+  /** 覚えやすい 3 語に、推測できない 4 文字を足す (例: happy-blue-fox-k7m2) */
   function newRoomId(): string {
-    const pick = (list: readonly string[]) => list[randomInt(list.length)];
+    const pick = <T>(list: ArrayLike<T>) => list[randomInt(list.length)];
     for (let i = 0; i < 100; i++) {
-      const id = `${pick(adjectives)}-${pick(colors)}-${pick(animals)}`;
+      const suffix = Array.from({ length: 4 }, () => pick(ROOM_ID_SUFFIX_CHARS)).join('');
+      const id = `${pick(adjectives)}-${pick(colors)}-${pick(animals)}-${suffix}`;
       if (!rooms.has(id)) return id;
     }
     throw new Error('ルーム ID を作れません');
@@ -186,21 +215,30 @@ export async function startServer(options: ServerOptions): Promise<{ port: numbe
     return profile;
   }
 
+  /** アバター画像の合計の容量。消すたびに数え直す */
+  let avatarBytes = 0;
+
   function removeOldAvatars(): void {
     const used = new Set<string>();
     for (const room of rooms.values()) for (const p of room.state.players) if (p.avatarUrl) used.add(p.avatarUrl);
     const limit = Date.now() - AVATAR_TTL_MS;
+    let total = 0;
     for (const file of readdirSync(avatarsDir)) {
       const path = join(avatarsDir, file);
-      if (used.has(`/avatars/${file}`) || statSync(path).mtimeMs > limit) continue;
+      const stat = statSync(path);
+      if (used.has(`/avatars/${file}`) || stat.mtimeMs > limit) {
+        total += stat.size;
+        continue;
+      }
       rmSync(path, { force: true });
     }
+    avatarBytes = total;
   }
 
   // ---- HTTP ----
 
-  const createLimit = hourlyLimit(createLimitPerHour);
-  const uploadLimit = hourlyLimit(uploadLimitPerHour);
+  const createLimit = windowLimit(createLimitPerHour);
+  const uploadLimit = windowLimit(uploadLimitPerHour);
   const app = express();
   app.disable('x-powered-by');
   // Nginx 経由の接続元 IP を使う
@@ -257,12 +295,18 @@ export async function startServer(options: ServerOptions): Promise<{ port: numbe
       res.status(400).json({ error: '画像の形式が不正です' });
       return;
     }
+    // ディスクを使い切らないよう、全体にも上限を置く
+    if (avatarBytes + body.length > avatarsMaxBytes) {
+      res.status(507).json({ error: '現在画像を受け付けられません。画像なしで遊んでください' });
+      return;
+    }
     if (!uploadLimit.allow(req.ip)) {
       res.status(429).json({ error: '画像を上げすぎています。時間をおいてお試しください' });
       return;
     }
     const name = `${randomBytes(16).toString('base64url')}.png`;
     writeFileSync(join(avatarsDir, name), body);
+    avatarBytes += body.length;
     res.status(201).json({ avatarUrl: `/avatars/${name}` } satisfies UploadAvatarResponse);
   });
 
@@ -313,19 +357,27 @@ export async function startServer(options: ServerOptions): Promise<{ port: numbe
     }
   }
 
+  // 接続元ごとの、今つながっている数と、存在しない部屋への接続を試した数
+  const socketsPerIp = new Map<string, number>();
+  const notFoundLimit = windowLimit(notFoundPerTenMinutes, 10 * 60 * 1000);
+
   io.use((socket, next) => {
     const auth = (socket.handshake.auth ?? {}) as Partial<Handshake>;
+    const ip = clientIpOf(socket);
     if (auth.protocol !== PROTOCOL_VERSION) return next(new Error('outdated'));
+    if (notFoundLimit.reached(ip) || (socketsPerIp.get(ip) ?? 0) >= socketsPerIpMax) return next(new Error('tooMany'));
     if (typeof auth.secret !== 'string' || !SECRET_PATTERN.test(auth.secret)) return next(new Error('invalid'));
     if (typeof auth.roomId !== 'string' || !ROOM_ID_PATTERN.test(auth.roomId) || !rooms.has(auth.roomId)) {
+      notFoundLimit.hit(ip);
       return next(new Error('notFound'));
     }
-    socket.data = { roomId: auth.roomId, playerId: playerIdOf(auth.secret) } satisfies SocketData;
+    socket.data = { roomId: auth.roomId, playerId: playerIdOf(auth.secret), ip } satisfies SocketData;
     next();
   });
 
   io.on('connection', (socket) => {
-    const { roomId, playerId } = socket.data as SocketData;
+    const { roomId, playerId, ip } = socket.data as SocketData;
+    socketsPerIp.set(ip, (socketsPerIp.get(ip) ?? 0) + 1);
     socket.join(roomId);
     const initial = rooms.get(roomId);
     if (initial) broadcast(initial);
@@ -353,6 +405,9 @@ export async function startServer(options: ServerOptions): Promise<{ port: numbe
     });
 
     socket.on('disconnect', () => {
+      const remaining = (socketsPerIp.get(ip) ?? 1) - 1;
+      if (remaining > 0) socketsPerIp.set(ip, remaining);
+      else socketsPerIp.delete(ip);
       const room = rooms.get(roomId);
       if (room) broadcast(room);
     });
@@ -403,6 +458,7 @@ export async function startServer(options: ServerOptions): Promise<{ port: numbe
       for (const timer of timers) clearInterval(timer);
       createLimit.stop();
       uploadLimit.stop();
+      notFoundLimit.stop();
       flush();
       await new Promise<void>((resolve) => io.close(() => resolve()));
     },

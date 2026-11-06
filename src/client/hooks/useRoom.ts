@@ -6,7 +6,7 @@ import { PROTOCOL_VERSION, type Ack, type ConnectRefusal, type Handshake } from 
 import { secret } from '@/lib/identity.ts';
 import { toastWithAnimation } from '@/lib/toast';
 
-export type Connection = 'connecting' | 'online' | 'offline' | 'notFound' | 'outdated';
+export type Connection = 'connecting' | 'online' | 'offline' | 'notFound' | 'outdated' | 'tooMany';
 
 const RELOADED_KEY = 'ito:reloadedForUpdate';
 
@@ -50,8 +50,9 @@ export function useRoom(roomId: string) {
     });
     socket.on('connect_error', (error) => {
       const refusal = error.message as ConnectRefusal;
-      if (refusal === 'notFound') {
-        setConnection('notFound');
+      // 部屋が無い・接続が多すぎるときは、つなぎ直しても同じなので止める
+      if (refusal === 'notFound' || refusal === 'tooMany') {
+        setConnection(refusal);
         socket.disconnect();
         return;
       }

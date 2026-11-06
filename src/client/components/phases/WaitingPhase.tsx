@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Copy, Crown, PlayIcon, XCircle } from 'lucide-react';
+import { Copy, Crown, Lock, LockOpen, PlayIcon, XCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { parseCustomTopics, type RoomView, type SelectableTopicSet } from '@shared/engine.ts';
 import NoticeGame from '@/components/common/others/NoticeGame';
@@ -97,7 +97,11 @@ const WaitingPhase: React.FC<Props> = ({ room, send }) => {
         <h2 className={headingClass}>数字の大きさを感覚でたとえて言葉にするゲーム</h2>
         <p className="text-center text-white text-shadow-md my-6">
           {!me.joined ? (
-            'ニックネームを入力して、ルームに参加してください。'
+            room.locked ? (
+              'このルームは参加を締め切っています。'
+            ) : (
+              'ニックネームを入力して、ルームに参加してください。'
+            )
           ) : me.isHost ? (
             <>
               フレンドにルームURLを伝えましょう。
@@ -157,10 +161,36 @@ const WaitingPhase: React.FC<Props> = ({ room, send }) => {
                 ルームから抜ける
               </button>
             )}
+            {/* 締め切り: メンバーがそろったら新しい人を入れない */}
+            {me.isHost ? (
+              <div className="mt-3 flex items-center justify-center gap-2 text-xs">
+                {room.locked && (
+                  <span className="inline-flex items-center gap-1 text-yellow-300">
+                    <Lock className="w-3 h-3" />
+                    参加を締め切っています
+                  </span>
+                )}
+                <button
+                  type="button"
+                  className={`${iconButton} inline-flex items-center gap-1 text-gray-300 underline hover:text-white`}
+                  onClick={() => send({ type: 'setLocked', locked: !room.locked })}
+                >
+                  {room.locked ? <LockOpen className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
+                  {room.locked ? '受付を再開する' : '参加を締め切る'}
+                </button>
+              </div>
+            ) : (
+              room.locked && (
+                <p className="mt-3 text-xs text-yellow-300 inline-flex items-center gap-1">
+                  <Lock className="w-3 h-3" />
+                  参加を締め切っています
+                </p>
+              )
+            )}
           </div>
 
-          {/* 参加フォーム */}
-          {!me.joined && (
+          {/* 参加フォーム。締め切り中は出さない */}
+          {!me.joined && !room.locked && (
             <div className="mb-4">
               <PlayerSetupForm form={form} submitLabel="ルームに参加" onSubmit={join} />
             </div>

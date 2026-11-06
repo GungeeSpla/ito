@@ -18,6 +18,9 @@ const server = await startServer({
   createLimitPerHour: positive('CREATE_LIMIT_PER_HOUR'),
   uploadLimitPerHour: positive('UPLOAD_LIMIT_PER_HOUR'),
   roomsMax: positive('ROOMS_MAX'),
+  socketsPerIpMax: positive('SOCKETS_PER_IP_MAX'),
+  notFoundPerTenMinutes: positive('NOT_FOUND_PER_TEN_MINUTES'),
+  avatarsMaxBytes: positive('AVATARS_MAX_BYTES'),
 });
 console.log(`ito: http://127.0.0.1:${server.port}/`);
 

@@ -110,6 +110,18 @@ function RoomScreen({ roomId }: { roomId: string }) {
     );
   }
 
+  if (connection === 'tooMany') {
+    return (
+      <Message>
+        <p className="text-xl font-semibold text-shadow-md">接続が多すぎます。しばらく待ってから読み込み直してください。</p>
+        <WoodyButton onClick={() => location.reload()}>
+          <RefreshCw className="w-4 h-4 translate-y-[0.1rem]" />
+          読み込み直す
+        </WoodyButton>
+      </Message>
+    );
+  }
+
   if (!room) {
     return (
       <Message>
@@ -137,7 +149,7 @@ function RoomScreen({ roomId }: { roomId: string }) {
           サーバーとの接続が切れました。つなぎ直しています…
         </div>
       )}
-      {!room.me.joined && room.phase !== 'waiting' && <JoinLater send={send} />}
+      {!room.me.joined && !room.locked && room.phase !== 'waiting' && <JoinLater send={send} />}
       {phase === 'waiting' && <WaitingPhase room={room} send={send} />}
       {phase === 'chooseTopic' && <ChooseTopicPhase room={room} send={send} chosenTitle={chosenTitle} />}
       {phase === 'placeCards' && <PlaceCardsPhase room={room} send={send} />}

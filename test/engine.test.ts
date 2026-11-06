@@ -264,6 +264,20 @@ test('接続が切れた人をゲームの途中で外すと、残りの人で�
   assert.ok(state.players.some((p) => p.id === 'C'));
 });
 
+test('参加を締め切ると、新しい人だけが入れなくなり、ほかの人には締め切りが見える', () => {
+  let state = room('B');
+  rejects(state, 'B', { type: 'setLocked', locked: true }, /ホストのみ/);
+  state = apply(state, 'A', { type: 'setLocked', locked: true }, env);
+  rejects(state, 'C', { type: 'join', profile: profile('C') }, /締め切って/);
+  // 参加済みの人は、プロフィールを変えられる
+  state = apply(state, 'B', { type: 'join', profile: profile('びー') }, env);
+  assert.equal(state.players[1].nickname, 'びー');
+  assert.equal(view('r', state, 'C', new Set()).locked, true);
+  state = apply(state, 'A', { type: 'setLocked', locked: false }, env);
+  state = apply(state, 'C', { type: 'join', profile: profile('C') }, env);
+  assert.equal(state.players.length, 3);
+});
+
 test('つながっていないホストの代わりは、つながっている先に入った人', () => {
   const state = room('B', 'C');
   assert.equal(pickNewHost(state, new Set(['A', 'C'])), null);

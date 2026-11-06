@@ -75,7 +75,7 @@ try {
     await phone.context().close();
   }
   await button(host, 'ルームを作成').click();
-  await host.waitForURL(/\/room\/[a-z]+-[a-z]+-[a-z]+$/);
+  await host.waitForURL(/\/room\/[a-z]+-[a-z]+-[a-z]+-[a-z0-9]{4}$/);
   const roomUrl = host.url();
   await host.getByText('2人以上になったらゲームを開始できます。').waitFor();
 
@@ -164,6 +164,16 @@ try {
   await button(host, 'ロビーに戻る').last().click();
   await host.getByRole('combobox', { name: 'レベル' }).selectOption('2');
   for (const page of [guest, guest2]) await page.getByText('レベル 2').waitFor();
+
+  // ---- 参加を締め切ると、新しく来た人は参加できない ----
+  await button(host, '参加を締め切る').click();
+  await guest.getByText('参加を締め切っています').waitFor();
+  const stranger = await open('stranger', roomUrl, { width: 390, height: 844 });
+  await stranger.getByText('このルームは参加を締め切っています。').waitFor();
+  assert.equal(await stranger.getByPlaceholder('ここにニックネームを入力').count(), 0);
+  await shot(stranger, '07-locked-stranger');
+  await button(host, '受付を再開する').click();
+  await stranger.getByPlaceholder('ここにニックネームを入力').waitFor();
 
   assert.deepEqual(errors, []);
   console.log('e2e: ok');

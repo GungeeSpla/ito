@@ -8,7 +8,7 @@ import { after } from 'node:test';
 import { io, type Socket } from 'socket.io-client';
 import type { Action, RoomView } from '../src/shared/engine.ts';
 import { PROTOCOL_VERSION, type Ack } from '../src/shared/protocol.ts';
-import { playerIdOf, startServer } from '../src/server/server.ts';
+import { playerIdOf, startServer, type ServerOptions } from '../src/server/server.ts';
 
 const dirs: string[] = [];
 const sockets: Socket[] = [];
@@ -20,9 +20,9 @@ after(async () => {
   for (const dir of dirs) rmSync(dir, { recursive: true, force: true });
 });
 
-export async function boot(dataDir = mkdtempSync(join(tmpdir(), 'ito-test-')), hostGraceMs = 300) {
+export async function boot(dataDir = mkdtempSync(join(tmpdir(), 'ito-test-')), hostGraceMs = 300, options: Partial<ServerOptions> = {}) {
   dirs.push(dataDir);
-  const server = await startServer({ port: 0, dataDir, clientDir: join(dataDir, 'none'), hostGraceMs, log: () => {} });
+  const server = await startServer({ port: 0, dataDir, clientDir: join(dataDir, 'none'), hostGraceMs, log: () => {}, ...options });
   const origin = `http://127.0.0.1:${server.port}`;
   // テストの中と後片付けの両方から呼ばれても、止めるのは 1 回だけ
   let closing: Promise<void> | null = null;
@@ -52,10 +52,18 @@ export class Client {
   readonly name: string;
   private waiters: (() => void)[] = [];
 
-  constructor(origin: string, roomId: string, secret = newSecret(), protocol = PROTOCOL_VERSION, name = '') {
+  /** forwardedFor: Nginx 経由の接続を装うときの接続元 IP */
+  constructor(origin: string, roomId: string, secret = newSecret(), protocol = PROTOCOL_VERSION, name = '', forwardedFor?: string) {
     this.secret = secret;
     this.name = name;
-    this.socket = io(origin, { auth: { protocol, secret, roomId }, transports: ['websocket'], forceNew: true });
+    this.socket = io(origin, {
+      auth: { protocol, secret, roomId },
+      transports: ['websocket'],
+      forceNew: true,
+      // つながらなかったら、つなぎ直さずに理由を受け取る
+      reconnection: false,
+      extraHeaders: forwardedFor ? { 'X-Forwarded-For': forwardedFor } : undefined,
+    });
     sockets.push(this.socket);
     this.socket.on('state', (state: RoomView) => {
       this.state = state;

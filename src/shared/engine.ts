@@ -94,6 +94,8 @@ export interface RoomState {
   players: Player[];
   /** 追い出された人。このルームには入り直せない */
   kicked: string[];
+  /** 締め切り中。新しい人は参加できない (すでに参加している人はそのまま)。この機能より前の部屋には無い */
+  locked?: boolean;
   settings: Settings;
   maxClearLevel: number;
   usedTitles: string[];
@@ -107,6 +109,7 @@ export type Action =
   | { type: 'updateProfile'; profile: Profile }
   | { type: 'kick'; playerId: string; ban?: boolean }
   | { type: 'transferHost'; playerId: string }
+  | { type: 'setLocked'; locked: boolean }
   | { type: 'updateSettings'; settings: Partial<Settings> }
   | { type: 'start' }
   | { type: 'redraw' }
@@ -416,6 +419,7 @@ export function apply(current: RoomState, actorId: string, action: Action, env: 
         Object.assign(existing, profile);
         break;
       }
+      if (state.locked) throw new GameError('このルームは参加を締め切っています');
       if (state.players.length >= LIMITS.playersMax) throw new GameError('ルームが満員です');
       state.players.push({ id: actorId, ...profile, joinedAt: env.now });
       if (!state.hostId) state.hostId = actorId;
@@ -444,6 +448,12 @@ export function apply(current: RoomState, actorId: string, action: Action, env: 
       requireHost();
       if (action.playerId === actorId || !isPlayer(state, action.playerId)) throw new GameError('その人にはホストを渡せません');
       state.hostId = action.playerId;
+      break;
+    }
+    case 'setLocked': {
+      requireHost();
+      if (typeof action.locked !== 'boolean') throw new GameError('指定が不正です');
+      state.locked = action.locked;
       break;
     }
     case 'updateSettings': {
@@ -627,6 +637,8 @@ export interface RoomView {
   id: string;
   phase: Phase;
   hostId: string;
+  /** 参加を締め切っている */
+  locked: boolean;
   players: PlayerView[];
   settings: Omit<Settings, 'customTopics'> & { customTopicCount: number };
   maxClearLevel: number;
@@ -642,6 +654,7 @@ export function view(roomId: string, state: RoomState, viewerId: string, online:
     id: roomId,
     phase: state.phase,
     hostId: state.hostId,
+    locked: !!state.locked,
     players: state.players.map((p) => ({ ...p, online: online.has(p.id) })),
     settings: { ...settings, customTopicCount: customTopics.length },
     maxClearLevel: state.maxClearLevel,
