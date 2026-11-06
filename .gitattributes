@@ -1,0 +1,2 @@
+# VPS で動かすシェルスクリプトは、Windows で取り出しても LF のまま
+*.sh text eol=lf

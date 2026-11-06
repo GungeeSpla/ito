@@ -127,6 +127,16 @@ location / {
 
 `sudo nginx -t && sudo systemctl reload nginx` で反映する。以前の静的配信のフォルダ (`/var/www/gungee.jp/subdomains/ito`) は消さずに残しておけば、Nginx の設定を戻すだけで以前の版に戻せる。
 
+### 止まったときの自動復旧
+
+PM2 はプロセスが落ちれば立ち上げ直すが、動いているのに応答しない状態には気づけない。`tools/ops/heal.sh` が VPS の中から Socket.io に問い合わせ、10 秒おいて 2 回続けて応答が無いときだけ `pm2 restart ito` して `~/ito_heal.log` に残す。ubuntu ユーザーの cron に次の 1 行を入れて、5 分おきに呼ぶ。
+
+```cron
+*/5 * * * * /var/www/ito/tools/ops/heal.sh >/dev/null 2>&1
+```
+
+`ITO_HEAL_DRY_RUN=1 /var/www/ito/tools/ops/heal.sh` で、再起動せずに判定だけを試せる。
+
 ### 更新するとき
 
 ```bash
