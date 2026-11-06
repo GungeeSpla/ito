@@ -6,7 +6,7 @@ import EmojiBurst from '@/components/common/effects/EmojiBurst';
 import FailBurst from '@/components/common/effects/FailBurst';
 import WoodyButton from '@/components/ui/WoodyButton';
 import type { Send } from '@/hooks/useRoom.ts';
-import { failSound, flipSound, successSound } from '@/utils/ui/sounds';
+import { failSound, flipSound, successSound } from '@/lib/sounds';
 import { PhaseHeader, TopicHeading, useDelayed, useOnChange } from './parts';
 
 /** カードが裏返る演出 (Card の duration-500) が終わってから結果を見せる */

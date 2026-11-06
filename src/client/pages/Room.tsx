@@ -12,7 +12,7 @@ import PlayerSetupForm from '@/components/ui/PlayerSetupForm';
 import WoodyButton from '@/components/ui/WoodyButton';
 import { useProfileForm } from '@/hooks/useProfileForm.ts';
 import { useRoom, type Send } from '@/hooks/useRoom.ts';
-import { toastWithAnimation } from '@/utils/ui/toast';
+import { toastWithAnimation } from '@/lib/toast';
 
 /** お題が決まってから、選ばれたカードの演出を見せる時間 */
 const CHOSEN_MS = 900;

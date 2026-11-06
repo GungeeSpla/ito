@@ -6,7 +6,7 @@ import ClickOrTouch from '@/components/common/others/ClickOrTouch';
 import ProposalModal from '@/components/ui/ProposalModal';
 import WoodyButton from '@/components/ui/WoodyButton';
 import type { Send } from '@/hooks/useRoom.ts';
-import { toastWithAnimation } from '@/utils/ui/toast';
+import { toastWithAnimation } from '@/lib/toast';
 import styles from './ChooseTopicPhase.module.scss';
 import { headingClass, PhaseHeader } from './parts';
 

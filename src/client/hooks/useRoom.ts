@@ -4,7 +4,7 @@ import { io, type Socket } from 'socket.io-client';
 import type { Action, RoomView } from '@shared/engine.ts';
 import { PROTOCOL_VERSION, type Ack, type ConnectRefusal, type Handshake } from '@shared/protocol.ts';
 import { secret } from '@/lib/identity.ts';
-import { toastWithAnimation } from '@/utils/ui/toast';
+import { toastWithAnimation } from '@/lib/toast';
 
 export type Connection = 'connecting' | 'online' | 'offline' | 'notFound' | 'outdated';
 

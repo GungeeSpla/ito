@@ -3,7 +3,7 @@ import { useState } from 'react';
 import type { Profile } from '@shared/engine.ts';
 import { uploadAvatar } from '@/lib/api.ts';
 import { loadProfile, preference, saveProfile } from '@/lib/identity.ts';
-import { toastWithAnimation } from '@/utils/ui/toast';
+import { toastWithAnimation } from '@/lib/toast';
 
 export function useProfileForm() {
   const [initial] = useState(loadProfile);

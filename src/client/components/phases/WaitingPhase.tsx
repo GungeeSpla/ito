@@ -10,8 +10,8 @@ import WoodyButton from '@/components/ui/WoodyButton';
 import type { Send } from '@/hooks/useRoom.ts';
 import { useProfileForm } from '@/hooks/useProfileForm.ts';
 import { preference } from '@/lib/identity.ts';
-import { copyToClipboard } from '@/utils/core/clipboard';
-import { toastWithAnimation } from '@/utils/ui/toast';
+import { copyToClipboard } from '@/lib/clipboard';
+import { toastWithAnimation } from '@/lib/toast';
 import { headingClass, PhaseHeader } from './parts';
 
 const TOPIC_SET_LABELS: Record<SelectableTopicSet, string> = { rainbow: 'レインボー', salmon: 'サーモンラン', custom: 'カスタム' };

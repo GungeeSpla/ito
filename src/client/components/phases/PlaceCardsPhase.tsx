@@ -9,7 +9,7 @@ import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import EditHintModal from '@/components/ui/EditHintModal';
 import WoodyButton from '@/components/ui/WoodyButton';
 import type { Send } from '@/hooks/useRoom.ts';
-import { dealSound, placeSound, returnSound } from '@/utils/ui/sounds';
+import { dealSound, placeSound, returnSound } from '@/lib/sounds';
 import styles from './PlaceCardsPhase.module.scss';
 import { PhaseHeader, TopicHeading, useOnChange } from './parts';
 

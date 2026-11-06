@@ -5,7 +5,7 @@ import PlayerSetupForm from '@/components/ui/PlayerSetupForm';
 import { useProfileForm } from '@/hooks/useProfileForm.ts';
 import { createRoom } from '@/lib/api.ts';
 import { headingClass } from '@/components/phases/parts';
-import { toastWithAnimation } from '@/utils/ui/toast';
+import { toastWithAnimation } from '@/lib/toast';
 
 // トップページ: ルームを作る
 export default function Home() {
