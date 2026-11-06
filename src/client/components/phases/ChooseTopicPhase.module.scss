@@ -21,9 +21,12 @@
   &.fadeOut {
   }
 
-  &:hover {
-    scale: 102%;
-    box-shadow: 0.5em 0.5em 1em rgba(0, 0, 0, 0.5);
+  // タッチ操作では :hover が残るので、マウスのときだけ
+  @media (hover: hover) {
+    &:hover {
+      scale: 102%;
+      box-shadow: 0.5em 0.5em 1em rgba(0, 0, 0, 0.5);
+    }
   }
 }
 

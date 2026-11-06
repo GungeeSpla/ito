@@ -11,9 +11,12 @@
 
 .revealCard {
   cursor: pointer;
-  &:hover {
-    scale: 108%;
-    filter: drop-shadow(0.5em 0.5em 1em rgba(0, 0, 0, 0.5));
+  // タッチ操作では、タップしたあとも :hover が残って大きいままになるので、マウスのときだけ
+  @media (hover: hover) {
+    &:hover {
+      scale: 108%;
+      filter: drop-shadow(0.5em 0.5em 1em rgba(0, 0, 0, 0.5));
+    }
   }
 }
 

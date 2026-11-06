@@ -80,6 +80,60 @@ Node.js 24 以上が要る。サーバーの TypeScript は Node.js がそのま
 | `UPLOAD_LIMIT_PER_HOUR` | 30 | 1 つの接続元から 1 時間に上げられるアバター画像の数 |
 | `ROOMS_MAX` | 5000 | 部屋の総数の上限 |
 
+## 本番 (さくら VPS)
+
+サーモンタワーバトルと同じく、PM2 で常駐させ、Nginx から転送する。
+
+| 項目 | 内容 |
+| ---- | ---- |
+| 置き場所 | `/var/www/ito` (GitHub の `GungeeSpla/ito` を clone) |
+| プロセス | PM2 の `ito`。ポート 3040 で `127.0.0.1` のみ待ち受ける |
+| データ | `/var/www/ito/data/` (部屋とアバター画像。git 管理外) |
+| Nginx | `ito.gungee.jp` の `server` で、すべてのパスを 3040 へ転送する (WebSocket 対応) |
+
+### はじめて置くとき
+
+```bash
+ssh sakura
+cd /var/www
+git clone https://github.com/GungeeSpla/ito.git
+cd ito
+npm ci
+npm run build
+NODE_ENV=production PORT=3040 pm2 start src/server/index.ts --name ito
+pm2 save
+```
+
+Nginx の `ito.gungee.jp` の `server` (443) の `root` での静的配信を、次の転送に置き換える。
+
+```nginx
+client_max_body_size 1m;
+location / {
+    proxy_pass http://127.0.0.1:3040;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+```
+
+`sudo nginx -t && sudo systemctl reload nginx` で反映する。以前の静的配信のフォルダ (`/var/www/gungee.jp/subdomains/ito`) は消さずに残しておけば、Nginx の設定を戻すだけで以前の版に戻せる。
+
+### 更新するとき
+
+```bash
+ssh sakura
+cd /var/www/ito
+git pull
+npm ci          # 依存が変わったときだけ
+npm run build
+pm2 restart ito
+```
+
+部屋は `data/` に保存されているので、再起動しても遊んでいる途中の状態ごと残る。通信の取り決め (`src/shared/protocol.ts`) を変えたときは `PROTOCOL_VERSION` を上げる。開いたままの古い画面は、自動で読み込み直す。
+
 ## ライセンス
 
 MIT License © 2025 GungeeX

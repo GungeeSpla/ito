@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowDownCircle } from 'lucide-react';
 import type { FieldCardView, PlayerView } from '@shared/engine.ts';
@@ -47,8 +47,27 @@ function misplacedIndexes(field: FieldCardView[]): Set<number> {
 const CardArea: React.FC<Props> = ({ mode, field, players, myId, onInsertCard, onRemoveCard, onEditCard, onRevealCard, showMisplaced = false }) => {
   const playerOf = (id: string) => players.find((p) => p.id === id);
   const misplaced = showMisplaced ? misplacedIndexes(field) : new Set<number>();
+
+  // 自分が新しく出したカードが場の外なら、見えるところまで横にスクロールする
+  const areaRef = useRef<HTMLDivElement>(null);
+  const seenIds = useRef<Set<string> | null>(null);
+  useEffect(() => {
+    const previous = seenIds.current;
+    seenIds.current = new Set(field.map((card) => card.id));
+    const placed = previous && field.find((card) => card.playerId === myId && !previous.has(card.id));
+    const area = areaRef.current;
+    const el = placed && area?.querySelector<HTMLElement>(`[data-card-id="${placed.id}"]`);
+    if (!area || !el) return;
+    const visible = el.offsetLeft >= area.scrollLeft && el.offsetLeft + el.offsetWidth <= area.scrollLeft + area.clientWidth;
+    if (!visible) area.scrollTo({ left: el.offsetLeft - (area.clientWidth - el.offsetWidth) / 2, behavior: 'smooth' });
+  }, [field, myId]);
+
   return (
-    <div className={`${styles.playedCardsArea} responsive-text`} style={mode === 'reveal' ? { animation: 'none', opacity: 1 } : undefined}>
+    <div
+      ref={areaRef}
+      className={`${styles.playedCardsArea} responsive-text`}
+      style={mode === 'reveal' ? { animation: 'none', opacity: 1 } : undefined}
+    >
       <div className="flex items-center gap-2 pointer-events-auto">
         <Card value={0} location="field" name="" />
         {onInsertCard && <InsertButton index={0} onClick={() => onInsertCard(0)} />}
@@ -68,6 +87,7 @@ const CardArea: React.FC<Props> = ({ mode, field, players, myId, onInsertCard, o
               transition={{ duration: 0.2 }}
               className="flex items-center gap-2 pointer-events-auto"
               data-testid="field-card"
+              data-card-id={card.id}
             >
               <Card
                 value={card.value ?? '?'}

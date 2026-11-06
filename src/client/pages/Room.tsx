@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import { Home, UserPlus } from 'lucide-react';
+import { Home, RefreshCw, UserPlus } from 'lucide-react';
 import type { Phase, RoomView } from '@shared/engine.ts';
 import { ROOM_ID_PATTERN } from '@shared/protocol.ts';
 import ChooseTopicPhase from '@/components/phases/ChooseTopicPhase';
@@ -96,6 +96,18 @@ function RoomScreen({ roomId }: { roomId: string }) {
     const timer = setTimeout(() => document.querySelector('main')?.scrollTo({ top: 0, behavior: 'smooth' }), 100);
     return () => clearTimeout(timer);
   }, [phase]);
+
+  if (connection === 'outdated') {
+    return (
+      <Message>
+        <p className="text-xl font-semibold text-shadow-md">新しい版が公開されました。ページを読み込み直してください。</p>
+        <WoodyButton onClick={() => location.reload()}>
+          <RefreshCw className="w-4 h-4 translate-y-[0.1rem]" />
+          読み込み直す
+        </WoodyButton>
+      </Message>
+    );
+  }
 
   if (!room) {
     return (

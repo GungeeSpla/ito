@@ -6,9 +6,28 @@ import { PROTOCOL_VERSION, type Ack, type ConnectRefusal, type Handshake } from 
 import { secret } from '@/lib/identity.ts';
 import { toastWithAnimation } from '@/utils/ui/toast';
 
-export type Connection = 'connecting' | 'online' | 'offline' | 'notFound';
+export type Connection = 'connecting' | 'online' | 'offline' | 'notFound' | 'outdated';
 
 const RELOADED_KEY = 'ito:reloadedForUpdate';
+
+// 新しい版へ読み込み直したかどうか。保存できない設定のブラウザでは、読み込み直しを繰り返さないよう「済み」とみなす
+const reloadedForUpdate = {
+  get: () => {
+    try {
+      return sessionStorage.getItem(RELOADED_KEY) !== null;
+    } catch {
+      return true;
+    }
+  },
+  set: (value: boolean) => {
+    try {
+      if (value) sessionStorage.setItem(RELOADED_KEY, '1');
+      else sessionStorage.removeItem(RELOADED_KEY);
+    } catch {
+      // 保存できなくても続ける
+    }
+  },
+};
 
 export function useRoom(roomId: string) {
   const [state, setState] = useState<RoomView | null>(null);
@@ -20,7 +39,7 @@ export function useRoom(roomId: string) {
     const socket = io({ auth, transports: ['websocket', 'polling'] });
     socketRef.current = socket;
     socket.on('state', (next: RoomView) => {
-      sessionStorage.removeItem(RELOADED_KEY);
+      reloadedForUpdate.set(false);
       setState(next);
     });
     socket.on('connect', () => setConnection('online'));
@@ -36,10 +55,15 @@ export function useRoom(roomId: string) {
         socket.disconnect();
         return;
       }
-      // 画面が古い。新しい版を読み込み直す (繰り返さないよう 1 回だけ)
-      if (refusal === 'outdated' && !sessionStorage.getItem(RELOADED_KEY)) {
-        sessionStorage.setItem(RELOADED_KEY, '1');
-        location.reload();
+      // 画面が古い。新しい版を読み込み直す (繰り返さないよう 1 回だけ)。それでも古ければ、利用者に頼む
+      if (refusal === 'outdated') {
+        socket.disconnect();
+        if (!reloadedForUpdate.get()) {
+          reloadedForUpdate.set(true);
+          location.reload();
+        } else {
+          setConnection('outdated');
+        }
         return;
       }
       setConnection('offline');
