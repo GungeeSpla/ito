@@ -51,6 +51,18 @@ async function open(name: string, url: string, viewport = { width: 1280, height:
 const shot = (page: Page, name: string) => page.screenshot({ path: join(SHOTS, `${name}.png`) });
 const button = (page: Page, name: string) => page.getByRole('button', { name, exact: true });
 
+/** マウスでドラッグして、カードの間の位置 index に落とす。「ここに出す」はドラッグを始めてから現れる */
+async function dragToSlot(page: Page, source: ReturnType<Page['locator']>, index: number) {
+  await source.hover();
+  await page.mouse.down();
+  const box = (await source.boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2 + 10, box.y + box.height / 2 - 10, { steps: 5 });
+  const slot = button(page, `${index} 番目に出す`);
+  await slot.waitFor();
+  await slot.hover();
+  await page.mouse.up();
+}
+
 async function fillProfile(page: Page, nickname: string) {
   await page.getByLabel('ニックネーム', { exact: true }).fill(nickname);
 }
@@ -93,6 +105,14 @@ try {
   for (const name of ['ゲスト', 'ゲスト2']) await members.getByText(name, { exact: true }).waitFor();
   await shot(host, '02-waiting-host');
   await shot(guest, '02-waiting-guest');
+
+  // ルームの QR コード (QR を作る部品は、開いたときに読み込む)
+  await button(guest, 'QRコード').click();
+  await guest.getByRole('img', { name: 'ルームのQRコード' }).waitFor();
+  assert.ok(await guest.getByText(roomUrl, { exact: true }).isVisible());
+  await guest.waitForTimeout(500);
+  await shot(guest, '02-qr-guest');
+  await guest.keyboard.press('Escape');
   const players = [host, guest, guest2];
 
   // ---- お題を選ぶ: 3 人とも同じお題に投票すると決まる ----
@@ -131,8 +151,13 @@ try {
       await card.page.getByRole('textbox', { name: 'たとえワード' }).fill('お父さんの靴下');
       await button(card.page, '決定').click();
     }
-    await card.page.getByLabel(`手札 ${card.v}`).click();
-    await button(card.page, `${index} 番目に出す`).click();
+    if (index === order.length - 1 && card.page !== guest) {
+      // 最後のカードは、手札からドラッグして出す (スマホの大きさの guest 以外)
+      await dragToSlot(card.page, card.page.getByLabel(`手札 ${card.v}`), index);
+    } else {
+      await card.page.getByLabel(`手札 ${card.v}`).click();
+      await button(card.page, `${index} 番目に出す`).click();
+    }
     for (const page of players) await page.getByTestId('field-card').nth(index).waitFor();
     if (index === 0) {
       await shot(host, '04-place-one');
@@ -144,6 +169,36 @@ try {
       assert.deepEqual(await hand(guest), card.page === guest ? [] : hands.get(guest));
     }
   }
+
+  // 場に出した自分のカードを、ドラッグで右端へ動かし、左端へ戻す (PC の大きさの人のカードで)
+  const mover = order.find((card) => card.page !== guest)!;
+  const ownFieldCard = () =>
+    mover.page
+      .getByTestId('field-card')
+      .filter({ has: mover.page.locator(`[data-value="${mover.v}"]`) })
+      .locator('[draggable="true"]');
+  const fieldValues = () => host.getByTestId('field-card').evaluateAll((els) => els.map((el) => el.getAttribute('data-card-id')));
+  const before = await fieldValues();
+  await dragToSlot(mover.page, ownFieldCard(), 3);
+  await host.waitForFunction(
+    (prev) => [...document.querySelectorAll('[data-testid="field-card"]')].map((el) => el.getAttribute('data-card-id')).join() !== prev,
+    before.join(),
+  );
+  const movedRight = (await fieldValues()).join();
+  await dragToSlot(mover.page, ownFieldCard(), 0);
+  await host.waitForFunction(
+    (prev) => [...document.querySelectorAll('[data-testid="field-card"]')].map((el) => el.getAttribute('data-card-id')).join() !== prev,
+    movedRight,
+  );
+  // 小さい順に戻すため、動かしたカードを元の位置へ
+  const target = order.indexOf(mover);
+  if (target !== 0) await dragToSlot(mover.page, ownFieldCard(), target + 1);
+  await host.waitForFunction(
+    (expected) =>
+      [...document.querySelectorAll('[data-testid="field-card"]')].map((el) => el.getAttribute('data-card-id')).join() === expected,
+    before.join(),
+  );
+
   await button(host, 'めくりフェーズへ！').click();
 
   // ---- めくる: 3 人がそれぞれ 1 枚ずつ ----

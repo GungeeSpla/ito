@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Copy, Crown, Lock, LockOpen, PlayIcon, XCircle } from 'lucide-react';
+import { Copy, Crown, Lock, LockOpen, PlayIcon, QrCode, XCircle } from 'lucide-react';
 import { navigate } from '@/lib/router.ts';
 import { parseCustomTopics, type RoomView, type SelectableTopicSet } from '@shared/engine.ts';
 import NoticeGame from '@/components/common/others/NoticeGame';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import PlayerSetupForm from '@/components/ui/PlayerSetupForm';
+import RoomQrDialog from '@/components/ui/RoomQrDialog';
 import SectionTitle from '@/components/ui/SectionTitle';
 import WoodyButton from '@/components/ui/WoodyButton';
 import type { Send } from '@/hooks/useRoom.ts';
@@ -34,6 +35,7 @@ const WaitingPhase: React.FC<Props> = ({ room, send }) => {
   const form = useProfileForm();
   const [customText, setCustomText] = useState(loadCustomText);
   const [confirm, setConfirm] = useState<{ id: string; kind: 'kick' | 'host' | 'leave' } | null>(null);
+  const [showQr, setShowQr] = useState(false);
   const players = [...room.players].sort((a, b) => a.joinedAt - b.joinedAt);
 
   // カスタムお題は入力が止まってから送る。ゲーム開始の直前にも送り直す
@@ -86,11 +88,16 @@ const WaitingPhase: React.FC<Props> = ({ room, send }) => {
   return (
     <div className="relative min-h-dvh text-white overflow-x-hidden">
       <PhaseHeader>
+        <WoodyButton onClick={() => setShowQr(true)}>
+          <QrCode className="w-3 h-3" />
+          QRコード
+        </WoodyButton>
         <WoodyButton onClick={copyUrl}>
           <Copy className="w-3 h-3" />
           ルームURLをコピー
         </WoodyButton>
       </PhaseHeader>
+      <RoomQrDialog open={showQr} onClose={() => setShowQr(false)} url={window.location.href} />
 
       <div className="relative w-full text-center px-4">
         <h2 className={headingClass}>数字の大きさを感覚でたとえて言葉にするゲーム</h2>

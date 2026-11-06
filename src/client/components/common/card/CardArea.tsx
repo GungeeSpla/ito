@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowDownCircle } from 'lucide-react';
 import type { FieldCardView, PlayerView } from '@shared/engine.ts';
@@ -11,26 +11,44 @@ interface Props {
   field: FieldCardView[];
   players: PlayerView[];
   myId: string;
-  /** 手札のカードを選んでいる間、カードの間に「ここに出す」を出す */
+  /** 手札のカードを選んでいる間・カードをドラッグしている間、カードの間に「ここに出す」を出す。押すか、ドロップすると呼ぶ */
   onInsertCard?: (index: number) => void;
   onRemoveCard?: (value: number) => void;
   onEditCard?: (value: number) => void;
   onRevealCard?: (index: number) => void;
+  /** 場に出した自分のカードのドラッグを始めた (value) ・終えた (null) */
+  onDragMine?: (value: number | null) => void;
   /** 失敗したとき、並びを崩したカードに印を付ける */
   showMisplaced?: boolean;
 }
 
-const InsertButton: React.FC<{ onClick: () => void; index: number }> = ({ onClick, index }) => (
-  <button
-    type="button"
-    aria-label={`${index} 番目に出す`}
-    className="flex flex-col items-center justify-center gap-0.5 text-xs bg-blue-600 text-white py-3 rounded hover:bg-blue-500 transition w-7 px-1 border-0"
-    onClick={onClick}
-  >
-    <ArrowDownCircle className="w-3 h-3" />
-    ここに出す
-  </button>
-);
+/** カードの間の「ここに出す」。押しても、カードをドロップしてもよい */
+const InsertButton: React.FC<{ onClick: () => void; index: number }> = ({ onClick, index }) => {
+  const [over, setOver] = useState(false);
+  return (
+    <button
+      type="button"
+      aria-label={`${index} 番目に出す`}
+      className={`flex flex-col items-center justify-center gap-0.5 text-xs text-white py-3 rounded transition w-7 px-1 border-0
+        ${over ? 'bg-blue-400 scale-110' : 'bg-blue-600 hover:bg-blue-500'}`}
+      onClick={onClick}
+      onDragOver={(e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        setOver(true);
+      }}
+      onDragLeave={() => setOver(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        setOver(false);
+        onClick();
+      }}
+    >
+      <ArrowDownCircle className="w-3 h-3" />
+      ここに出す
+    </button>
+  );
+};
 
 /** めくったカードのうち、左にもっと大きい数字があるもの (並びが崩れた原因) */
 function misplacedIndexes(field: FieldCardView[]): Set<number> {
@@ -53,6 +71,7 @@ const CardArea: React.FC<Props> = ({
   onRemoveCard,
   onEditCard,
   onRevealCard,
+  onDragMine,
   showMisplaced = false,
 }) => {
   const playerOf = (id: string) => players.find((p) => p.id === id);
@@ -88,6 +107,7 @@ const CardArea: React.FC<Props> = ({
           const player = playerOf(card.playerId);
           const isMine = card.playerId === myId;
           const canReveal = mode === 'reveal' && !card.revealed && onRevealCard;
+          const draggable = mode === 'place' && isMine && card.value !== null && !!onDragMine;
           return (
             <motion.div
               key={card.id}
@@ -99,22 +119,33 @@ const CardArea: React.FC<Props> = ({
               data-testid="field-card"
               data-card-id={card.id}
             >
-              <Card
-                value={card.value ?? '?'}
-                name={player?.nickname}
-                color={player?.color}
-                avatarUrl={player?.avatarUrl}
-                revealed={mode === 'reveal' && card.revealed}
-                isMine={isMine}
-                hint={card.hint}
-                mode={mode}
-                location="field"
-                label={canReveal ? `${player?.nickname ?? ''}のカードをめくる` : undefined}
-                onClick={canReveal ? () => onRevealCard(index) : undefined}
-                onReturnToHand={isMine && onRemoveCard && card.value !== null ? () => onRemoveCard(card.value!) : undefined}
-                onEdit={isMine && onEditCard && card.value !== null ? () => onEditCard(card.value!) : undefined}
-                misplaced={misplaced.has(index)}
-              />
+              <div
+                draggable={draggable}
+                className={draggable ? 'cursor-grab' : undefined}
+                onDragStart={(e) => {
+                  e.dataTransfer.setData('text/plain', String(card.value));
+                  e.dataTransfer.effectAllowed = 'move';
+                  onDragMine?.(card.value);
+                }}
+                onDragEnd={() => onDragMine?.(null)}
+              >
+                <Card
+                  value={card.value ?? '?'}
+                  name={player?.nickname}
+                  color={player?.color}
+                  avatarUrl={player?.avatarUrl}
+                  revealed={mode === 'reveal' && card.revealed}
+                  isMine={isMine}
+                  hint={card.hint}
+                  mode={mode}
+                  location="field"
+                  label={canReveal ? `${player?.nickname ?? ''}のカードをめくる` : undefined}
+                  onClick={canReveal ? () => onRevealCard(index) : undefined}
+                  onReturnToHand={isMine && onRemoveCard && card.value !== null ? () => onRemoveCard(card.value!) : undefined}
+                  onEdit={isMine && onEditCard && card.value !== null ? () => onEditCard(card.value!) : undefined}
+                  misplaced={misplaced.has(index)}
+                />
+              </div>
               {onInsertCard && <InsertButton index={index + 1} onClick={() => onInsertCard(index + 1)} />}
             </motion.div>
           );

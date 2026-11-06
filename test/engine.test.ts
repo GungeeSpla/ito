@@ -184,6 +184,31 @@ test('自分のカードしか出し入れできず、たとえワードは場�
   assert.equal(state.round!.field.length, 1);
 });
 
+test('場に出した自分のカードだけを、カードの間の位置を指定して動かせる', () => {
+  let state = toPlaceCards(room('B', 'C'));
+  for (const [i, id] of ['A', 'B', 'C'].entries()) {
+    state = apply(state, id, { type: 'place', value: state.round!.hands[id][0].value, index: i }, env);
+  }
+  const order = () => state.round!.field.map((c) => c.playerId).join('');
+  assert.equal(order(), 'ABC');
+  const a = state.round!.field[0].value;
+  // 右端 (位置 3) へ
+  state = apply(state, 'A', { type: 'move', value: a, index: 3 }, env);
+  assert.equal(order(), 'BCA');
+  // B と C の間 (位置 1) へ
+  state = apply(state, 'A', { type: 'move', value: a, index: 1 }, env);
+  assert.equal(order(), 'BAC');
+  // 同じ場所へ動かしても変わらない
+  state = apply(state, 'A', { type: 'move', value: a, index: 2 }, env);
+  assert.equal(order(), 'BAC');
+  rejects(state, 'B', { type: 'move', value: a, index: 0 }, /持っていません/);
+  rejects(state, 'A', { type: 'move', value: a, index: 4 }, /不正/);
+  const id = state.round!.field[1].id;
+  state = apply(state, 'A', { type: 'move', value: a, index: 0 }, env);
+  // 動かしてもカードの番号は変わらない (画面のアニメーションが続く)
+  assert.equal(state.round!.field[0].id, id);
+});
+
 test('めくった順に関係なく、場の並びが崩れていたら失敗、全部そろえば成功', () => {
   const card = (value: number, revealed = true) => ({ id: String(value), playerId: 'A', value, hint: '', revealed });
   assert.equal(judge([card(10), card(5, false), card(30)]), null);

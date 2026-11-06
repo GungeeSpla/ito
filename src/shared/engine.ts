@@ -119,6 +119,8 @@ export type Action =
   | { type: 'setHint'; value: number; hint: string }
   | { type: 'place'; value: number; index: number }
   | { type: 'takeBack'; value: number }
+  /** 場に出した自分のカードを動かす。index は動かす前の場の、カードの間の位置 (0 は左端、field.length は右端) */
+  | { type: 'move'; value: number; index: number }
   | { type: 'redeal' }
   | { type: 'toReveal' }
   | { type: 'reveal'; index: number }
@@ -549,6 +551,21 @@ export function apply(current: RoomState, actorId: string, action: Action, env: 
       if (!onField) throw new GameError('そのカードは場にありません');
       r.field = r.field.filter((card) => card !== onField);
       r.hands[actorId] = [...hand, { value: onField.value, hint: onField.hint }].sort((a, b) => a.value - b.value);
+      break;
+    }
+    case 'move': {
+      requirePhase('placeCards');
+      const r = requireParticipant();
+      const { onField } = ownCard(r, action.value);
+      if (!onField) throw new GameError('そのカードは場にありません');
+      if (!Number.isInteger(action.index) || action.index < 0 || action.index > r.field.length) {
+        throw new GameError('動かす場所が不正です');
+      }
+      const from = r.field.indexOf(onField);
+      // 取り除いたぶん、右側の位置は 1 つ詰まる
+      const to = action.index > from ? action.index - 1 : action.index;
+      r.field.splice(from, 1);
+      r.field.splice(to, 0, onField);
       break;
     }
     case 'redeal': {

@@ -54,7 +54,19 @@ const PlaceCardsPhase: React.FC<Props> = ({ room, send }) => {
     return () => document.removeEventListener('click', onClick);
   }, []);
 
+  // ドラッグ中のカード。手札から出すか、場の自分のカードを動かす
+  const [dragging, setDragging] = useState<{ from: 'hand' | 'field'; value: number } | null>(null);
+  // dragstart の中で画面を変える (「ここに出す」を差し込む) とドラッグが止まるブラウザがあるので、次の瞬間に変える
+  const startDrag = (from: 'hand' | 'field', value: number) => setTimeout(() => setDragging({ from, value }), 0);
+  const endDrag = () => setTimeout(() => setDragging(null), 0);
+
+  /** カードの間の位置 index に、ドラッグ中か選んでいるカードを出す */
   const place = (index: number) => {
+    if (dragging) {
+      setDragging(null);
+      send(dragging.from === 'hand' ? { type: 'place', value: dragging.value, index } : { type: 'move', value: dragging.value, index });
+      return;
+    }
     if (active === null) return;
     setActiveValue(null);
     send({ type: 'place', value: active, index });
@@ -94,15 +106,16 @@ const PlaceCardsPhase: React.FC<Props> = ({ room, send }) => {
         field={round.field}
         players={room.players}
         myId={me.id}
-        onInsertCard={active !== null ? place : undefined}
+        onInsertCard={active !== null || dragging ? place : undefined}
         onRemoveCard={(value) => send({ type: 'takeBack', value })}
         onEditCard={setEditingValue}
+        onDragMine={(value) => (value === null ? endDrag() : startDrag('field', value))}
       />
 
       <div className="absolute z-10 responsive-text left-1/2 top-1/2 -translate-x-1/2 translate-y-[7em] flex flex-col items-center text-center w-[90vw] max-w-md">
         {round.myHand.length > 0 && (
           <p className="text-sm text-shadow-sm mb-2 font-bold">
-            {active === null ? '手札のカードを選んでから、出す場所を選んでください。' : '出す場所を選んでください。'}
+            {active === null && !dragging ? '手札のカードを選んでから、出す場所を選んでください。' : '出す場所を選んでください。'}
           </p>
         )}
         {round.allPlaced ? (
@@ -163,22 +176,35 @@ const PlaceCardsPhase: React.FC<Props> = ({ room, send }) => {
                 exit={{ translateY: '-2rem', opacity: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <Card
-                  value={card.value}
-                  mode="place"
-                  location="hand"
-                  label={`手札 ${card.value}`}
-                  isActive={active === card.value}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveValue(active === card.value ? null : card.value);
+                {/* PC ではドラッグして「ここに出す」に落としても出せる */}
+                <div
+                  draggable
+                  className="cursor-grab"
+                  onDragStart={(e) => {
+                    e.dataTransfer.setData('text/plain', String(card.value));
+                    e.dataTransfer.effectAllowed = 'move';
+                    setActiveValue(null);
+                    startDrag('hand', card.value);
                   }}
-                  onEdit={() => setEditingValue(card.value)}
-                  onClearHint={() => send({ type: 'setHint', value: card.value, hint: '' })}
-                  hint={card.hint}
-                  isMine
-                  className={dealing ? styles.handCard : ''}
-                />
+                  onDragEnd={endDrag}
+                >
+                  <Card
+                    value={card.value}
+                    mode="place"
+                    location="hand"
+                    label={`手札 ${card.value}`}
+                    isActive={active === card.value}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveValue(active === card.value ? null : card.value);
+                    }}
+                    onEdit={() => setEditingValue(card.value)}
+                    onClearHint={() => send({ type: 'setHint', value: card.value, hint: '' })}
+                    hint={card.hint}
+                    isMine
+                    className={dealing ? styles.handCard : ''}
+                  />
+                </div>
               </motion.div>
             ))}
           </AnimatePresence>

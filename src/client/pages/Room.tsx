@@ -6,6 +6,7 @@ import ChooseTopicPhase from '@/components/phases/ChooseTopicPhase';
 import PlaceCardsPhase from '@/components/phases/PlaceCardsPhase';
 import RevealCardsPhase from '@/components/phases/RevealCardsPhase';
 import WaitingPhase from '@/components/phases/WaitingPhase';
+import { useOnChange } from '@/components/phases/parts';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import PlayerSetupForm from '@/components/ui/PlayerSetupForm';
 import WoodyButton from '@/components/ui/WoodyButton';
@@ -86,6 +87,17 @@ export default function Room({ roomId }: { roomId: string }) {
 function RoomScreen({ roomId }: { roomId: string }) {
   const { state: room, connection, send } = useRoom(roomId);
   const { phase, chosenTitle } = useDisplayedPhase(room);
+
+  // ホストが変わったら知らせる (接続が切れたホストの交代や、ホストの受け渡し)。部屋を開いたときは出さない
+  useOnChange(room?.hostId, (previous, next) => {
+    if (!previous || !next || !room) return;
+    if (next === room.me.id) {
+      toastWithAnimation('あなたがホストになりました。', { type: 'info', duration: 5000 });
+      return;
+    }
+    const name = room.players.find((p) => p.id === next)?.nickname;
+    if (name) toastWithAnimation(`${name} さんがホストになりました。`, { type: 'info' });
+  });
 
   useEffect(() => {
     if (connection !== 'notFound') return;
