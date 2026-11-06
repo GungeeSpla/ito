@@ -39,7 +39,14 @@
   transform: translateY(-50%);
   display: flex;
   gap: 0.5rem;
-  justify-content: center;
+  // 中央に寄せる。justify-content: center だと、はみ出した左端へスクロールできなくなるので、両端の余白で寄せる
+  justify-content: flex-start;
+  & > :first-child {
+    margin-left: auto;
+  }
+  & > :last-child {
+    margin-right: auto;
+  }
   padding-left: 1rem;
   padding-right: 1rem;
   padding-top: 20rem;
@@ -47,13 +54,18 @@
   pointer-events: none;
   overflow-x: auto;
   overflow-y: hidden;
+  scrollbar-width: thin;
 }
 
 .handCardsArea {
   opacity: 0;
   animation: fadeIn 500ms 1500ms ease-out forwards;
   overflow-x: auto;
-  translate: 0 6em;
+  // 手札は画面の下から少しのぞかせる。スマホでは数字が隠れない深さまで
+  translate: 0 3em;
+  @media (min-width: 640px) {
+    translate: 0 6em;
+  }
 }
 
 .handCard {

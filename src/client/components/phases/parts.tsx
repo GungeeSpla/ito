@@ -4,19 +4,20 @@ import type { Topic } from '@shared/engine.ts';
 import FallingText from '@/components/common/effects/FallingText';
 import styles from './PlaceCardsPhase.module.scss';
 
-/** 画面上部の帯。右側にホスト用のボタンを並べる */
+/** 画面上部の帯。右側にホスト用のボタンを並べる。狭い画面では見出しに重ならないよう折り返す */
 export const PhaseHeader: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
-  <div className="relative h-12">
-    {children && <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-x-2">{children}</div>}
-  </div>
+  <div className="relative z-20 min-h-12 flex flex-wrap items-center justify-end gap-2 px-2 py-2">{children}</div>
 );
+
+/** 画面の見出し。スマホでは一回り小さくする */
+export const headingClass = 'text-2xl sm:text-3xl font-bold text-shadow-md mt-0 mb-4';
 
 /** お題と、1 と 100 の意味 */
 export const TopicHeading: React.FC<{ topic: Topic; animate?: boolean }> = ({ topic, animate = false }) => {
   const still = animate ? '' : styles.noAnim;
   return (
-    <div className="relative w-full text-center max-w-xl mx-auto">
-      <h2 className="text-3xl font-bold text-shadow-md mt-0 mb-4">
+    <div className="relative w-full text-center max-w-3xl mx-auto px-4">
+      <h2 className={headingClass}>
         {animate ? <FallingText text={`お題：${topic.title}`} duration={0.8} /> : `お題：${topic.title}`}
       </h2>
       <div className={`${styles.scaleDescription} ${still} max-w-md mx-auto`}>

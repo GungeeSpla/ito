@@ -16,6 +16,8 @@ interface Props {
   onRemoveCard?: (value: number) => void;
   onEditCard?: (value: number) => void;
   onRevealCard?: (index: number) => void;
+  /** 失敗したとき、並びを崩したカードに印を付ける */
+  showMisplaced?: boolean;
 }
 
 const InsertButton: React.FC<{ onClick: () => void; index: number }> = ({ onClick, index }) => (
@@ -30,8 +32,21 @@ const InsertButton: React.FC<{ onClick: () => void; index: number }> = ({ onClic
   </button>
 );
 
-const CardArea: React.FC<Props> = ({ mode, field, players, myId, onInsertCard, onRemoveCard, onEditCard, onRevealCard }) => {
+/** めくったカードのうち、左にもっと大きい数字があるもの (並びが崩れた原因) */
+function misplacedIndexes(field: FieldCardView[]): Set<number> {
+  const result = new Set<number>();
+  let max = -1;
+  field.forEach((card, index) => {
+    if (!card.revealed || card.value === null) return;
+    if (card.value < max) result.add(index);
+    max = Math.max(max, card.value);
+  });
+  return result;
+}
+
+const CardArea: React.FC<Props> = ({ mode, field, players, myId, onInsertCard, onRemoveCard, onEditCard, onRevealCard, showMisplaced = false }) => {
   const playerOf = (id: string) => players.find((p) => p.id === id);
+  const misplaced = showMisplaced ? misplacedIndexes(field) : new Set<number>();
   return (
     <div className={`${styles.playedCardsArea} responsive-text`} style={mode === 'reveal' ? { animation: 'none', opacity: 1 } : undefined}>
       <div className="flex items-center gap-2 pointer-events-auto">
@@ -68,6 +83,7 @@ const CardArea: React.FC<Props> = ({ mode, field, players, myId, onInsertCard, o
                 onClick={canReveal ? () => onRevealCard(index) : undefined}
                 onReturnToHand={isMine && onRemoveCard && card.value !== null ? () => onRemoveCard(card.value!) : undefined}
                 onEdit={isMine && onEditCard && card.value !== null ? () => onEditCard(card.value!) : undefined}
+                misplaced={misplaced.has(index)}
               />
               {onInsertCard && <InsertButton index={index + 1} onClick={() => onInsertCard(index + 1)} />}
             </motion.div>

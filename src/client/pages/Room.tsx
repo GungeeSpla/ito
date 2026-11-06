@@ -91,9 +91,9 @@ function RoomScreen({ roomId }: { roomId: string }) {
     navigate('/', { replace: true });
   }, [connection, navigate]);
 
-  // フェーズが変わったら上へ戻す
+  // フェーズが変わったら上へ戻す。スクロールするのは Layout の main
   useEffect(() => {
-    const timer = setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
+    const timer = setTimeout(() => document.querySelector('main')?.scrollTo({ top: 0, behavior: 'smooth' }), 100);
     return () => clearTimeout(timer);
   }, [phase]);
 

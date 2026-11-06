@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import {
+  allPlaced,
   apply,
   createState,
   GameError,
@@ -223,6 +224,19 @@ test('追い出された人は入り直せない。ホストが抜けると次�
   rejects(state, 'B', { type: 'join', profile: profile('B') }, /参加できません/);
   state = apply(state, 'A', { type: 'leave' }, env);
   assert.equal(state.hostId, 'C');
+});
+
+test('接続が切れた人をゲームの途中で外すと、残りの人で続けられ、外された人は入り直せる', () => {
+  let state = toPlaceCards(room('B', 'C'));
+  for (const id of ['A', 'B']) {
+    const value = state.round!.hands[id][0].value;
+    state = apply(state, id, { type: 'place', value, index: 0 }, env);
+  }
+  state = apply(state, 'A', { type: 'kick', playerId: 'C', ban: false }, env);
+  assert.equal(state.phase, 'placeCards');
+  assert.ok(allPlaced(state.round!));
+  state = apply(state, 'C', { type: 'join', profile: profile('C') }, env);
+  assert.ok(state.players.some((p) => p.id === 'C'));
 });
 
 test('つながっていないホストの代わりは、つながっている先に入った人', () => {

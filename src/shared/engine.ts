@@ -105,7 +105,7 @@ export type Action =
   | { type: 'join'; profile: Profile }
   | { type: 'leave' }
   | { type: 'updateProfile'; profile: Profile }
-  | { type: 'kick'; playerId: string }
+  | { type: 'kick'; playerId: string; ban?: boolean }
   | { type: 'transferHost'; playerId: string }
   | { type: 'updateSettings'; settings: Partial<Settings> }
   | { type: 'start' }
@@ -429,7 +429,8 @@ export function apply(current: RoomState, actorId: string, action: Action, env: 
       requireHost();
       if (action.playerId === actorId || !isPlayer(state, action.playerId)) throw new GameError('その人は追い出せません');
       removePlayer(state, action.playerId, env);
-      state.kicked.push(action.playerId);
+      // 接続が切れた人を外すだけのときは、戻ってきたら入り直せる
+      if (action.ban !== false) state.kicked.push(action.playerId);
       break;
     }
     case 'transferHost': {

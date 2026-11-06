@@ -60,6 +60,11 @@ try {
   const host = await open('host', ORIGIN);
   await fillProfile(host, 'ホスト');
   await shot(host, '01-home');
+  {
+    const phone = await open('phone', ORIGIN, { width: 390, height: 844 });
+    await shot(phone, '01-home-phone');
+    await phone.context().close();
+  }
   await button(host, 'ルームを作成').click();
   await host.waitForURL(/\/room\/[a-z]+-[a-z]+-[a-z]+$/);
   const roomUrl = host.url();
@@ -87,6 +92,7 @@ try {
   // カードが現れる演出を待ってから撮る
   await host.waitForTimeout(1500);
   await shot(host, '03-choose-topic');
+  await shot(guest, '03-choose-topic-guest');
   await host.getByTestId('topic-card').filter({ hasText: title }).click();
 
   // ---- カードを出す ----
@@ -105,6 +111,8 @@ try {
   await button(first.page, '0 番目に出す').click();
   await host.getByTestId('field-card').first().waitFor();
   await shot(host, '04-place-one');
+  await guest.waitForTimeout(800);
+  await shot(guest, '04-place-one-guest');
 
   // 途中で読み込み直しても、手札と場がそのまま
   await guest.reload();
@@ -127,6 +135,7 @@ try {
   await host.getByTestId('result').getByText('成功！').waitFor();
   await guest.getByTestId('result').getByText('成功！').waitFor();
   await shot(host, '06-success');
+  await shot(guest, '06-success-guest');
 
   // ---- 次のゲームはレベル 2 まで選べる ----
   await button(host, 'ロビーに戻る').last().click();

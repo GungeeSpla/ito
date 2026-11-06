@@ -27,3 +27,4 @@ dist-ssr
 data
 # E2E テストのスクリーンショット
 tools/e2e/shots
+tools/dev/shots

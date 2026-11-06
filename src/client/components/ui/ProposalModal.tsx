@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { LIMITS } from "@shared/engine.ts";
 
 // Propsの型
 type Props = {
@@ -23,15 +24,6 @@ const ProposalModal: React.FC<Props> = ({ open, onClose, onSubmit }) => {
   const [title, setTitle] = useState("");
   const [min, setMin] = useState("");
   const [max, setMax] = useState("");
-
-  // モーダルが開いたときにスクロール位置をトップに戻す（スマホ対策）
-  useEffect(() => {
-    if (open) {
-      setTimeout(() => {
-        window.scrollTo(0, 0);
-      }, 50);
-    }
-  }, [open]);
 
   const handleSubmit = () => {
     if (!title.trim()) return;
@@ -78,6 +70,7 @@ const ProposalModal: React.FC<Props> = ({ open, onClose, onSubmit }) => {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="例：投げたいもの"
+              maxLength={LIMITS.topicTitleMax}
               required
             />
           </div>
@@ -90,6 +83,7 @@ const ProposalModal: React.FC<Props> = ({ open, onClose, onSubmit }) => {
                 value={min}
                 onChange={(e) => setMin(e.target.value)}
                 placeholder="例：投げたくない"
+                maxLength={LIMITS.topicLabelMax}
               />
             </div>
             <div className="flex-1">
@@ -99,6 +93,7 @@ const ProposalModal: React.FC<Props> = ({ open, onClose, onSubmit }) => {
                 value={max}
                 onChange={(e) => setMax(e.target.value)}
                 placeholder="例：投げたい"
+                maxLength={LIMITS.topicLabelMax}
               />
             </div>
           </div>

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Copy, Crown, PlayIcon, XCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { parseCustomTopics, type RoomView, type SelectableTopicSet } from '@shared/engine.ts';
 import NoticeGame from '@/components/common/others/NoticeGame';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
@@ -11,7 +12,7 @@ import { useProfileForm } from '@/hooks/useProfileForm.ts';
 import { preference } from '@/lib/identity.ts';
 import { copyToClipboard } from '@/utils/core/clipboard';
 import { toastWithAnimation } from '@/utils/ui/toast';
-import { PhaseHeader } from './parts';
+import { headingClass, PhaseHeader } from './parts';
 
 const TOPIC_SET_LABELS: Record<SelectableTopicSet, string> = { rainbow: 'レインボー', salmon: 'サーモンラン', custom: 'カスタム' };
 const CUSTOM_TEXT_KEY = 'customTopicsText';
@@ -19,7 +20,8 @@ const CUSTOM_TEXT_KEY = 'customTopicsText';
 const loadCustomText = () => preference.get(CUSTOM_TEXT_KEY) ?? localStorage.getItem('customPromptText') ?? '';
 
 // index.css の button の共通スタイル (背景・余白・枠) を打ち消す
-const iconButton = 'bg-transparent p-0 border-0 rounded-none align-baseline';
+// スマホで押しやすいよう、アイコンの周りにも押せる余白を持たせる
+const iconButton = 'shrink-0 bg-transparent p-1 border-0 rounded';
 const selectClass ='w-full p-2 bg-white text-black rounded focus:outline-none focus:ring-2 focus:ring-blue-400';
 
 interface Props {
@@ -31,7 +33,8 @@ const WaitingPhase: React.FC<Props> = ({ room, send }) => {
   const { me, settings } = room;
   const form = useProfileForm();
   const [customText, setCustomText] = useState(loadCustomText);
-  const [confirm, setConfirm] = useState<{ id: string; kind: 'kick' | 'host' } | null>(null);
+  const [confirm, setConfirm] = useState<{ id: string; kind: 'kick' | 'host' | 'leave' } | null>(null);
+  const navigate = useNavigate();
   const players = [...room.players].sort((a, b) => a.joinedAt - b.joinedAt);
 
   // カスタムお題は入力が止まってから送る。ゲーム開始の直前にも送り直す
@@ -69,6 +72,13 @@ const WaitingPhase: React.FC<Props> = ({ room, send }) => {
   };
 
   const target = confirm && room.players.find((p) => p.id === confirm.id);
+  const dialog =
+    target &&
+    {
+      kick: { title: `${target.nickname} をキックしますか？`, description: 'キックした人は、このルームに入り直せなくなります。', label: 'キックする' },
+      host: { title: `${target.nickname} にホストを渡しますか？`, description: undefined, label: 'ホストを渡す' },
+      leave: { title: 'ルームから抜けますか？', description: undefined, label: '抜ける' },
+    }[confirm.kind];
 
   return (
     <div className="relative min-h-screen text-white overflow-x-hidden">
@@ -80,7 +90,7 @@ const WaitingPhase: React.FC<Props> = ({ room, send }) => {
       </PhaseHeader>
 
       <div className="relative w-full text-center px-4">
-        <h2 className="text-3xl font-bold text-shadow-md mt-0 mb-4">数字の大きさを言葉でたとえて価値観を比べるゲーム</h2>
+        <h2 className={headingClass}>数字の大きさを言葉でたとえて価値観を比べるゲーム</h2>
         <p className="text-center text-white text-shadow-md my-6">
           {!me.joined ? (
             'ニックネームを入力して、ルームに参加してください。'
@@ -101,10 +111,14 @@ const WaitingPhase: React.FC<Props> = ({ room, send }) => {
             <SectionTitle className="mt-0">参加者一覧</SectionTitle>
             <ul className="grid grid-cols-2 gap-y-2 text-left" aria-label="参加者一覧">
               {players.map((player) => (
-                <li key={player.id} className={`text-sm ${player.online ? '' : 'opacity-50'}`} title={player.online ? undefined : '接続していません'}>
-                  {player.nickname}
-                  {player.id === room.hostId && <Crown size={16} className="inline text-yellow-700 ml-1 relative top-[-0.05rem]" aria-label="ホスト" />}
-                  {player.id === me.id && <span className="text-white text-xs">（You）</span>}
+                <li
+                  key={player.id}
+                  className={`text-sm flex items-center min-w-0 pr-1 ${player.online ? '' : 'opacity-50'}`}
+                  title={player.online ? player.nickname : `${player.nickname}（接続していません）`}
+                >
+                  <span className="truncate">{player.nickname}</span>
+                  {player.id === room.hostId && <Crown size={16} className="shrink-0 text-yellow-700 ml-1" aria-label="ホスト" />}
+                  {player.id === me.id && <span className="shrink-0 text-white text-xs">（You）</span>}
                   {me.isHost && player.id !== me.id && (
                     <>
                       <button
@@ -114,7 +128,7 @@ const WaitingPhase: React.FC<Props> = ({ room, send }) => {
                         title={`${player.nickname} にホストを渡す`}
                         aria-label={`${player.nickname} にホストを渡す`}
                       >
-                        <Crown size={16} className="inline text-gray-400 hover:text-yellow-500 ml-1 relative top-[-0.05rem]" />
+                        <Crown size={16} className="text-gray-400 hover:text-yellow-500" />
                       </button>
                       <button
                         type="button"
@@ -123,13 +137,18 @@ const WaitingPhase: React.FC<Props> = ({ room, send }) => {
                         title={`${player.nickname} をキック`}
                         aria-label={`${player.nickname} をキック`}
                       >
-                        <XCircle size={16} className="inline text-red-600 hover:text-red-400 ml-1 relative top-[-0.05rem]" />
+                        <XCircle size={16} className="text-red-600 hover:text-red-400" />
                       </button>
                     </>
                   )}
                 </li>
               ))}
             </ul>
+            {me.joined && !me.isHost && (
+              <button type="button" className={`${iconButton} mt-3 text-xs text-gray-300 underline hover:text-white`} onClick={() => setConfirm({ id: me.id, kind: 'leave' })}>
+                ルームから抜ける
+              </button>
+            )}
           </div>
 
           {/* 参加フォーム */}
@@ -215,11 +234,16 @@ const WaitingPhase: React.FC<Props> = ({ room, send }) => {
 
       <ConfirmDialog
         open={!!target}
-        title={confirm?.kind === 'kick' ? `${target?.nickname} をキックしますか？` : `${target?.nickname} にホストを渡しますか？`}
-        description={confirm?.kind === 'kick' ? 'キックした人は、このルームに入り直せなくなります。' : undefined}
-        confirmLabel={confirm?.kind === 'kick' ? 'キックする' : 'ホストを渡す'}
-        onConfirm={() => {
-          if (confirm) send({ type: confirm.kind === 'kick' ? 'kick' : 'transferHost', playerId: confirm.id });
+        title={dialog?.title ?? ''}
+        description={dialog?.description}
+        confirmLabel={dialog?.label}
+        onConfirm={async () => {
+          if (!confirm) return;
+          if (confirm.kind === 'leave') {
+            if (await send({ type: 'leave' })) navigate('/');
+          } else {
+            send({ type: confirm.kind === 'kick' ? 'kick' : 'transferHost', playerId: confirm.id });
+          }
         }}
         onOpenChange={(open) => !open && setConfirm(null)}
       />

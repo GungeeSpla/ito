@@ -8,7 +8,7 @@ import WoodyButton from '@/components/ui/WoodyButton';
 import type { Send } from '@/hooks/useRoom.ts';
 import { toastWithAnimation } from '@/utils/ui/toast';
 import styles from './ChooseTopicPhase.module.scss';
-import { PhaseHeader } from './parts';
+import { headingClass, PhaseHeader } from './parts';
 
 interface Props {
   room: RoomView;
@@ -54,7 +54,7 @@ const ChooseTopicPhase: React.FC<Props> = ({ room, send, chosenTitle }) => {
       </PhaseHeader>
 
       <div className="relative w-full text-center px-4">
-        <motion.h2 className="text-3xl font-bold text-shadow-md mt-0 mb-4" {...fade} transition={{ duration: 0.4 }}>
+        <motion.h2 className={headingClass} {...fade} transition={{ duration: 0.4 }}>
           お題の選択
         </motion.h2>
 

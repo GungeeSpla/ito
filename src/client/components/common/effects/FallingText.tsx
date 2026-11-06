@@ -6,18 +6,21 @@ type Props = {
   duration?: number;
 };
 
+const startSize = typeof window !== "undefined" && window.innerWidth < 640 ? 24 : 32;
+
 const FallingText: React.FC<Props> = ({ text, duration = 1.5 }) => {
   const letters = text.split("");
   const delayPerChar = duration / letters.length;
 
   const containerRef = useRef<HTMLParagraphElement>(null);
-  const [fontSize, setFontSize] = useState(32); // 初期フォントサイズ
+  // 初期フォントサイズ。スマホでは見出し (text-2xl) にそろえて小さめから始める
+  const [fontSize, setFontSize] = useState(startSize);
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
 
-    let size = 32;
+    let size = startSize;
     const maxHeightPx = window.innerHeight * 0.15; // ← 画面高さの15%
 
     const shrinkToFit = () => {

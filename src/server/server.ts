@@ -166,8 +166,13 @@ export async function startServer(options: ServerOptions): Promise<{ port: numbe
     if (!url.startsWith('/avatars/') || !AVATAR_NAME.test(name) || !existsSync(avatarPath(url))) {
       return { ...profile, avatarUrl: '' };
     }
-    const now = new Date();
-    utimesSync(avatarPath(url), now, now);
+    try {
+      const now = new Date();
+      utimesSync(avatarPath(url), now, now);
+    } catch {
+      // 確かめた直後に消された場合など。画像を外して続ける
+      return { ...profile, avatarUrl: '' };
+    }
     return profile;
   }
 

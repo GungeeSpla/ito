@@ -25,6 +25,8 @@ interface CardProps {
   avatarUrl?: string;
   color?: string;
   label?: string;
+  /** 並びを崩したカード。赤い枠を付ける */
+  misplaced?: boolean;
 }
 
 const stop = (handler?: () => void) => (e: React.MouseEvent) => {
@@ -49,6 +51,7 @@ const Card: React.FC<CardProps> = ({
   avatarUrl,
   color,
   label,
+  misplaced = false,
 }) => {
   // 特定の名前の人のカードに絵柄を出す遊び (index.css の .player-*)
   const playerClass = name ? `player-${name}` : '';
@@ -64,6 +67,8 @@ const Card: React.FC<CardProps> = ({
       aria-label={label}
       aria-pressed={location === 'hand' ? isActive : undefined}
       data-value={typeof value === 'number' && (isMine || revealed) ? value : undefined}
+      data-misplaced={misplaced || undefined}
+      style={misplaced ? { outline: '0.25em solid #ef4444', outlineOffset: '0.15em', borderRadius: '0.25rem' } : undefined}
     >
       {/*--- カードの表面と裏面を包括 ---*/}
       <div

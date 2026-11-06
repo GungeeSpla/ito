@@ -5,6 +5,7 @@ import type { RoomView } from '@shared/engine.ts';
 import Card from '@/components/common/card/Card';
 import CardArea from '@/components/common/card/CardArea';
 import cardStyles from '@/components/common/card/Card.module.scss';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import EditHintModal from '@/components/ui/EditHintModal';
 import WoodyButton from '@/components/ui/WoodyButton';
 import type { Send } from '@/hooks/useRoom.ts';
@@ -65,6 +66,9 @@ const PlaceCardsPhase: React.FC<Props> = ({ room, send }) => {
       : (round.myHand.find((c) => c.value === editingValue) ?? round.field.find((c) => c.playerId === me.id && c.value === editingValue));
 
   const waitingFor = room.players.filter((p) => (round.handCounts[p.id] ?? 0) > 0);
+  // 接続が切れたまま戻らない人を、ホストがゲームから外す
+  const [removing, setRemoving] = useState<string | null>(null);
+  const removingPlayer = removing ? room.players.find((p) => p.id === removing) : undefined;
 
   return (
     <div className="relative min-h-screen text-white">
@@ -95,21 +99,53 @@ const PlaceCardsPhase: React.FC<Props> = ({ room, send }) => {
         onEditCard={setEditingValue}
       />
 
-      <div className="absolute responsive-text left-1/2 top-1/2 -translate-x-1/2 translate-y-[10em] text-center">
+      <div className="absolute z-10 responsive-text left-1/2 top-1/2 -translate-x-1/2 translate-y-[7em] flex flex-col items-center text-center w-[90vw] max-w-md">
+        {round.myHand.length > 0 && (
+          <p className="text-sm text-shadow-sm mb-2 font-bold">
+            {active === null ? '手札のカードを選んでから、出す場所を選んでください。' : '「ここに出す」で出す場所を選んでください。'}
+          </p>
+        )}
         {round.allPlaced ? (
-          me.isHost && (
+          me.isHost ? (
             <WoodyButton onClick={() => send({ type: 'toReveal' })}>
               <Eye className="w-4 h-4 translate-y-[0.1rem]" />
               めくりフェーズへ！
             </WoodyButton>
+          ) : (
+            <p className="text-sm text-shadow-sm">全員のカードが出ました。ホストがめくりフェーズへ進めます。</p>
           )
         ) : (
-          <p className="text-sm text-shadow-sm whitespace-nowrap" data-testid="waiting-for">
-            まだ出していない人：{waitingFor.map((p) => p.nickname).join('、')}
+          <p className="text-sm text-shadow-sm" data-testid="waiting-for">
+            まだ出していない人：
+            {waitingFor.map((p, i) => (
+              <span key={p.id} className="inline-flex items-center">
+                {i > 0 && '、'}
+                <span className={p.online ? '' : 'opacity-60'}>{p.nickname}</span>
+                {!p.online && <span className="text-xs">（接続なし）</span>}
+                {me.isHost && !p.online && (
+                  <button
+                    type="button"
+                    className="ml-1 px-1.5 py-0 text-xs bg-red-700 hover:bg-red-600 rounded border-0"
+                    onClick={() => setRemoving(p.id)}
+                  >
+                    外す
+                  </button>
+                )}
+              </span>
+            ))}
           </p>
         )}
         {!me.participant && <p className="text-sm text-shadow-sm mt-2">ゲームの途中です。次のゲームから参加できます。</p>}
       </div>
+
+      <ConfirmDialog
+        open={!!removingPlayer}
+        title={`${removingPlayer?.nickname ?? ''} をゲームから外しますか？`}
+        description="手札と場のカードを取り除き、残りの人でゲームを続けます。戻ってきたら次のゲームから参加できます。"
+        confirmLabel="外す"
+        onConfirm={() => removingPlayer && send({ type: 'kick', playerId: removingPlayer.id, ban: false })}
+        onOpenChange={(open) => !open && setRemoving(null)}
+      />
 
       {/* 自分の手札 */}
       <div

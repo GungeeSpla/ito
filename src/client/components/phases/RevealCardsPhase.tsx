@@ -56,12 +56,18 @@ const RevealCardsPhase: React.FC<Props> = ({ room, send }) => {
         players={room.players}
         myId={me.id}
         onRevealCard={me.participant ? (index) => send({ type: 'reveal', index }) : undefined}
+        showMisplaced={result === 'fail'}
       />
 
       <div className="absolute responsive-text transition duration-200 left-1/2 top-1/2 -translate-x-1/2 translate-y-[8em] text-center">
-        <div data-testid="result" className="mb-4 text-center font-bold text-2xl">
+        <div data-testid="result" className="mb-4 text-center font-bold text-2xl whitespace-nowrap">
           {result === 'success' && <span className="text-green-400">成功！</span>}
-          {result === 'fail' && <span className="text-red-400">失敗！</span>}
+          {result === 'fail' && (
+            <>
+              <span className="text-red-400">失敗！</span>
+              {round.field.some((c) => !c.revealed) && <p className="text-sm font-normal text-shadow-sm mt-1">残りのカードもめくれます。</p>}
+            </>
+          )}
           {!result && <span className="text-white text-shadow-sm">カードをめくろう！</span>}
         </div>
         {me.isHost && result && (
