@@ -24,7 +24,7 @@ export default function Home() {
     });
 
   return (
-    <div className="relative min-h-screen text-white">
+    <div className="relative min-h-dvh text-white">
       <ItoAnimation />
 
       <div className="relative w-full text-center px-4 overflow-hidden">

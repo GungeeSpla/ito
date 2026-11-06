@@ -32,7 +32,7 @@ const RevealCardsPhase: React.FC<Props> = ({ room, send }) => {
   }, [result]);
 
   return (
-    <div className="relative min-h-screen text-white">
+    <div className="relative min-h-dvh text-white">
       <PhaseHeader>
         {me.isHost && (
           <>

@@ -37,7 +37,7 @@ const ChooseTopicPhase: React.FC<Props> = ({ room, send, chosenTitle }) => {
   const fade = { initial: { opacity: 0 }, animate: { opacity: decided ? 0 : 1 } };
 
   return (
-    <div className="relative min-h-screen text-white">
+    <div className="relative min-h-dvh text-white">
       <ProposalModal
         open={showProposal}
         onClose={() => setShowProposal(false)}
@@ -103,9 +103,10 @@ const ChooseTopicPhase: React.FC<Props> = ({ room, send, chosenTitle }) => {
                       </div>
                       <div className="h-[2px] bg-gray-900 mt-1" />
                     </div>
-                    <p className="text-sm text-gray-900 mb-2" title={voters.map(nameOf).join('、')}>
+                    <p className="text-sm text-gray-900 mb-1">
                       票: {voters.length} {isVoted && <span>（投票済み）</span>}
                     </p>
+                    {voters.length > 0 && <p className="text-xs text-gray-700 mb-2 break-all">{voters.map(nameOf).join('、')}</p>}
                     {topic.by && <p className="text-xs text-gray-700 mb-2">{nameOf(topic.by)} の提案</p>}
                     {me.isHost && (
                       <div className="flex justify-center">

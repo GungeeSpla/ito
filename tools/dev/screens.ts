@@ -129,6 +129,13 @@ try {
       await page.goto(`http://127.0.0.1:${PORT}/room/${roomId}`);
       await page.waitForTimeout(3000);
       await page.screenshot({ path: join(OUT, `${name}-${size}.png`) });
+      // 手札を選んだところ (「ここに出す」が並ぶ)
+      const handCard = page.getByRole('button', { name: /^手札 \d+$/ }).first();
+      if (await handCard.count()) {
+        await handCard.click();
+        await page.waitForTimeout(500);
+        await page.screenshot({ path: join(OUT, `${name}-selected-${size}.png`) });
+      }
     }
     if (!only.length || only.includes('home')) {
       await page.goto(`http://127.0.0.1:${PORT}/`);

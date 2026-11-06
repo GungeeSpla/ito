@@ -10,7 +10,7 @@ import VolumeControl from "@/components/ui/VolumeControl";
 // ------------------------------------------------
 const Layout: React.FC = () => {
   return (
-    <div className="w-screen h-screen flex flex-col overflow-hidden">
+    <div className="w-screen h-dvh flex flex-col overflow-hidden">
       {/* 外側をぼんやり暗く */}
       <div className="bg-gradient"></div>
 

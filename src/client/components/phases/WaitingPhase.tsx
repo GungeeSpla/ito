@@ -81,7 +81,7 @@ const WaitingPhase: React.FC<Props> = ({ room, send }) => {
     }[confirm.kind];
 
   return (
-    <div className="relative min-h-screen text-white overflow-x-hidden">
+    <div className="relative min-h-dvh text-white overflow-x-hidden">
       <PhaseHeader>
         <WoodyButton onClick={copyUrl}>
           <Copy className="w-3 h-3" />

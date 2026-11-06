@@ -71,7 +71,7 @@ const PlaceCardsPhase: React.FC<Props> = ({ room, send }) => {
   const removingPlayer = removing ? room.players.find((p) => p.id === removing) : undefined;
 
   return (
-    <div className="relative min-h-screen text-white">
+    <div className="relative min-h-dvh text-white">
       <PhaseHeader>
         {me.isHost && (
           <>
@@ -115,11 +115,10 @@ const PlaceCardsPhase: React.FC<Props> = ({ room, send }) => {
             <p className="text-sm text-shadow-sm">全員のカードが出ました。ホストがめくりフェーズへ進めます。</p>
           )
         ) : (
-          <p className="text-sm text-shadow-sm" data-testid="waiting-for">
-            まだ出していない人：
-            {waitingFor.map((p, i) => (
+          <p className="text-sm text-shadow-sm flex flex-wrap justify-center gap-x-3 gap-y-1" data-testid="waiting-for">
+            <span>まだ出していない人：</span>
+            {waitingFor.map((p) => (
               <span key={p.id} className="inline-flex items-center">
-                {i > 0 && '、'}
                 <span className={p.online ? '' : 'opacity-60'}>{p.nickname}</span>
                 {!p.online && <span className="text-xs">（接続なし）</span>}
                 {me.isHost && !p.online && (

@@ -305,3 +305,12 @@ button:focus-visible {
     @apply bg-background text-foreground;
   }
 }
+/* --------------------------------------------
+  タッチ操作: ボタンやカードを素早くタップしても拡大しない
+-------------------------------------------- */
+button,
+[role="button"],
+a,
+select {
+  touch-action: manipulation;
+}

@@ -18,7 +18,7 @@ import { toastWithAnimation } from '@/utils/ui/toast';
 const CHOSEN_MS = 900;
 
 const Message: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div className="flex flex-col items-center justify-center gap-6 h-screen text-white text-center px-4">{children}</div>
+  <div className="flex flex-col items-center justify-center gap-6 h-dvh text-white text-center px-4">{children}</div>
 );
 
 /** お題が決まった直後は、すぐ次の画面へ移らず、選ばれたお題の演出を挟む */

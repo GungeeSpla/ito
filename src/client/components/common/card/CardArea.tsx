@@ -24,7 +24,7 @@ const InsertButton: React.FC<{ onClick: () => void; index: number }> = ({ onClic
   <button
     type="button"
     aria-label={`${index} 番目に出す`}
-    className="flex flex-col items-center justify-center gap-0.5 text-xs bg-blue-600 text-white py-2 rounded hover:bg-blue-500 transition w-4 px-3"
+    className="flex flex-col items-center justify-center gap-0.5 text-xs bg-blue-600 text-white py-3 rounded hover:bg-blue-500 transition w-7 px-1 border-0"
     onClick={onClick}
   >
     <ArrowDownCircle className="w-3 h-3" />
