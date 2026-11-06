@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { navigate } from '@/lib/router.ts';
 import ItoAnimation from '@/components/common/effects/ItoAnimation';
 import NoticeGame from '@/components/common/others/NoticeGame';
 import PlayerSetupForm from '@/components/ui/PlayerSetupForm';
@@ -9,7 +9,6 @@ import { toastWithAnimation } from '@/lib/toast';
 
 // トップページ: ルームを作る
 export default function Home() {
-  const navigate = useNavigate();
   const form = useProfileForm();
 
   const create = () =>

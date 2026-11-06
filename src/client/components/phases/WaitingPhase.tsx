@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Copy, Crown, Lock, LockOpen, PlayIcon, XCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { navigate } from '@/lib/router.ts';
 import { parseCustomTopics, type RoomView, type SelectableTopicSet } from '@shared/engine.ts';
 import NoticeGame from '@/components/common/others/NoticeGame';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
@@ -34,7 +34,6 @@ const WaitingPhase: React.FC<Props> = ({ room, send }) => {
   const form = useProfileForm();
   const [customText, setCustomText] = useState(loadCustomText);
   const [confirm, setConfirm] = useState<{ id: string; kind: 'kick' | 'host' | 'leave' } | null>(null);
-  const navigate = useNavigate();
   const players = [...room.players].sort((a, b) => a.joinedAt - b.joinedAt);
 
   // カスタムお題は入力が止まってから送る。ゲーム開始の直前にも送り直す

@@ -4,6 +4,7 @@ import { createHash, randomBytes, randomInt } from 'node:crypto';
 import { createServer, type Server as HttpServer } from 'node:http';
 import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, utimesSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import compression from 'compression';
 import express from 'express';
 import { Server, type Socket } from 'socket.io';
 import {
@@ -241,6 +242,8 @@ export async function startServer(options: ServerOptions): Promise<{ port: numbe
   const uploadLimit = windowLimit(uploadLimitPerHour);
   const app = express();
   app.disable('x-powered-by');
+  // 画面のファイル (JS は約 650KB) を圧縮して送る。Nginx は JS を圧縮しない設定なので、ここで行う
+  app.use(compression());
   // Nginx 経由の接続元 IP を使う
   app.set('trust proxy', 'loopback');
   app.use((_req, res, next) => {

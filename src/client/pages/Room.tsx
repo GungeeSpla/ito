@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { Home, RefreshCw, UserPlus } from 'lucide-react';
 import type { Phase, RoomView } from '@shared/engine.ts';
 import { ROOM_ID_PATTERN } from '@shared/protocol.ts';
@@ -12,6 +11,7 @@ import PlayerSetupForm from '@/components/ui/PlayerSetupForm';
 import WoodyButton from '@/components/ui/WoodyButton';
 import { useProfileForm } from '@/hooks/useProfileForm.ts';
 import { useRoom, type Send } from '@/hooks/useRoom.ts';
+import { navigate } from '@/lib/router.ts';
 import { toastWithAnimation } from '@/lib/toast';
 
 /** お題が決まってから、選ばれたカードの演出を見せる時間 */
@@ -75,14 +75,15 @@ const JoinLater: React.FC<{ send: Send }> = ({ send }) => {
   );
 };
 
-export default function Room() {
-  const { roomId = '' } = useParams<{ roomId: string }>();
-  if (!ROOM_ID_PATTERN.test(roomId)) return <Navigate to="/" replace />;
-  return <RoomScreen key={roomId} roomId={roomId} />;
+export default function Room({ roomId }: { roomId: string }) {
+  const valid = ROOM_ID_PATTERN.test(roomId);
+  useEffect(() => {
+    if (!valid) navigate('/', { replace: true });
+  }, [valid]);
+  return valid ? <RoomScreen key={roomId} roomId={roomId} /> : null;
 }
 
 function RoomScreen({ roomId }: { roomId: string }) {
-  const navigate = useNavigate();
   const { state: room, connection, send } = useRoom(roomId);
   const { phase, chosenTitle } = useDisplayedPhase(room);
 
@@ -90,7 +91,7 @@ function RoomScreen({ roomId }: { roomId: string }) {
     if (connection !== 'notFound') return;
     toastWithAnimation('ルームが存在しません。', { type: 'error' });
     navigate('/', { replace: true });
-  }, [connection, navigate]);
+  }, [connection]);
 
   // フェーズが変わったら上へ戻す。スクロールするのは Layout の main
   useEffect(() => {

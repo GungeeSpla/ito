@@ -1,24 +1,15 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom'; // ページ遷移とルーティング用
 import { Toaster } from 'sonner';
 import VolumeControl from '@/components/ui/VolumeControl';
 
-// ------------------------------------------------
-// アプリ全体の共通レイアウトコンポーネント
-// - ヘッダー、メイン、フッターで構成
-// - <Outlet /> に現在のページをレンダリング
-// ------------------------------------------------
-const Layout: React.FC = () => {
+// アプリ全体の枠。スクロールするのは main の中だけ
+const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <div className="w-screen h-dvh flex flex-col overflow-hidden">
       {/* 外側をぼんやり暗く */}
       <div className="bg-gradient"></div>
 
-      {/* メインコンテンツ */}
-      <main className="flex-1 overflow-auto">
-        {/* 現在のページの中身を差し込む */}
-        <Outlet />
-      </main>
+      <main className="flex-1 overflow-auto">{children}</main>
 
       <Toaster richColors position="bottom-right" expand />
       <VolumeControl />
