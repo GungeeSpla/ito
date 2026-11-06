@@ -12,7 +12,9 @@
     "start": "node src/server/index.ts",
     "lint": "eslint .",
     "test": "node --test \"test/**/*.test.ts\"",
-    "test:e2e": "node tools/e2e/run.ts"
+    "test:e2e": "node tools/e2e/run.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "express": "^5.3.0",
@@ -42,6 +44,7 @@
     "lucide-react": "^1.70.0",
     "playwright": "1.64.1",
     "postcss": "^8.5.32",
+    "prettier": "^3.9.10",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-router-dom": "^7.4.0",

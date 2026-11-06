@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from "react";
-import styles from "./ItoAnimation.module.scss";
+import React, { useEffect, useRef } from 'react';
+import styles from './ItoAnimation.module.scss';
 
 const ItoAnimation: React.FC = () => {
   const kotobaRef = useRef<HTMLImageElement>(null);
@@ -47,15 +47,7 @@ const ItoAnimation: React.FC = () => {
         const pastTime = time - startTime;
         const progress = pastTime / countUpDuration;
         const changeRatio = easeOutCubic(progress);
-        currentValue = Math.max(
-          0,
-          Math.min(
-            Math.floor(
-              initialValue + (targetValue - initialValue) * changeRatio,
-            ),
-            targetValue,
-          ),
-        );
+        currentValue = Math.max(0, Math.min(Math.floor(initialValue + (targetValue - initialValue) * changeRatio), targetValue));
         const numberRef = refList[currentRefIndex].number.current;
         if (numberRef) {
           numberRef.textContent = String(currentValue);
@@ -74,13 +66,8 @@ const ItoAnimation: React.FC = () => {
         refList.forEach((item) => {
           item.container.current?.classList.remove(styles.animating);
         });
-        refList[currentRefIndex].container.current?.classList.add(
-          styles.animating,
-        );
-        kotobaRef.current?.setAttribute(
-          "animation-index",
-          String(currentRefIndex),
-        );
+        refList[currentRefIndex].container.current?.classList.add(styles.animating);
+        kotobaRef.current?.setAttribute('animation-index', String(currentRefIndex));
         timeoutId = setTimeout(() => {
           currentValue = 0;
           targetValue = Math.floor(Math.random() * 99) + 1;
@@ -88,7 +75,7 @@ const ItoAnimation: React.FC = () => {
         }, 300);
         const numberRef = refList[currentRefIndex].number.current;
         if (numberRef) {
-          numberRef.textContent = "0";
+          numberRef.textContent = '0';
         }
       };
       intervalId = setInterval(loop, oneAnimationDuration);
@@ -107,11 +94,7 @@ const ItoAnimation: React.FC = () => {
 
   return (
     <div className={styles.itoAnimation}>
-      <img
-        ref={kotobaRef}
-        className={styles.kotoba}
-        src="/icons/kotoba.min.svg"
-      />
+      <img ref={kotobaRef} className={styles.kotoba} src="/icons/kotoba.min.svg" />
 
       <div ref={scaleRef} className={styles.scale}>
         <div className={styles.head} />

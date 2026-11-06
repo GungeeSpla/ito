@@ -22,7 +22,7 @@ const loadCustomText = () => preference.get(CUSTOM_TEXT_KEY) ?? localStorage.get
 // index.css の button の共通スタイル (背景・余白・枠) を打ち消す
 // スマホで押しやすいよう、アイコンの周りにも押せる余白を持たせる
 const iconButton = 'shrink-0 bg-transparent p-1 border-0 rounded';
-const selectClass ='w-full p-2 bg-white text-black rounded focus:outline-none focus:ring-2 focus:ring-blue-400';
+const selectClass = 'w-full p-2 bg-white text-black rounded focus:outline-none focus:ring-2 focus:ring-blue-400';
 
 interface Props {
   room: RoomView;
@@ -75,7 +75,11 @@ const WaitingPhase: React.FC<Props> = ({ room, send }) => {
   const dialog =
     target &&
     {
-      kick: { title: `${target.nickname} をキックしますか？`, description: 'キックした人は、このルームに入り直せなくなります。', label: 'キックする' },
+      kick: {
+        title: `${target.nickname} をキックしますか？`,
+        description: 'キックした人は、このルームに入り直せなくなります。',
+        label: 'キックする',
+      },
       host: { title: `${target.nickname} にホストを渡しますか？`, description: undefined, label: 'ホストを渡す' },
       leave: { title: 'ルームから抜けますか？', description: undefined, label: '抜ける' },
     }[confirm.kind];
@@ -145,7 +149,11 @@ const WaitingPhase: React.FC<Props> = ({ room, send }) => {
               ))}
             </ul>
             {me.joined && !me.isHost && (
-              <button type="button" className={`${iconButton} mt-3 text-xs text-gray-300 underline hover:text-white`} onClick={() => setConfirm({ id: me.id, kind: 'leave' })}>
+              <button
+                type="button"
+                className={`${iconButton} mt-3 text-xs text-gray-300 underline hover:text-white`}
+                onClick={() => setConfirm({ id: me.id, kind: 'leave' })}
+              >
                 ルームから抜ける
               </button>
             )}

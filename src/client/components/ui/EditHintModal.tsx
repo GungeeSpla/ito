@@ -1,15 +1,8 @@
-import React, { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { LIMITS } from "@shared/engine.ts";
+import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { LIMITS } from '@shared/engine.ts';
 
 interface Props {
   initialValue?: string;
@@ -18,12 +11,7 @@ interface Props {
   onClose: () => void;
 }
 
-const EditHintModal: React.FC<Props> = ({
-  initialValue = "",
-  open,
-  onSubmit,
-  onClose,
-}) => {
+const EditHintModal: React.FC<Props> = ({ initialValue = '', open, onSubmit, onClose }) => {
   // 開くたびに作り直されるので、最初の値だけを使う
   const [hint, setHint] = useState(initialValue);
 
@@ -37,9 +25,7 @@ const EditHintModal: React.FC<Props> = ({
       >
         <DialogHeader>
           <DialogTitle>たとえワードを入力</DialogTitle>
-          <DialogDescription>
-            数値をたとえるワードを入力できます。
-          </DialogDescription>
+          <DialogDescription>数値をたとえるワードを入力できます。</DialogDescription>
         </DialogHeader>
 
         <Textarea

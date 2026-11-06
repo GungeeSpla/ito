@@ -14,7 +14,8 @@ interface Props {
 const isPreset = (color: string) => (PRESET_COLORS as readonly string[]).includes(color);
 
 const PlayerSetupForm: React.FC<Props> = ({ form, submitLabel, onSubmit }) => {
-  const { nickname, setNickname, color, setColor, avatarFile, setAvatarFile, avatarUrl, setAvatarUrl, showOptions, setShowOptions, busy } = form;
+  const { nickname, setNickname, color, setColor, avatarFile, setAvatarFile, avatarUrl, setAvatarUrl, showOptions, setShowOptions, busy } =
+    form;
   const [customColor, setCustomColor] = useState(() => (color && !isPreset(color) ? color : '#1F1F1F'));
   const inputRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -118,7 +119,11 @@ const PlayerSetupForm: React.FC<Props> = ({ form, submitLabel, onSubmit }) => {
 
             {preview && (
               <div className="mt-3">
-                <img src={preview} alt="プロフィール画像プレビュー" className="w-16 h-16 object-cover rounded border border-gray-300 mx-auto" />
+                <img
+                  src={preview}
+                  alt="プロフィール画像プレビュー"
+                  className="w-16 h-16 object-cover rounded border border-gray-300 mx-auto"
+                />
                 <button
                   type="button"
                   onClick={() => {

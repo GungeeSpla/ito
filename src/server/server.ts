@@ -6,7 +6,17 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, s
 import { join } from 'node:path';
 import express from 'express';
 import { Server, type Socket } from 'socket.io';
-import { apply, createState, GameError, pickNewHost, sanitizeProfile, view, type Action, type Env, type RoomState } from '../shared/engine.ts';
+import {
+  apply,
+  createState,
+  GameError,
+  pickNewHost,
+  sanitizeProfile,
+  view,
+  type Action,
+  type Env,
+  type RoomState,
+} from '../shared/engine.ts';
 import {
   AVATAR_MAX_BYTES,
   PROTOCOL_VERSION,
@@ -330,7 +340,8 @@ export async function startServer(options: ServerOptions): Promise<{ port: numbe
         if (++count > ACTIONS_PER_SECOND_MAX) throw new GameError('操作が多すぎます。少し待ってからお試しください');
         if (!room) throw new GameError('ルームが見つかりません');
         if (!action || typeof action !== 'object' || typeof action.type !== 'string') throw new GameError('不明な操作です');
-        if (action.type === 'join' || action.type === 'updateProfile') action = { ...action, profile: checkAvatar(action.profile) as never };
+        if (action.type === 'join' || action.type === 'updateProfile')
+          action = { ...action, profile: checkAvatar(action.profile) as never };
         room.state = apply(room.state, playerId, action, env());
         touch(room);
         broadcast(room);

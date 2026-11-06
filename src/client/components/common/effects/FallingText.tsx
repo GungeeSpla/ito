@@ -1,15 +1,15 @@
-import React, { useEffect, useRef, useState } from "react";
-import styles from "./FallingText.module.css";
+import React, { useEffect, useRef, useState } from 'react';
+import styles from './FallingText.module.css';
 
 type Props = {
   text: string;
   duration?: number;
 };
 
-const startSize = typeof window !== "undefined" && window.innerWidth < 640 ? 24 : 32;
+const startSize = typeof window !== 'undefined' && window.innerWidth < 640 ? 24 : 32;
 
 const FallingText: React.FC<Props> = ({ text, duration = 1.5 }) => {
-  const letters = text.split("");
+  const letters = text.split('');
   const delayPerChar = duration / letters.length;
 
   const containerRef = useRef<HTMLParagraphElement>(null);
@@ -25,7 +25,7 @@ const FallingText: React.FC<Props> = ({ text, duration = 1.5 }) => {
 
     const shrinkToFit = () => {
       el.style.fontSize = `${size}px`;
-      el.style.lineHeight = "1.2";
+      el.style.lineHeight = '1.2';
 
       while (el.scrollHeight > maxHeightPx && size > 10) {
         size -= 1;
@@ -44,22 +44,20 @@ const FallingText: React.FC<Props> = ({ text, duration = 1.5 }) => {
       className={styles.fallingText}
       style={{
         fontSize: `${fontSize}px`,
-        maxHeight: "15vh", // CSS的にも指定
-        overflow: "hidden",
-        lineHeight: "1.2",
+        maxHeight: '15vh', // CSS的にも指定
+        overflow: 'hidden',
+        lineHeight: '1.2',
       }}
     >
       {letters.map((char, index) => {
-        const isSpace = char === " ";
+        const isSpace = char === ' ';
         return (
           <span
             key={index}
             className={isSpace ? styles.space : undefined}
-            style={
-              !isSpace ? { animationDelay: `${index * delayPerChar}s` } : {}
-            }
+            style={!isSpace ? { animationDelay: `${index * delayPerChar}s` } : {}}
           >
-            {isSpace ? "\u00A0" : char}
+            {isSpace ? '\u00A0' : char}
           </span>
         );
       })}

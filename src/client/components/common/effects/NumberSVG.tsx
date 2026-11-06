@@ -1,27 +1,27 @@
-import React from "react";
+import React from 'react';
 
 interface NumberSVGProps {
-  value: number | "?";
+  value: number | '?';
   className?: string;
 }
 
 const getColorFromValue = (value: number): string => {
   const colors = [
-    "#e74c3c", // 赤
-    "#3498db", // 青
-    "#2ecc71", // 緑
-    "#f39c12", // オレンジ
-    "#9b59b6", // 紫
-    "#1abc9c", // シアン
-    "#e67e22", // 濃いオレンジ
-    "#fd79a8", // ピンク
+    '#e74c3c', // 赤
+    '#3498db', // 青
+    '#2ecc71', // 緑
+    '#f39c12', // オレンジ
+    '#9b59b6', // 紫
+    '#1abc9c', // シアン
+    '#e67e22', // 濃いオレンジ
+    '#fd79a8', // ピンク
   ];
   const index = value % colors.length;
   return colors[index];
 };
 
 const NumberSVG: React.FC<NumberSVGProps> = ({ value, className }) => {
-  if (value === "?") value = 0;
+  if (value === '?') value = 0;
   const fillColor = getColorFromValue(value);
 
   return (

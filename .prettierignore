@@ -1,0 +1,9 @@
+dist
+data
+node_modules
+package-lock.json
+tools/e2e/shots
+tools/dev/shots
+src/shared/topics.ts
+src/shared/roomWords.ts
+*.md

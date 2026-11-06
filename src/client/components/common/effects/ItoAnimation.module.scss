@@ -22,7 +22,7 @@ $color: white;
 .kotoba {
   width: 7em;
 
-  &[animation-index="0"] {
+  &[animation-index='0'] {
     animation: animating0 3s ease-out 1;
     @keyframes animating0 {
       0% {

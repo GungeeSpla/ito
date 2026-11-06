@@ -28,7 +28,10 @@ function room(...others: string[]): RoomState {
 
 const run = (state: RoomState, steps: [string, Action][]) => steps.reduce((s, [actor, action]) => apply(s, actor, action, env), state);
 const rejects = (state: RoomState, actor: string, action: Action, message?: RegExp) =>
-  assert.throws(() => apply(state, actor, action, env), (error: unknown) => error instanceof GameError && (!message || message.test(error.message)));
+  assert.throws(
+    () => apply(state, actor, action, env),
+    (error: unknown) => error instanceof GameError && (!message || message.test(error.message)),
+  );
 
 /** 全員の手札を、数字の小さい順に場へ並べる */
 function placeAllSorted(state: RoomState): RoomState {
@@ -152,7 +155,9 @@ test('使ったお題は次から出ない。使い切ると使用済みを忘�
 test('カードは参加者数 + レベル - 1 枚で、数字は重ならない', () => {
   let state = run(room('B', 'C'), [['A', { type: 'start' }]]);
   state = apply(state, 'A', { type: 'decide', title: state.round!.options[0].title }, env);
-  const values = Object.values(state.round!.hands).flat().map((c) => c.value);
+  const values = Object.values(state.round!.hands)
+    .flat()
+    .map((c) => c.value);
   assert.equal(values.length, 3);
   assert.equal(new Set(values).size, 3);
   for (const id of ['A', 'B', 'C']) assert.ok(state.round!.hands[id].length >= 1);

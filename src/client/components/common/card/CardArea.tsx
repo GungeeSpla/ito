@@ -44,7 +44,17 @@ function misplacedIndexes(field: FieldCardView[]): Set<number> {
   return result;
 }
 
-const CardArea: React.FC<Props> = ({ mode, field, players, myId, onInsertCard, onRemoveCard, onEditCard, onRevealCard, showMisplaced = false }) => {
+const CardArea: React.FC<Props> = ({
+  mode,
+  field,
+  players,
+  myId,
+  onInsertCard,
+  onRemoveCard,
+  onEditCard,
+  onRevealCard,
+  showMisplaced = false,
+}) => {
   const playerOf = (id: string) => players.find((p) => p.id === id);
   const misplaced = showMisplaced ? misplacedIndexes(field) : new Set<number>();
 

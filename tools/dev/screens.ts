@@ -46,7 +46,8 @@ function placeOthers(state: RoomState, hints = true): RoomState {
     .sort((a, b) => a.value - b.value);
   const words = ['お父さんの靴下', 'コンビニのおにぎり', '', '夏休みの最終日にまとめてやる宿題くらい', '電車', ''];
   cards.forEach((card, i) => {
-    if (hints && words[i % words.length]) state = act(state, card.id, { type: 'setHint', value: card.value, hint: words[i % words.length] });
+    if (hints && words[i % words.length])
+      state = act(state, card.id, { type: 'setHint', value: card.value, hint: words[i % words.length] });
     state = act(state, card.id, { type: 'place', value: card.value, index: i });
   });
   return state;
@@ -106,7 +107,10 @@ for (const [name, build] of Object.entries(scenes)) {
   // ルーム ID は「英小文字-英小文字-英小文字」の形でなければつながらない
   const roomId = `scene-${name.replace(/[^a-z]/g, '')}-room`;
   ids[name] = roomId;
-  writeFileSync(join(dataDir, 'rooms', `${roomId}.json`), JSON.stringify({ id: roomId, state: build(), createdAt: Date.now(), updatedAt: Date.now() }));
+  writeFileSync(
+    join(dataDir, 'rooms', `${roomId}.json`),
+    JSON.stringify({ id: roomId, state: build(), createdAt: Date.now(), updatedAt: Date.now() }),
+  );
 }
 
 const server = spawn(process.execPath, ['src/server/index.ts'], {

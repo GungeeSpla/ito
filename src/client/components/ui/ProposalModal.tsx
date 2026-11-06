@@ -1,17 +1,10 @@
-import React, { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { LIMITS } from "@shared/engine.ts";
+import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { LIMITS } from '@shared/engine.ts';
 
 // Propsの型
 type Props = {
@@ -21,9 +14,9 @@ type Props = {
 };
 
 const ProposalModal: React.FC<Props> = ({ open, onClose, onSubmit }) => {
-  const [title, setTitle] = useState("");
-  const [min, setMin] = useState("");
-  const [max, setMax] = useState("");
+  const [title, setTitle] = useState('');
+  const [min, setMin] = useState('');
+  const [max, setMax] = useState('');
 
   const handleSubmit = () => {
     if (!title.trim()) return;
@@ -34,16 +27,16 @@ const ProposalModal: React.FC<Props> = ({ open, onClose, onSubmit }) => {
       max: max.trim(),
     });
 
-    setTitle("");
-    setMin("");
-    setMax("");
+    setTitle('');
+    setMin('');
+    setMax('');
     onClose();
   };
 
   const handleCancel = () => {
-    setTitle("");
-    setMin("");
-    setMax("");
+    setTitle('');
+    setMin('');
+    setMax('');
     onClose();
   };
 
@@ -57,9 +50,7 @@ const ProposalModal: React.FC<Props> = ({ open, onClose, onSubmit }) => {
       >
         <DialogHeader>
           <DialogTitle>お題を提案する</DialogTitle>
-          <DialogDescription>
-            タイトルは必須。1と100の意味は省略できます。
-          </DialogDescription>
+          <DialogDescription>タイトルは必須。1と100の意味は省略できます。</DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-4">

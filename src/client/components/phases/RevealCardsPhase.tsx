@@ -65,7 +65,9 @@ const RevealCardsPhase: React.FC<Props> = ({ room, send }) => {
           {result === 'fail' && (
             <>
               <span className="text-red-400">失敗！</span>
-              {round.field.some((c) => !c.revealed) && <p className="text-sm font-normal text-shadow-sm mt-1">残りのカードもめくれます。</p>}
+              {round.field.some((c) => !c.revealed) && (
+                <p className="text-sm font-normal text-shadow-sm mt-1">残りのカードもめくれます。</p>
+              )}
             </>
           )}
           {!result && <span className="text-white text-shadow-sm">カードをめくろう！</span>}

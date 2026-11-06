@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Howler } from "howler";
-import * as Slider from "@radix-ui/react-slider";
-import { Volume1, Volume2, VolumeX } from "lucide-react";
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Howler } from 'howler';
+import * as Slider from '@radix-ui/react-slider';
+import { Volume1, Volume2, VolumeX } from 'lucide-react';
 
-const VOLUME_STORAGE_KEY = "volumeLevel";
+const VOLUME_STORAGE_KEY = 'volumeLevel';
 
 const VolumeControl: React.FC = () => {
   // 0 ~ 1。前回の音量を引き継ぐ
@@ -51,23 +51,23 @@ const VolumeControl: React.FC = () => {
     if (!el) return;
 
     const handleTouchStart = () => {
-      document.body.addEventListener("touchmove", preventScroll, {
+      document.body.addEventListener('touchmove', preventScroll, {
         passive: false,
       });
     };
     const handleTouchEnd = () => {
-      document.body.removeEventListener("touchmove", preventScroll);
+      document.body.removeEventListener('touchmove', preventScroll);
     };
 
-    el.addEventListener("touchstart", handleTouchStart);
-    el.addEventListener("touchend", handleTouchEnd);
-    el.addEventListener("touchcancel", handleTouchEnd);
+    el.addEventListener('touchstart', handleTouchStart);
+    el.addEventListener('touchend', handleTouchEnd);
+    el.addEventListener('touchcancel', handleTouchEnd);
 
     return () => {
-      el.removeEventListener("touchstart", handleTouchStart);
-      el.removeEventListener("touchend", handleTouchEnd);
-      el.removeEventListener("touchcancel", handleTouchEnd);
-      document.body.removeEventListener("touchmove", preventScroll);
+      el.removeEventListener('touchstart', handleTouchStart);
+      el.removeEventListener('touchend', handleTouchEnd);
+      el.removeEventListener('touchcancel', handleTouchEnd);
+      document.body.removeEventListener('touchmove', preventScroll);
     };
   }, [preventScroll]);
 
@@ -77,7 +77,7 @@ const VolumeControl: React.FC = () => {
         <div
           ref={sliderRef}
           className={`
-            ${showSlider ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"}
+            ${showSlider ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}
             transition-all duration-300 origin-bottom bg-white/50 w-8 rounded-full
             mb-2
           `}

@@ -17,9 +17,7 @@ export const TopicHeading: React.FC<{ topic: Topic; animate?: boolean }> = ({ to
   const still = animate ? '' : styles.noAnim;
   return (
     <div className="relative w-full text-center max-w-3xl mx-auto px-4">
-      <h2 className={headingClass}>
-        {animate ? <FallingText text={`お題：${topic.title}`} duration={0.8} /> : `お題：${topic.title}`}
-      </h2>
+      <h2 className={headingClass}>{animate ? <FallingText text={`お題：${topic.title}`} duration={0.8} /> : `お題：${topic.title}`}</h2>
       <div className={`${styles.scaleDescription} ${still} max-w-md mx-auto`}>
         <div className={`${styles.scaleText} ${still} grid grid-cols-2 font-bold text-white`}>
           <div className="text-left text-shadow-sm">1 {topic.min}</div>

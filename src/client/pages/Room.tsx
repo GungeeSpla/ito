@@ -29,7 +29,8 @@ function useDisplayedPhase(room: RoomView | null): { phase: Phase | null; chosen
   const round = room?.round;
   if (phase !== previous) {
     setPrevious(phase);
-    if (previous === 'chooseTopic' && phase === 'placeCards' && round?.topic) setHolding({ dealId: round.dealId, title: round.topic.title });
+    if (previous === 'chooseTopic' && phase === 'placeCards' && round?.topic)
+      setHolding({ dealId: round.dealId, title: round.topic.title });
     else if (holding) setHolding(null);
   }
   useEffect(() => {

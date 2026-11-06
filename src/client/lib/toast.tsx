@@ -1,14 +1,8 @@
-import { toast } from "sonner";
-import {
-  CheckCircle,
-  Info,
-  AlertTriangle,
-  XCircle,
-  MessageCircle,
-} from "lucide-react";
-import styles from "./toast.module.scss";
+import { toast } from 'sonner';
+import { CheckCircle, Info, AlertTriangle, XCircle, MessageCircle } from 'lucide-react';
+import styles from './toast.module.scss';
 
-type ToastType = "default" | "success" | "info" | "error" | "warn";
+type ToastType = 'default' | 'success' | 'info' | 'error' | 'warn';
 
 interface ToastOptions {
   type?: ToastType;
@@ -17,39 +11,36 @@ interface ToastOptions {
 
 const getToastConfig = (type: ToastType) => {
   switch (type) {
-    case "success":
+    case 'success':
       return {
         Icon: CheckCircle,
-        className: "bg-green-100 text-green-900 border-green-300",
+        className: 'bg-green-100 text-green-900 border-green-300',
       };
-    case "info":
+    case 'info':
       return {
         Icon: Info,
-        className: "bg-blue-100 text-blue-900 border-blue-300",
+        className: 'bg-blue-100 text-blue-900 border-blue-300',
       };
-    case "error":
+    case 'error':
       return {
         Icon: XCircle,
-        className: "bg-red-100 text-red-900 border-red-300",
+        className: 'bg-red-100 text-red-900 border-red-300',
       };
-    case "warn":
+    case 'warn':
       return {
         Icon: AlertTriangle,
-        className: "bg-yellow-100 text-yellow-900 border-yellow-300",
+        className: 'bg-yellow-100 text-yellow-900 border-yellow-300',
       };
     default:
       return {
         Icon: MessageCircle,
-        className: "bg-white text-black border-gray-300",
+        className: 'bg-white text-black border-gray-300',
       };
   }
 };
 
-export function toastWithAnimation(
-  message: string,
-  options: ToastOptions = {},
-) {
-  const { type = "default", duration = 3000 } = options;
+export function toastWithAnimation(message: string, options: ToastOptions = {}) {
+  const { type = 'default', duration = 3000 } = options;
   const { Icon, className } = getToastConfig(type);
 
   toast.custom(

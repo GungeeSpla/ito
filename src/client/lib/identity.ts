@@ -26,7 +26,10 @@ export function secret(): string {
   const saved = read(SECRET_KEY) ?? memorySecret;
   if (saved) return saved;
   const bytes = crypto.getRandomValues(new Uint8Array(24));
-  const created = btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const created = btoa(String.fromCharCode(...bytes))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
   memorySecret = created;
   write(SECRET_KEY, created);
   return created;

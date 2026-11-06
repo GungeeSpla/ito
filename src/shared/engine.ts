@@ -137,7 +137,12 @@ const PRESET_COLOR = /^#[0-9a-fA-F]{6}$/;
 const AVATAR_URL = /^\/avatars\/[A-Za-z0-9_-]{16,64}\.png$/;
 
 const text = (value: unknown, max: number): string =>
-  typeof value === 'string' ? value.replace(/[\r\n\t]+/g, ' ').trim().slice(0, max) : '';
+  typeof value === 'string'
+    ? value
+        .replace(/[\r\n\t]+/g, ' ')
+        .trim()
+        .slice(0, max)
+    : '';
 
 export function sanitizeProfile(input: unknown): Profile {
   const raw = (input ?? {}) as Record<string, unknown>;
@@ -160,7 +165,10 @@ export function parseCustomTopics(source: string): Topic[] {
   const seen = new Set<string>();
   const topics: Topic[] = [];
   for (const line of source.split('\n')) {
-    const [title, min, max] = line.replace(/\t/g, ',').split(',').map((part) => part.trim());
+    const [title, min, max] = line
+      .replace(/\t/g, ',')
+      .split(',')
+      .map((part) => part.trim());
     const topic = sanitizeTopic({ title, min, max }, 'custom');
     if (!topic || seen.has(topic.title)) continue;
     seen.add(topic.title);
@@ -363,8 +371,7 @@ function removePlayer(state: RoomState, playerId: string, env: Env): void {
   if (state.hostId === playerId) state.hostId = state.players[0]?.id ?? '';
 }
 
-export const allPlaced = (round: Round): boolean =>
-  round.participants.every((id) => (round.hands[id] ?? []).length === 0);
+export const allPlaced = (round: Round): boolean => round.participants.every((id) => (round.hands[id] ?? []).length === 0);
 
 const sameState = (state: RoomState): RoomState => structuredClone(state);
 

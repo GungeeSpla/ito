@@ -51,7 +51,10 @@ async function fillProfile(page: Page, nickname: string) {
 
 /** 手札の数字 */
 async function hand(page: Page): Promise<number[]> {
-  return page.getByLabel('手札', { exact: true }).locator('[data-value]').evaluateAll((els) => els.map((el) => Number((el as HTMLElement).dataset.value)));
+  return page
+    .getByLabel('手札', { exact: true })
+    .locator('[data-value]')
+    .evaluateAll((els) => els.map((el) => Number((el as HTMLElement).dataset.value)));
 }
 
 let exitCode = 0;
@@ -141,7 +144,10 @@ try {
   for (const page of players) await page.getByText('カードをめくろう！').waitFor();
   await shot(guest, '05-reveal-before');
   for (const page of [guest, guest2, host]) {
-    await page.getByRole('button', { name: /のカードをめくる$/ }).first().click();
+    await page
+      .getByRole('button', { name: /のカードをめくる$/ })
+      .first()
+      .click();
     await page.waitForTimeout(300);
   }
   for (const page of players) await page.getByTestId('result').getByText('成功！').waitFor();

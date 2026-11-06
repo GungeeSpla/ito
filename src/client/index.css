@@ -7,10 +7,8 @@
 -------------------------------------------- */
 :root {
   font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI",
-    "Helvetica Neue", "Helvetica",
-    "Hiragino Kaku Gothic ProN", "Hiragino Sans",
-    "Noto Sans JP", "Yu Gothic", "Meiryo", sans-serif;
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', 'Helvetica', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans',
+    'Noto Sans JP', 'Yu Gothic', 'Meiryo', sans-serif;
 
   line-height: 1.5;
   font-weight: 400;
@@ -55,7 +53,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background-color: #0d0902;
-  background-image: url("/images/wood-bg.jpg");
+  background-image: url('/images/wood-bg.jpg');
   background-repeat: repeat;
   background-size: 100vw 50em;
   background-attachment: fixed;
@@ -70,24 +68,18 @@ body {
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  background: radial-gradient(circle at center,
-      transparent 60%,
-      rgba(0, 0, 0, 0.5) 100%);
+  background: radial-gradient(circle at center, transparent 60%, rgba(0, 0, 0, 0.5) 100%);
 }
 
 .bg-gradient-fail {
   z-index: 0;
-  background: radial-gradient(circle at center,
-      transparent 60%,
-      rgba(255, 0, 0, 0.2) 100%);
+  background: radial-gradient(circle at center, transparent 60%, rgba(255, 0, 0, 0.2) 100%);
 }
 
 .bg-gradient-success {
   z-index: 0;
   mix-blend-mode: screen;
-  background: radial-gradient(circle at center,
-      transparent 60%,
-      rgba(176, 240, 2, 0.2) 100%);
+  background: radial-gradient(circle at center, transparent 60%, rgba(176, 240, 2, 0.2) 100%);
 }
 
 /* --------------------------------------------
@@ -130,7 +122,6 @@ button:focus-visible {
   font-size: 1.2rem;
 }
 
-
 @media (min-width: 640px) {
   .responsive-text {
     font-size: 1rem;
@@ -172,25 +163,25 @@ button:focus-visible {
 @layer utilities {
   @keyframes dots {
     0% {
-      content: "";
+      content: '';
     }
 
     33% {
-      content: ".";
+      content: '.';
     }
 
     66% {
-      content: "..";
+      content: '..';
     }
 
     100% {
-      content: "...";
+      content: '...';
     }
   }
 
   .animate-pulse-dots::after {
     display: inline-block;
-    content: "";
+    content: '';
     animation: dots 1.5s steps(3, end) infinite;
   }
 }
@@ -214,7 +205,6 @@ button:focus-visible {
 .notice ul li {
   margin-top: 0.5rem;
 }
-
 
 @layer base {
   :root {
@@ -286,7 +276,7 @@ button:focus-visible {
   タッチ操作: ボタンやカードを素早くタップしても拡大しない
 -------------------------------------------- */
 button,
-[role="button"],
+[role='button'],
 a,
 select {
   touch-action: manipulation;

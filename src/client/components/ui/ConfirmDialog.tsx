@@ -1,13 +1,6 @@
-import React from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogFooter,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import React from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -25,8 +18,8 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   title,
   description,
   onConfirm,
-  confirmLabel = "OK",
-  cancelLabel = "キャンセル",
+  confirmLabel = 'OK',
+  cancelLabel = 'キャンセル',
 }) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
