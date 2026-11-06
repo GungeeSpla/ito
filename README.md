@@ -50,8 +50,8 @@
 | `npm run build` | 型を確かめてから、`dist/client` に配信用のファイルを出力する。 |
 | `npm start` | サーバーを起動する。`dist/client` も配信する。本番は PM2 で動かす。 |
 | `npm run lint` | ESLint (`eslint.config.js`)。 |
-| `npm test` | 決まりごとのテストと、本物のサーバーを起動して Socket.io で話すテスト (`test/`)。 |
-| `npm run test:e2e` | ブラウザでの通しテスト (`tools/e2e/run.ts`)。ルームの作成から、参加、投票、途中の再読み込み、成功までを 2 つのブラウザで通す。事前に `npm run build` が必要。画面の写真を `tools/e2e/shots/` に残す。 |
+| `npm test` | 決まりごとのテスト (`test/engine.test.ts`) と、本物のサーバーを起動して Socket.io で話すテスト。`test/multiplayer.test.ts` は 3〜6 人で遊び、全員が同時にカードを出し入れ・めくっても全員に同じ場が見えること、同票、お題の提案、途中の切断と途中参加、レベル 2 を確かめる。 |
+| `npm run test:e2e` | ブラウザでの通しテスト (`tools/e2e/run.ts`)。3 つのブラウザ (うち 1 つはスマホの大きさ) で、ルームの作成から、参加、投票、途中の再読み込み、成功までを通す。事前に `npm run build` が必要。画面の写真を `tools/e2e/shots/` に残す。 |
 | `node tools/dev/screens.ts [場面...]` | 見た目の確認用。参加者が多い・名前やたとえワードが長い・失敗した、などの部屋を組み立て、スマホと PC の大きさで写真を `tools/dev/shots/` に撮る。事前に `npm run build` が必要。 |
 
 Node.js 24 以上が要る。サーバーの TypeScript は Node.js がそのまま動かす (ビルドしない) ので、`enum` や引数プロパティのような、型を取り除くだけでは動かない書き方は使えない (`tsconfig.json` の `erasableSyntaxOnly`)。

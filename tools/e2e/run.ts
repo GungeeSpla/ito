@@ -70,19 +70,25 @@ try {
   const roomUrl = host.url();
   await host.getByText('2人以上になったらゲームを開始できます。').waitFor();
 
-  // ---- ゲストが参加する ----
+  // ---- ゲスト 2 人が参加する (1 人はスマホ) ----
   const guest = await open('guest', roomUrl, { width: 390, height: 844 });
   await guest.getByText('ニックネームを入力して、ルームに参加してください。').waitFor();
   await fillProfile(guest, 'ゲスト');
   await button(guest, 'ルームに参加').click();
   await guest.getByText('ホストのゲーム開始を待っています。').waitFor();
-  await host.getByRole('list', { name: '参加者一覧' }).getByText('ゲスト').waitFor();
+  const guest2 = await open('guest2', roomUrl);
+  await fillProfile(guest2, 'ゲスト2');
+  await button(guest2, 'ルームに参加').click();
+  await guest2.getByText('ホストのゲーム開始を待っています。').waitFor();
+  const members = host.getByRole('list', { name: '参加者一覧' });
+  for (const name of ['ゲスト', 'ゲスト2']) await members.getByText(name, { exact: true }).waitFor();
   await shot(host, '02-waiting-host');
   await shot(guest, '02-waiting-guest');
+  const players = [host, guest, guest2];
 
-  // ---- お題を選ぶ ----
+  // ---- お題を選ぶ: 3 人とも同じお題に投票すると決まる ----
   await button(host, 'ゲーム開始').click();
-  await host.getByText('お題の選択').waitFor();
+  for (const page of players) await page.getByText('お題の選択').waitFor();
   const firstTopic = guest.getByTestId('topic-card').first();
   await firstTopic.waitFor();
   const title = (await firstTopic.locator('h3').textContent())!;
@@ -93,54 +99,59 @@ try {
   await host.waitForTimeout(1500);
   await shot(host, '03-choose-topic');
   await shot(guest, '03-choose-topic-guest');
+  await guest2.getByTestId('topic-card').filter({ hasText: title }).click();
+  await host.getByTestId('topic-card').filter({ hasText: '票: 2' }).waitFor();
   await host.getByTestId('topic-card').filter({ hasText: title }).click();
 
   // ---- カードを出す ----
-  for (const page of [host, guest]) await page.getByText(`お題：${title}`).first().waitFor();
+  for (const page of players) await page.getByText(`お題：${title}`).first().waitFor();
   await host.waitForTimeout(500);
-  const hands = { host: await hand(host), guest: await hand(guest) };
-  assert.equal(hands.host.length + hands.guest.length, 2);
-  const order = [...hands.host.map((v) => ({ v, page: host })), ...hands.guest.map((v) => ({ v, page: guest }))].sort((a, b) => a.v - b.v);
+  const hands = new Map<Page, number[]>();
+  for (const page of players) hands.set(page, await hand(page));
+  const order = players.flatMap((page) => hands.get(page)!.map((v) => ({ v, page }))).sort((a, b) => a.v - b.v);
+  assert.equal(order.length, 3);
+  assert.equal(new Set(order.map((c) => c.v)).size, 3);
 
-  // たとえワードを書いて、最初のカードを出す
-  const first = order[0];
-  await first.page.getByLabel(`手札 ${first.v}`).getByRole('button', { name: 'たとえワードを入力する' }).click();
-  await first.page.getByRole('textbox', { name: 'たとえワード' }).fill('お父さんの靴下');
-  await button(first.page, '決定').click();
-  await first.page.getByLabel(`手札 ${first.v}`).click();
-  await button(first.page, '0 番目に出す').click();
-  await host.getByTestId('field-card').first().waitFor();
-  await shot(host, '04-place-one');
-  await guest.waitForTimeout(800);
-  await shot(guest, '04-place-one-guest');
+  // まだ出していない人に 3 人とも並ぶ
+  for (const name of ['ホスト', 'ゲスト', 'ゲスト2']) await host.getByTestId('waiting-for').getByText(name, { exact: true }).waitFor();
 
-  // 途中で読み込み直しても、手札と場がそのまま
-  await guest.reload();
-  await guest.getByTestId('field-card').first().waitFor();
-  const reloaded = await hand(guest);
-  assert.deepEqual(reloaded, first.page === guest ? [] : hands.guest);
-
-  const second = order[1];
-  await second.page.getByLabel(`手札 ${second.v}`).click();
-  await button(second.page, '1 番目に出す').click();
+  for (const [index, card] of order.entries()) {
+    if (index === 0) {
+      // 最初のカードには、たとえワードを書いてから出す
+      await card.page.getByLabel(`手札 ${card.v}`).getByRole('button', { name: 'たとえワードを入力する' }).click();
+      await card.page.getByRole('textbox', { name: 'たとえワード' }).fill('お父さんの靴下');
+      await button(card.page, '決定').click();
+    }
+    await card.page.getByLabel(`手札 ${card.v}`).click();
+    await button(card.page, `${index} 番目に出す`).click();
+    for (const page of players) await page.getByTestId('field-card').nth(index).waitFor();
+    if (index === 0) {
+      await shot(host, '04-place-one');
+      await guest.waitForTimeout(800);
+      await shot(guest, '04-place-one-guest');
+      // 途中で読み込み直しても、手札と場がそのまま
+      await guest.reload();
+      await guest.getByTestId('field-card').first().waitFor();
+      assert.deepEqual(await hand(guest), card.page === guest ? [] : hands.get(guest));
+    }
+  }
   await button(host, 'めくりフェーズへ！').click();
 
-  // ---- めくる ----
-  await guest.getByText('カードをめくろう！').waitFor();
+  // ---- めくる: 3 人がそれぞれ 1 枚ずつ ----
+  for (const page of players) await page.getByText('カードをめくろう！').waitFor();
   await shot(guest, '05-reveal-before');
-  for (let i = 0; i < 2; i++) {
-    await guest.getByRole('button', { name: /のカードをめくる$/ }).first().click();
-    await guest.waitForTimeout(300);
+  for (const page of [guest, guest2, host]) {
+    await page.getByRole('button', { name: /のカードをめくる$/ }).first().click();
+    await page.waitForTimeout(300);
   }
-  await host.getByTestId('result').getByText('成功！').waitFor();
-  await guest.getByTestId('result').getByText('成功！').waitFor();
+  for (const page of players) await page.getByTestId('result').getByText('成功！').waitFor();
   await shot(host, '06-success');
   await shot(guest, '06-success-guest');
 
   // ---- 次のゲームはレベル 2 まで選べる ----
   await button(host, 'ロビーに戻る').last().click();
   await host.getByRole('combobox', { name: 'レベル' }).selectOption('2');
-  await guest.getByText('レベル 2').waitFor();
+  for (const page of [guest, guest2]) await page.getByText('レベル 2').waitFor();
 
   assert.deepEqual(errors, []);
   console.log('e2e: ok');

@@ -486,7 +486,9 @@ export function apply(current: RoomState, actorId: string, action: Action, env: 
       if ([...r.options, ...r.proposals].some((t) => t.title === topic.title)) throw new GameError('同じお題がすでにあります');
       if (r.proposals.length >= LIMITS.proposalsMax) throw new GameError('これ以上お題を提案できません');
       r.proposals.push({ ...topic, by: actorId });
-      // 候補が増えたので、投票し終えていても決めずに待つ
+      // 候補が増えたので投票し直す。古い票を残すと、最初に入れ直した 1 票と古い票の組み合わせで、
+      // 提案したお題とは別のお題に決まってしまう
+      r.votes = {};
       r.tie = false;
       break;
     }

@@ -98,6 +98,26 @@ test('同票でホストが決める設定なら、ホストの決定を待つ',
   assert.equal(state.round!.topic!.title, second.title);
 });
 
+test('全員が投票したあとにお題が提案されると、票がリセットされ、古い票で勝手に決まらない', () => {
+  let state = run(room('B', 'C'), [
+    ['A', { type: 'updateSettings', settings: { tiebreak: 'host' } }],
+    ['A', { type: 'start' }],
+  ]);
+  const [first, second, third] = state.round!.options;
+  state = run(state, [
+    ['A', { type: 'vote', title: first.title }],
+    ['B', { type: 'vote', title: second.title }],
+    ['C', { type: 'vote', title: third.title }],
+  ]);
+  assert.equal(state.round!.tie, true);
+  state = run(state, [
+    ['C', { type: 'propose', topic: { title: '投げたいもの', min: '', max: '' } }],
+    ['C', { type: 'vote', title: '投げたいもの' }],
+  ]);
+  assert.equal(state.phase, 'chooseTopic');
+  assert.deepEqual(state.round!.votes, { C: '投げたいもの' });
+});
+
 test('提案したお題に投票でき、再抽選すると提案と票が消える', () => {
   let state = apply(room('B'), 'A', { type: 'start' }, env);
   state = apply(state, 'B', { type: 'propose', topic: { title: '投げたいもの', min: '', max: '' } }, env);

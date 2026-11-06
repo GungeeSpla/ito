@@ -1,89 +1,10 @@
 // 本物のサーバーを起動し、HTTP と Socket.io で話すテスト
 import assert from 'node:assert/strict';
-import { randomBytes } from 'node:crypto';
-import { existsSync, mkdtempSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { after, test } from 'node:test';
-import { io, type Socket } from 'socket.io-client';
-import type { Action, RoomView } from '../src/shared/engine.ts';
-import { PROTOCOL_VERSION, type Ack } from '../src/shared/protocol.ts';
-import { playerIdOf, startServer } from '../src/server/server.ts';
-
-const dirs: string[] = [];
-const sockets: Socket[] = [];
-after(() => {
-  for (const socket of sockets) socket.disconnect();
-  for (const dir of dirs) rmSync(dir, { recursive: true, force: true });
-});
-
-async function boot(dataDir = mkdtempSync(join(tmpdir(), 'ito-test-')), hostGraceMs = 300) {
-  dirs.push(dataDir);
-  const server = await startServer({ port: 0, dataDir, clientDir: join(dataDir, 'none'), hostGraceMs, log: () => {} });
-  const origin = `http://127.0.0.1:${server.port}`;
-  return { ...server, origin, dataDir };
-}
-
-const newSecret = () => randomBytes(24).toString('base64url');
-const profile = (nickname: string) => ({ nickname, color: '#EF4444', avatarUrl: '' });
-
-async function createRoom(origin: string, secret: string, nickname = 'ホスト'): Promise<string> {
-  const res = await fetch(`${origin}/api/rooms`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ secret, profile: profile(nickname) }),
-  });
-  assert.equal(res.status, 201);
-  return ((await res.json()) as { roomId: string }).roomId;
-}
-
-/** 接続して、最新の状態を持ち続ける利用者 */
-class Client {
-  state: RoomView | null = null;
-  readonly socket: Socket;
-  readonly secret: string;
-  private waiters: (() => void)[] = [];
-
-  constructor(origin: string, roomId: string, secret = newSecret(), protocol = PROTOCOL_VERSION) {
-    this.secret = secret;
-    this.socket = io(origin, { auth: { protocol, secret, roomId }, transports: ['websocket'], forceNew: true });
-    sockets.push(this.socket);
-    this.socket.on('state', (state: RoomView) => {
-      this.state = state;
-      for (const wake of this.waiters.splice(0)) wake();
-    });
-  }
-
-  get id() {
-    return playerIdOf(this.secret);
-  }
-
-  /** 条件を満たす状態が届くまで待つ */
-  async until(check: (state: RoomView) => boolean, timeoutMs = 3000): Promise<RoomView> {
-    const deadline = Date.now() + timeoutMs;
-    while (!this.state || !check(this.state)) {
-      if (Date.now() > deadline) throw new Error(`待っていた状態になりません: ${JSON.stringify(this.state)}`);
-      await new Promise<void>((resolve) => {
-        this.waiters.push(resolve);
-        setTimeout(resolve, 50);
-      });
-    }
-    return this.state;
-  }
-
-  send(action: Action): Promise<Ack> {
-    return this.socket.timeout(3000).emitWithAck('action', action);
-  }
-
-  async ok(action: Action): Promise<void> {
-    const ack = await this.send(action);
-    assert.equal(ack.error, undefined, `${action.type}: ${ack.error}`);
-  }
-
-  connectError(): Promise<string> {
-    return new Promise((resolve) => this.socket.on('connect_error', (error) => resolve(error.message)));
-  }
-}
+import { test } from 'node:test';
+import { PROTOCOL_VERSION } from '../src/shared/protocol.ts';
+import { boot, Client, createRoom, newSecret, profile } from './helpers.ts';
 
 test('2 人で最初から最後まで遊べる。数字はめくるまで相手に見えない', async () => {
   const server = await boot();
