@@ -1,5 +1,6 @@
 // ゲームの決まりごと。状態を変えてよいのはこのファイルの apply だけで、サーバーだけが呼ぶ。
 // クライアントは操作 (Action) を送り、サーバーが返す見え方 (RoomView) を表示する。
+import { AUTO_COLORS } from './colors.ts';
 import { TOPICS } from './topics.ts';
 
 export type TopicSet = 'normal' | 'rainbow' | 'classic' | 'salmon' | 'custom';
@@ -56,6 +57,8 @@ export interface HandCard {
 }
 
 export interface FieldCard {
+  /** 場に出すたびに振る番号。数字を伏せたままカードを見分けるのに使う */
+  id: string;
   playerId: string;
   value: number;
   hint: string;
@@ -82,6 +85,8 @@ export interface Round {
   result: Result | null;
   /** 配り直すたびに増える。クライアントは配る演出のきっかけにする */
   dealId: number;
+  /** 次に場へ出すカードの番号 */
+  nextCardId: number;
 }
 
 export interface RoomState {
@@ -264,8 +269,19 @@ function deal(round: Round, env: Env): void {
   round.dealId++;
 }
 
+/** 色を選んでいない人に、ほかの人と重ならない色を割り当てる */
+function assignColors(state: RoomState): void {
+  const used = new Set(state.players.map((p) => p.color).filter(Boolean));
+  const free = AUTO_COLORS.filter((color) => !used.has(color));
+  let next = 0;
+  for (const player of state.players) {
+    if (!player.color) player.color = free[next++ % free.length] ?? AUTO_COLORS[0];
+  }
+}
+
 function startRound(state: RoomState, env: Env): void {
   if (state.players.length < 2) throw new GameError('2 人以上で始められます');
+  assignColors(state);
   const level = Math.min(state.settings.level, levelMax(state));
   state.settings.level = level;
   state.round = {
@@ -280,6 +296,7 @@ function startRound(state: RoomState, env: Env): void {
     field: [],
     result: null,
     dealId: 0,
+    nextCardId: 1,
   };
   state.phase = 'chooseTopic';
 }
@@ -496,7 +513,13 @@ export function apply(current: RoomState, actorId: string, action: Action, env: 
         throw new GameError('出す場所が不正です');
       }
       r.hands[actorId] = hand.filter((card) => card !== inHand);
-      r.field.splice(action.index, 0, { playerId: actorId, value: inHand.value, hint: inHand.hint, revealed: false });
+      r.field.splice(action.index, 0, {
+        id: String(r.nextCardId++),
+        playerId: actorId,
+        value: inHand.value,
+        hint: inHand.hint,
+        revealed: false,
+      });
       break;
     }
     case 'takeBack': {
@@ -566,6 +589,7 @@ export interface PlayerView extends Player {
 }
 
 export interface FieldCardView {
+  id: string;
   playerId: string;
   hint: string;
   /** めくられたカードと、自分のカードだけ数字が見える */
@@ -623,6 +647,7 @@ export function view(roomId: string, state: RoomState, viewerId: string, online:
       myHand: round.hands[viewerId] ?? [],
       handCounts: Object.fromEntries(round.participants.map((id) => [id, (round.hands[id] ?? []).length])),
       field: round.field.map((card) => ({
+        id: card.id,
         playerId: card.playerId,
         hint: card.hint,
         value: card.revealed || card.playerId === viewerId ? card.value : null,

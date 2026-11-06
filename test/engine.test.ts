@@ -49,6 +49,10 @@ test('2 人そろうまで始められず、ホストだけが始められる', 
   assert.equal(started.phase, 'chooseTopic');
   assert.equal(started.round!.options.length, 3);
   assert.deepEqual(started.round!.participants, ['A', 'B']);
+  // 色を選んでいない人には、重ならない色が付く
+  const colors = started.players.map((p) => p.color);
+  assert.ok(colors.every(Boolean));
+  assert.equal(new Set(colors).size, 2);
 });
 
 test('操作を断っても元の状態は変わらない', () => {
@@ -155,7 +159,7 @@ test('自分のカードしか出し入れできず、たとえワードは場�
 });
 
 test('めくった順に関係なく、場の並びが崩れていたら失敗、全部そろえば成功', () => {
-  const card = (value: number, revealed = true) => ({ playerId: 'A', value, hint: '', revealed });
+  const card = (value: number, revealed = true) => ({ id: String(value), playerId: 'A', value, hint: '', revealed });
   assert.equal(judge([card(10), card(5, false), card(30)]), null);
   assert.equal(judge([card(10), card(50, false), card(5)]), 'fail');
   assert.equal(judge([card(10), card(20), card(30)]), 'success');

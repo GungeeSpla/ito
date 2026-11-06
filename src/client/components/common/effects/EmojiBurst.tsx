@@ -1,40 +1,35 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from 'react';
 
-// 表示させたい祝福系の絵文字たち
-const emojis = ["🎉", "🎊", "💯", "✨", "🧠", "🍾", "🥳"];
+// 成功したときに、下から湧き上がる絵文字
+const emojis = ['🎉', '🎊', '💯', '✨', '🧠', '🍾', '🥳'];
+
+const makeItems = () =>
+  Array.from({ length: 60 }, () => ({
+    emoji: emojis[Math.floor(Math.random() * emojis.length)],
+    left: Math.random() * 100,
+    duration: 1 + Math.random() * 0.8,
+    delay: Math.random() * 0.3,
+    size: 28 + Math.random() * 12,
+  }));
 
 const EmojiBurst: React.FC = () => {
-  const [items, setItems] = useState<number[]>([]);
-
-  useEffect(() => {
-    // 初期化時に一斉に60個の絵文字を生成
-    setItems(Array.from({ length: 60 }, (_, i) => i));
-  }, []);
-
+  const [items] = useState(makeItems);
   return (
-    <div className="pointer-events-none fixed inset-0 overflow-hidden z-50">
-      {items.map((i) => {
-        const emoji = emojis[Math.floor(Math.random() * emojis.length)];
-        const left = Math.random() * 100;
-        const duration = 1 + Math.random() * 0.8;
-        const delay = Math.random() * 0.3;
-        const size = 28 + Math.random() * 12;
-
-        return (
-          <span
-            key={i}
-            className="absolute bottom-0 animate-emoji-float"
-            style={{
-              left: `${left}%`,
-              fontSize: `${size}px`,
-              animationDuration: `${duration}s`,
-              animationDelay: `${delay}s`,
-            }}
-          >
-            {emoji}
-          </span>
-        );
-      })}
+    <div className="pointer-events-none fixed inset-0 overflow-hidden z-50" aria-hidden="true">
+      {items.map((item, i) => (
+        <span
+          key={i}
+          className="absolute bottom-0 animate-emoji-float"
+          style={{
+            left: `${item.left}%`,
+            fontSize: `${item.size}px`,
+            animationDuration: `${item.duration}s`,
+            animationDelay: `${item.delay}s`,
+          }}
+        >
+          {item.emoji}
+        </span>
+      ))}
     </div>
   );
 };

@@ -1,20 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React from 'react';
 
-const useIsTouchDevice = () => {
-  const [isTouch, setIsTouch] = useState(false);
-  useEffect(() => {
-    const touchDetected =
-      typeof window !== "undefined" &&
-      ("ontouchstart" in window || navigator.maxTouchPoints > 0);
-    setIsTouch(touchDetected);
-  }, []);
+// 操作の呼び方を、タッチ操作の端末かどうかで変える
+const isTouch = typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
 
-  return isTouch;
-};
-
-const ClickOrTouch: React.FC = () => {
-  const isTouch = useIsTouchDevice();
-  return <span>{isTouch ? "タッチ" : "クリック"}</span>;
-};
+const ClickOrTouch: React.FC = () => <span>{isTouch ? 'タッチ' : 'クリック'}</span>;
 
 export default ClickOrTouch;

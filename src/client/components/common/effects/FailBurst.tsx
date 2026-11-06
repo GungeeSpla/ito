@@ -1,40 +1,35 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from 'react';
 
-// 💥 表示される失敗系の絵文字たち
-const emojis = ["💥", "😱", "🔥", "🫨", "😵‍💫"];
+// 失敗したときに、上から降ってくる絵文字
+const emojis = ['💥', '😱', '🔥', '🫨', '😵‍💫'];
+
+const makeItems = () =>
+  Array.from({ length: 30 }, () => ({
+    emoji: emojis[Math.floor(Math.random() * emojis.length)],
+    left: Math.random() * 100,
+    duration: 1 + Math.random(),
+    delay: Math.random() * 0.3,
+    size: 28 + Math.random() * 16,
+  }));
 
 const FailBurst: React.FC = () => {
-  const [items, setItems] = useState<number[]>([]);
-
-  useEffect(() => {
-    // 🔻 初期化時に絵文字を一気に生成（派手に30個）
-    setItems(Array.from({ length: 30 }, (_, i) => i));
-  }, []);
-
+  const [items] = useState(makeItems);
   return (
-    <div className="pointer-events-none fixed inset-0 overflow-hidden z-50">
-      {items.map((i) => {
-        const emoji = emojis[Math.floor(Math.random() * emojis.length)];
-        const left = Math.random() * 100;
-        const duration = 1 + Math.random(); // 🎬 落下速度
-        const delay = Math.random() * 0.3;
-        const size = 28 + Math.random() * 16;
-
-        return (
-          <span
-            key={i}
-            className="absolute top-0 animate-fail-fall"
-            style={{
-              left: `${left}%`,
-              fontSize: `${size}px`,
-              animationDuration: `${duration}s`,
-              animationDelay: `${delay}s`,
-            }}
-          >
-            {emoji}
-          </span>
-        );
-      })}
+    <div className="pointer-events-none fixed inset-0 overflow-hidden z-50" aria-hidden="true">
+      {items.map((item, i) => (
+        <span
+          key={i}
+          className="absolute top-0 animate-fail-fall"
+          style={{
+            left: `${item.left}%`,
+            fontSize: `${item.size}px`,
+            animationDuration: `${item.duration}s`,
+            animationDelay: `${item.delay}s`,
+          }}
+        >
+          {item.emoji}
+        </span>
+      ))}
     </div>
   );
 };

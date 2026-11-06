@@ -196,7 +196,7 @@ test('古い画面と、無い部屋への接続は理由を付けて断る', as
 
 test('アバターは PNG だけを受け付け、部屋で使える', async () => {
   const server = await boot();
-  const upload = (body: Uint8Array, type = 'image/png') =>
+  const upload = (body: Uint8Array<ArrayBuffer>, type = 'image/png') =>
     fetch(`${server.origin}/api/avatars`, { method: 'POST', headers: { 'Content-Type': type }, body });
   assert.equal((await upload(new TextEncoder().encode('<svg onload=alert(1)>'.padEnd(100)))).status, 400);
   assert.equal((await upload(new Uint8Array(400 * 1024))).status, 413);

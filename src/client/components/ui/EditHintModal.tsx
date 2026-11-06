@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { LIMITS } from "@shared/engine.ts";
 
 interface Props {
   initialValue?: string;
@@ -23,11 +24,8 @@ const EditHintModal: React.FC<Props> = ({
   onSubmit,
   onClose,
 }) => {
+  // 開くたびに作り直されるので、最初の値だけを使う
   const [hint, setHint] = useState(initialValue);
-
-  useEffect(() => {
-    setHint(initialValue);
-  }, [initialValue]);
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
@@ -48,6 +46,8 @@ const EditHintModal: React.FC<Props> = ({
           value={hint}
           onChange={(e) => setHint(e.target.value)}
           placeholder="例：お父さんの靴下"
+          maxLength={LIMITS.hintMax}
+          aria-label="たとえワード"
           className="h-24"
         />
 

@@ -6,27 +6,27 @@ import { Volume1, Volume2, VolumeX } from "lucide-react";
 const VOLUME_STORAGE_KEY = "volumeLevel";
 
 const VolumeControl: React.FC = () => {
-  const [volume, setVolume] = useState(1); // 0 ~ 1
-  const [showSlider, setShowSlider] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const hideTimeout = useRef<NodeJS.Timeout | null>(null);
-  const sliderRef = useRef<HTMLDivElement | null>(null);
-
-  // 初回：localStorageから読み込み
-  useEffect(() => {
-    const storedVolume = localStorage.getItem(VOLUME_STORAGE_KEY);
-    if (storedVolume) {
-      const vol = parseFloat(storedVolume);
-      setVolume(vol);
-      Howler.volume(vol);
+  // 0 ~ 1。前回の音量を引き継ぐ
+  const [volume, setVolume] = useState(() => {
+    try {
+      const stored = parseFloat(localStorage.getItem(VOLUME_STORAGE_KEY) ?? '');
+      return Number.isFinite(stored) ? Math.min(1, Math.max(0, stored)) : 1;
+    } catch {
+      return 1;
     }
-    setIsLoaded(true);
-  }, []);
+  });
+  const [showSlider, setShowSlider] = useState(false);
+  const hideTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const sliderRef = useRef<HTMLDivElement | null>(null);
 
   // 音量が変わるたびに反映・保存
   useEffect(() => {
     Howler.volume(volume);
-    localStorage.setItem(VOLUME_STORAGE_KEY, volume.toString());
+    try {
+      localStorage.setItem(VOLUME_STORAGE_KEY, volume.toString());
+    } catch {
+      // 保存できなくても、このタブの間は効く
+    }
   }, [volume]);
 
   const triggerSliderTemporaryDisplay = () => {
@@ -84,28 +84,26 @@ const VolumeControl: React.FC = () => {
         >
           <div className="w-2 h-2" />
           <div className="relative">
-            {isLoaded && (
-              <Slider.Root
-                orientation="vertical"
-                className="h-24 w-4 flex flex-col items-center select-none m-auto justify-between"
-                value={[volume * 100]}
-                max={100}
-                step={1}
-                onValueChange={([v]) => {
-                  setVolume(v / 100);
-                  triggerSliderTemporaryDisplay();
-                }}
-              >
-                <Slider.Track className="relative bg-gray-300 grow w-[4px] rounded-full">
-                  <Slider.Range className="absolute bg-blue-500 w-full rounded-full" />
-                </Slider.Track>
-                <Slider.Thumb
-                  className="block w-4 h-4 bg-white border border-gray-500 rounded-full shadow
-                  hover:bg-gray-200 focus:outline-none transition"
-                  aria-label="Volume"
-                />
-              </Slider.Root>
-            )}
+            <Slider.Root
+              orientation="vertical"
+              className="h-24 w-4 flex flex-col items-center select-none m-auto justify-between"
+              value={[volume * 100]}
+              max={100}
+              step={1}
+              onValueChange={([v]) => {
+                setVolume(v / 100);
+                triggerSliderTemporaryDisplay();
+              }}
+            >
+              <Slider.Track className="relative bg-gray-300 grow w-[4px] rounded-full">
+                <Slider.Range className="absolute bg-blue-500 w-full rounded-full" />
+              </Slider.Track>
+              <Slider.Thumb
+                className="block w-4 h-4 bg-white border border-gray-500 rounded-full shadow
+                hover:bg-gray-200 focus:outline-none transition"
+                aria-label="Volume"
+              />
+            </Slider.Root>
           </div>
           <div className="w-2 h-2" />
         </div>

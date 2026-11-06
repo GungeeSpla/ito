@@ -1,11 +1,21 @@
+import plugin from 'tailwindcss/plugin';
+import animate from 'tailwindcss-animate';
+
+// text-shadow-* のクラス。値は theme.textShadow から作る (以前は tailwindcss-textshadow を使っていた)
+const textshadow = plugin(
+  ({ matchUtilities, theme }) => {
+    matchUtilities({ 'text-shadow': (value) => ({ textShadow: value }) }, { values: theme('textShadow') });
+  },
+  { theme: { textShadow: { DEFAULT: '0px 0px 1px rgb(0 0 0 / 20%), 0px 0px 1px rgb(1 0 5 / 10%)' } } },
+);
+
 /** @type {import('tailwindcss').Config} */
-const textshadow = require('tailwindcss-textshadow');
 
 export default {
   darkMode: ["class"],
   content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
+    "./src/client/index.html",
+    "./src/client/**/*.{js,ts,jsx,tsx}",
   ],
   safelist: [
     'text-shadow',
@@ -118,5 +128,5 @@ export default {
       }
     }
   },
-  plugins: [textshadow, require("tailwindcss-animate")],
+  plugins: [textshadow, animate],
 };

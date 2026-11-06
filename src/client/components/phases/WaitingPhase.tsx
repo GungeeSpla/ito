@@ -1,457 +1,228 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Crown, PlayIcon, XCircle, Copy } from "lucide-react";
-import { Topic } from "@/types/Topic";
-import { getRoomMaxClearLevel } from "@/utils/gameLogic/levelProgress";
-import WoodyButton from "@/components/ui/WoodyButton";
-import { toastWithAnimation } from "@/utils/ui/toast";
-import NoticeGame from "@/components/common/others/NoticeGame";
-import { PlayerInfo } from "@/types/PlayerInfo";
-import { useUser } from "@/hooks/useUser";
-import PlayerSetupForm from "@/components/ui/PlayerSetupForm";
-import SectionTitle from "@/components/ui/SectionTitle";
-import { copyToClipboard } from "@/utils/core/clipboard";
-import { logInfo, logError } from "@/utils/core/logger";
+import React, { useEffect, useRef, useState } from 'react';
+import { Copy, Crown, PlayIcon, XCircle } from 'lucide-react';
+import { parseCustomTopics, type RoomView, type SelectableTopicSet } from '@shared/engine.ts';
+import NoticeGame from '@/components/common/others/NoticeGame';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import PlayerSetupForm from '@/components/ui/PlayerSetupForm';
+import SectionTitle from '@/components/ui/SectionTitle';
+import WoodyButton from '@/components/ui/WoodyButton';
+import type { Send } from '@/hooks/useRoom.ts';
+import { useProfileForm } from '@/hooks/useProfileForm.ts';
+import { preference } from '@/lib/identity.ts';
+import { copyToClipboard } from '@/utils/core/clipboard';
+import { toastWithAnimation } from '@/utils/ui/toast';
+import { PhaseHeader } from './parts';
 
-// -----------------------------
-// Props 型定義
-// -----------------------------
-interface WaitingPhaseProps {
-  roomId: string;
-  players: Record<string, PlayerInfo>;
-  host: string;
-  alreadyJoined: boolean;
-  addPlayer: (nickname: string) => void;
-  selectedSet: string;
-  setSelectedSet: React.Dispatch<
-    React.SetStateAction<"normal" | "rainbow" | "classic" | "salmon" | "custom">
-  >;
-  level: number;
-  setLevel: (level: number) => void;
-  startGame: () => void;
-  removePlayer: (playerName: string) => void;
-  setCustomTopics: (topics: Topic[]) => void;
+const TOPIC_SET_LABELS: Record<SelectableTopicSet, string> = { rainbow: 'レインボー', salmon: 'サーモンラン', custom: 'カスタム' };
+const CUSTOM_TEXT_KEY = 'customTopicsText';
+// 以前の版がブラウザに残した入力も引き継ぐ
+const loadCustomText = () => preference.get(CUSTOM_TEXT_KEY) ?? localStorage.getItem('customPromptText') ?? '';
+
+// index.css の button の共通スタイル (背景・余白・枠) を打ち消す
+const iconButton = 'bg-transparent p-0 border-0 rounded-none align-baseline';
+const selectClass ='w-full p-2 bg-white text-black rounded focus:outline-none focus:ring-2 focus:ring-blue-400';
+
+interface Props {
+  room: RoomView;
+  send: Send;
 }
 
-// -----------------------------
-// メインコンポーネント
-// -----------------------------
-const WaitingPhase: React.FC<WaitingPhaseProps> = ({
-  roomId,
-  players,
-  host,
-  alreadyJoined,
-  addPlayer,
-  selectedSet,
-  setSelectedSet,
-  level,
-  setLevel,
-  startGame,
-  removePlayer,
-  setCustomTopics,
-}) => {
-  const inputRef = useRef<HTMLInputElement>(null); // ニックネーム入力にフォーカスする用
-  const [customPromptText, setCustomPromptText] = useState("");
-  const [maxClearLevel, setMaxClearLevel] = useState(1);
-  const { userId } = useUser();
-  const { userInfo, updateUserInfo } = useUser();
-  const [nickname, setNickname] = useState("");
-  const [color, setColor] = useState("transparent");
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [userAvatarUrl, setUserAvatarUrl] = useState("");
-  const [showOptions, setShowOptions] = useState(() => {
-    return localStorage.getItem("showOptions") === "true";
-  });
-  const [joinLoading, setJoinLoading] = useState(false);
-  const presetColors = [
-    "#EF4444",
-    "#F97316",
-    "#EAB308",
-    "#22C55E",
-    "#14B8A6",
-    "#06B6D4",
-    "#3B82F6",
-    "#8B5CF6",
-    "#EC4899",
-    "#7F1D1D",
-    "#5C4033",
-    "#064E3B",
-    "#1E3A8A",
-    "#4C1D95",
-    "#475569",
-  ];
-  const prevPlayersRef = useRef<Record<string, PlayerInfo>>({});
-  useEffect(() => {
-    const prev = prevPlayersRef.current;
-    const curr = players;
-    if (Object.keys(prev).length !== 0) {
-      const added = Object.keys(curr).filter((id) => !prev[id]);
-      const removed = Object.keys(prev).filter((id) => !curr[id]);
-      if (added.length) {
-        logInfo("プレイヤーが参加しました。", {
-          名前: added.map((id) => curr[id]?.nickname ?? id).join(", "),
-        });
-      }
-      if (removed.length) {
-        logInfo("プレイヤーが退出しました。", {
-          名前: removed.map((id) => prev[id]?.nickname ?? id).join(", "),
-        });
-      }
-    }
-    prevPlayersRef.current = players;
-  }, [players]);
+const WaitingPhase: React.FC<Props> = ({ room, send }) => {
+  const { me, settings } = room;
+  const form = useProfileForm();
+  const [customText, setCustomText] = useState(loadCustomText);
+  const [confirm, setConfirm] = useState<{ id: string; kind: 'kick' | 'host' } | null>(null);
+  const players = [...room.players].sort((a, b) => a.joinedAt - b.joinedAt);
 
-  // 最大クリアレベルを取得
+  // カスタムお題は入力が止まってから送る。ゲーム開始の直前にも送り直す
+  const customTopics = parseCustomTopics(customText);
+  const sentCustom = useRef('');
+  const syncCustom = async () => {
+    const json = JSON.stringify(customTopics);
+    if (sentCustom.current === json) return true;
+    const ok = await send({ type: 'updateSettings', settings: { customTopics } });
+    if (ok) sentCustom.current = json;
+    return ok;
+  };
   useEffect(() => {
-    getRoomMaxClearLevel(roomId).then((level) => {
-      setMaxClearLevel(level);
-    });
-  }, [roomId]);
+    preference.set(CUSTOM_TEXT_KEY, customText);
+    if (!me.isHost || settings.topicSet !== 'custom') return;
+    const timer = setTimeout(syncCustom, 500);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [customText, me.isHost, settings.topicSet]);
 
-  // -----------------------------
-  // カスタムお題をパース
-  // -----------------------------
-  const parseCustomPrompts = (text: string): Topic[] => {
-    const seenTitles = new Set<string>();
-    return text
-      .replace(/\t/g, ",")
-      .split("\n")
-      .map((line) => line.trim())
-      .filter((line) => line !== "")
-      .map((line) => {
-        const parts = line.split(",").map((part) => part.trim());
-        const [title = "", min = "", max = ""] = parts;
-        return { title, min, max, set: "custom" as const };
-      })
-      .filter(({ title }) => {
-        if (seenTitles.has(title)) return false;
-        seenTitles.add(title);
-        return true;
-      });
+  const start = async () => {
+    if (settings.topicSet === 'custom' && !(await syncCustom())) return;
+    await send({ type: 'start' });
   };
 
-  // カスタムお題の保存＆Room.tsx側に反映
-  useEffect(() => {
-    localStorage.setItem("customPromptText", customPromptText);
-    setCustomTopics(parseCustomPrompts(customPromptText));
-  }, [customPromptText]);
+  const join = () => form.submit((profile) => send({ type: 'join', profile }));
 
-  // 初回：ローカルストレージから復元
-  useEffect(() => {
-    const savedCustomPrompts = localStorage.getItem("customPromptText");
-    if (savedCustomPrompts) {
-      setCustomPromptText(savedCustomPrompts);
-    }
-  }, []);
-
-  // -----------------------------
-  // 初期処理：前回のニックネーム復元＋フォーカス
-  // -----------------------------
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-
-  useEffect(() => {
-    if (userInfo) {
-      if (userInfo.nickname) setNickname(userInfo.nickname);
-      if (userInfo.color) setColor(userInfo.color);
-      if (userInfo.avatarUrl) setUserAvatarUrl(userInfo.avatarUrl);
-    }
-  }, [userInfo]);
-
-  // -----------------------------
-  // 現在のページURLをクリップボードにコピー
-  // -----------------------------
-  const handleCopyUrl = async () => {
+  const copyUrl = async () => {
     try {
       await copyToClipboard(window.location.href);
-      toastWithAnimation("ルームURLをコピーしました！", {
-        type: "success",
-      });
-    } catch (err) {
-      toastWithAnimation("コピーに失敗しました。", {
-        type: "error",
-      });
-    }
-  };
-  // -----------------------------
-  // プロフィール画像をアップロード・変換する処理
-  // -----------------------------
-  const uploadAvatarImage = async (
-    file: File,
-    userId: string,
-  ): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      const reader = new FileReader();
-
-      reader.onload = () => {
-        img.src = reader.result as string;
-      };
-
-      img.onload = async () => {
-        const canvas = document.createElement("canvas");
-        const size = 256;
-        canvas.width = size;
-        canvas.height = size;
-
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return reject("Canvas unsupported");
-
-        ctx.clearRect(0, 0, size, size);
-
-        const ratio = Math.min(size / img.width, size / img.height);
-        const x = (size - img.width * ratio) / 2;
-        const y = (size - img.height * ratio) / 2;
-
-        ctx.drawImage(img, x, y, img.width * ratio, img.height * ratio);
-
-        canvas.toBlob(async (blob) => {
-          if (!blob) return reject("Blob generation failed");
-
-          const formData = new FormData();
-          formData.append("avatar", blob, `${userId}.png`);
-          formData.append("userId", userId);
-
-          try {
-            const res = await fetch("https://ito.gungee.jp/upload-avatar.php", {
-              method: "POST",
-              body: formData,
-            });
-
-            const data = await res.json();
-            if (data.success && data.url) {
-              resolve(data.url);
-            } else {
-              reject("Upload failed: " + data.message);
-            }
-          } catch (err) {
-            reject("Upload error: " + err);
-          }
-        }, "image/png");
-      };
-
-      reader.onerror = (err) => reject(err);
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const handleJoin = async () => {
-    if (!userInfo || !nickname.trim()) return;
-    setJoinLoading(true);
-
-    try {
-      let avatarUrl = userAvatarUrl;
-      if (avatarFile) {
-        try {
-          avatarUrl = await uploadAvatarImage(avatarFile, userId);
-        } catch (e) {
-          logError("画像アップロードに失敗しました", e);
-          toastWithAnimation("画像のアップロードに失敗しました。", {
-            type: "warn",
-          });
-        }
-      }
-
-      await updateUserInfo({ nickname, color, avatarUrl });
-      await addPlayer(nickname);
-    } catch (e) {
-      toastWithAnimation("参加に失敗しました", { type: "error" });
-    } finally {
-      setJoinLoading(false);
+      toastWithAnimation('ルームURLをコピーしました！', { type: 'success' });
+    } catch {
+      toastWithAnimation('コピーに失敗しました。', { type: 'error' });
     }
   };
 
-  const isHost = userId === host; // ホスト判定
+  const target = confirm && room.players.find((p) => p.id === confirm.id);
 
-  // -----------------------------
-  // UI描画
-  // -----------------------------
   return (
     <div className="relative min-h-screen text-white overflow-x-hidden">
-      {/* ヘッダー */}
-      <div key="ito-header" className="relative h-12">
-        {/* 中断ボタン */}
-        {isHost && (
-          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-x-2">
-            <WoodyButton onClick={handleCopyUrl}>
-              <Copy className="w-3 h-3" />
-              ルームURLをコピー
-            </WoodyButton>
-          </div>
-        )}
-      </div>
+      <PhaseHeader>
+        <WoodyButton onClick={copyUrl}>
+          <Copy className="w-3 h-3" />
+          ルームURLをコピー
+        </WoodyButton>
+      </PhaseHeader>
 
-      {/* コンテンツ */}
       <div className="relative w-full text-center px-4">
-        {/*-------- 見出し --------*/}
-        <h2 className="text-3xl font-bold text-shadow-md mt-0 mb-4">
-          数字の大きさを言葉でたとえて価値観を比べるゲーム
-        </h2>
+        <h2 className="text-3xl font-bold text-shadow-md mt-0 mb-4">数字の大きさを言葉でたとえて価値観を比べるゲーム</h2>
         <p className="text-center text-white text-shadow-md my-6">
-          {!alreadyJoined ? (
-            <span>ニックネームを入力して、ルームに参加してください。</span>
+          {!me.joined ? (
+            'ニックネームを入力して、ルームに参加してください。'
+          ) : me.isHost ? (
+            <>
+              フレンドにルームURLを伝えましょう。
+              <br />
+              2人以上になったらゲームを開始できます。
+            </>
           ) : (
-            <span>
-              {isHost ? (
-                <span>
-                  フレンドにルームURLに伝えましょう。
-                  <br />
-                  2人以上になったらゲームを開始できます。
-                </span>
-              ) : (
-                <span>ホストのゲーム開始を待っています。</span>
-              )}
-            </span>
+            'ホストのゲーム開始を待っています。'
           )}
         </p>
 
-        {/*-------- 設定画面 --------*/}
-        <div
-          className="
-          bg-black/70 backdrop-blur-sm text-white p-6 my-6 rounded-md shadow-md
-          w-full max-w-md animate-fade-in relative mx-auto"
-        >
-          {/* プレイヤー一覧 */}
+        <div className="bg-black/70 backdrop-blur-sm text-white p-6 my-6 rounded-md shadow-md w-full max-w-md animate-fade-in relative mx-auto">
+          {/* 参加者一覧 */}
           <div className="mb-4">
             <SectionTitle className="mt-0">参加者一覧</SectionTitle>
-            <ul className="grid grid-cols-2 gap-y-2 text-left">
-              {Object.entries(players)
-                .sort(([, a], [, b]) => (a.joinedAt ?? 0) - (b.joinedAt ?? 0)) // ←ここで参加順ソート
-                .map(([id, player]) => (
-                  <li key={id} className="text-sm">
-                    {player.nickname}
-                    {id === host && (
-                      <Crown
-                        size={16}
-                        className="inline text-yellow-700 ml-1 relative top-[-0.05rem]"
-                      />
-                    )}
-                    <span className="text-white text-xs">
-                      {id === userId && "（You）"}
-                    </span>
-                    {isHost && id !== host && (
-                      <span
-                        onClick={() => removePlayer(id)}
-                        title={`${player.nickname} をキック`}
+            <ul className="grid grid-cols-2 gap-y-2 text-left" aria-label="参加者一覧">
+              {players.map((player) => (
+                <li key={player.id} className={`text-sm ${player.online ? '' : 'opacity-50'}`} title={player.online ? undefined : '接続していません'}>
+                  {player.nickname}
+                  {player.id === room.hostId && <Crown size={16} className="inline text-yellow-700 ml-1 relative top-[-0.05rem]" aria-label="ホスト" />}
+                  {player.id === me.id && <span className="text-white text-xs">（You）</span>}
+                  {me.isHost && player.id !== me.id && (
+                    <>
+                      <button
+                        type="button"
+                        className={iconButton}
+                        onClick={() => setConfirm({ id: player.id, kind: 'host' })}
+                        title={`${player.nickname} にホストを渡す`}
+                        aria-label={`${player.nickname} にホストを渡す`}
                       >
-                        <XCircle
-                          size={16}
-                          className="cursor-pointer inline text-red-600 hover:text-red-400 ml-1 relative top-[-0.05rem]"
-                        />
-                      </span>
-                    )}
-                  </li>
-                ))}
+                        <Crown size={16} className="inline text-gray-400 hover:text-yellow-500 ml-1 relative top-[-0.05rem]" />
+                      </button>
+                      <button
+                        type="button"
+                        className={iconButton}
+                        onClick={() => setConfirm({ id: player.id, kind: 'kick' })}
+                        title={`${player.nickname} をキック`}
+                        aria-label={`${player.nickname} をキック`}
+                      >
+                        <XCircle size={16} className="inline text-red-600 hover:text-red-400 ml-1 relative top-[-0.05rem]" />
+                      </button>
+                    </>
+                  )}
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* 参加フォーム or メッセージ */}
-          {!alreadyJoined && (
+          {/* 参加フォーム */}
+          {!me.joined && (
             <div className="mb-4">
-              <PlayerSetupForm
-                mode="join"
-                nickname={nickname}
-                setNickname={setNickname}
-                color={color}
-                setColor={setColor}
-                avatarFile={avatarFile}
-                setAvatarFile={setAvatarFile}
-                onSubmit={handleJoin}
-                loading={joinLoading}
-                showOptions={showOptions}
-                setShowOptions={setShowOptions}
-                presetColors={presetColors}
-                userAvatarUrl={userAvatarUrl}
-                setUserAvatarUrl={setUserAvatarUrl}
-                inputRef={inputRef}
-              />
+              <PlayerSetupForm form={form} submitLabel="ルームに参加" onSubmit={join} />
             </div>
           )}
 
-          {/* ホスト用設定UI */}
-          {isHost && (
+          {/* ホスト用設定 */}
+          {me.isHost ? (
             <div className="space-y-4">
-              {/* お題セット選択 */}
               <div>
                 <SectionTitle>お題セット</SectionTitle>
                 <select
-                  value={selectedSet}
-                  onChange={(e) =>
-                    setSelectedSet(
-                      e.target.value as
-                        | "normal"
-                        | "rainbow"
-                        | "classic"
-                        | "salmon"
-                        | "custom",
-                    )
-                  }
-                  className="w-full p-2 bg-white text-black rounded
-                  focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  aria-label="お題セット"
+                  value={settings.topicSet}
+                  onChange={(e) => send({ type: 'updateSettings', settings: { topicSet: e.target.value as SelectableTopicSet } })}
+                  className={selectClass}
                 >
-                  <option value="rainbow">レインボー</option>
-                  {/* <option value="normal">通常</option> */}
-                  {/* <option value="classic">クラシック</option> */}
-                  <option value="salmon">サーモンラン</option>
-                  <option value="custom">カスタム</option>
+                  {Object.entries(TOPIC_SET_LABELS).map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
                 </select>
               </div>
 
-              {selectedSet === "custom" && isHost && (
+              {settings.topicSet === 'custom' && (
                 <div>
-                  <label className="block mb-1">カスタムお題セット</label>
+                  <label className="block mb-1" htmlFor="custom-topics">
+                    カスタムお題セット（{customTopics.length}件）
+                  </label>
                   <textarea
-                    value={customPromptText}
-                    onChange={(e) => setCustomPromptText(e.target.value)}
+                    id="custom-topics"
+                    value={customText}
+                    onChange={(e) => setCustomText(e.target.value)}
                     rows={6}
                     placeholder={`例：\nコンビニの商品の人気, 人気ない, 人気ある\n100円ショップの商品の人気, 人気ない, 人気ある`}
-                    className="w-full p-2 bg-white text-black rounded resize-y
-                      focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="w-full p-2 bg-white text-black rounded resize-y focus:outline-none focus:ring-2 focus:ring-blue-400"
                   />
                   <p className="text-sm">（カンマもしくはタブ区切りで記述）</p>
                 </div>
               )}
 
-              {/* レベル選択 */}
               <div>
                 <SectionTitle>レベル</SectionTitle>
                 <select
-                  value={level}
-                  onChange={(e) => setLevel(Number(e.target.value))}
-                  className="w-full p-2 bg-white text-black rounded focus:outline-none focus:ring-2
-                  focus:ring-blue-400"
+                  aria-label="レベル"
+                  value={settings.level}
+                  onChange={(e) => send({ type: 'updateSettings', settings: { level: Number(e.target.value) } })}
+                  className={selectClass}
                 >
-                  {Array.from(
-                    // { length: 10 }, // デバッグ用
-                    { length: maxClearLevel + 1 },
-                    (_, i) => i + 1,
-                  ).map((lvl) => (
-                    <option key={lvl} value={lvl}>
-                      レベル {lvl}
+                  {Array.from({ length: room.levelMax }, (_, i) => i + 1).map((level) => (
+                    <option key={level} value={level}>
+                      レベル {level}
                     </option>
                   ))}
                 </select>
               </div>
             </div>
+          ) : (
+            me.joined && (
+              <p className="text-sm text-center flex justify-center gap-x-4">
+                <span>お題セット：{TOPIC_SET_LABELS[settings.topicSet]}</span>
+                <span>レベル {settings.level}</span>
+              </p>
+            )
           )}
         </div>
 
-        {isHost && (
+        {me.isHost && (
           <div className="flex justify-center gap-x-2 h-12 scale-125">
-            <WoodyButton
-              onClick={startGame}
-              disabled={Object.keys(players).length <= 1}
-              className="absolute"
-            >
+            <WoodyButton onClick={start} disabled={room.players.length <= 1} className="absolute">
               <PlayIcon className="w-4 h-4" />
               ゲーム開始
             </WoodyButton>
           </div>
         )}
 
-        {/*-------- 注意書き --------*/}
         <NoticeGame />
       </div>
+
+      <ConfirmDialog
+        open={!!target}
+        title={confirm?.kind === 'kick' ? `${target?.nickname} をキックしますか？` : `${target?.nickname} にホストを渡しますか？`}
+        description={confirm?.kind === 'kick' ? 'キックした人は、このルームに入り直せなくなります。' : undefined}
+        confirmLabel={confirm?.kind === 'kick' ? 'キックする' : 'ホストを渡す'}
+        onConfirm={() => {
+          if (confirm) send({ type: confirm.kind === 'kick' ? 'kick' : 'transferHost', playerId: confirm.id });
+        }}
+        onOpenChange={(open) => !open && setConfirm(null)}
+      />
     </div>
   );
 };
