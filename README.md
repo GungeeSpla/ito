@@ -52,7 +52,7 @@
 | `npm run lint` | ESLint (`eslint.config.js`)。 |
 | `npm run format` | Prettier で整形する (`.prettierrc`。シングルクォート、1 行 140 文字)。`npm run format:check` は確かめるだけ。 |
 | `npm test` | 決まりごとのテスト (`test/engine.test.ts`) と、本物のサーバーを起動して Socket.io で話すテスト。`test/multiplayer.test.ts` は 3〜6 人で遊び、全員が同時にカードを出し入れ・めくっても全員に同じ場が見えること、同票、お題の提案、途中の切断と途中参加、レベル 2 を確かめる。 |
-| `npm run test:e2e` | ブラウザでの通しテスト (`tools/e2e/run.ts`)。3 つのブラウザ (うち 1 つはスマホの大きさ) で、ルームの作成から、参加、投票、途中の再読み込み、成功までを通す。事前に `npm run build` が必要。画面の写真を `tools/e2e/shots/` に残す。 |
+| `npm run test:e2e` | ブラウザでの通しテスト (`tools/e2e/run.ts`)。3 つのブラウザ (うち 1 つはスマホの大きさ) で、ルームの作成から、参加、投票、途中の再読み込み、成功までを通す。事前に `npm run build` が必要。画面の写真を `tools/e2e/shots/` に残す。`E2E_ORIGIN=https://ito.gungee.jp` を付けると、本番に対して流す (部屋が 1 つでき、24 時間で消える)。 |
 | `node tools/dev/screens.ts [場面...]` | 見た目の確認用。参加者が多い・名前やたとえワードが長い・失敗した、などの部屋を組み立て、スマホと PC の大きさで写真を `tools/dev/shots/` に撮る。事前に `npm run build` が必要。 |
 
 Node.js 24 以上が要る。サーバーの TypeScript は Node.js がそのまま動かす (ビルドしない) ので、`enum` や引数プロパティのような、型を取り除くだけでは動かない書き方は使えない (`tsconfig.json` の `erasableSyntaxOnly`)。
@@ -101,7 +101,7 @@ git clone https://github.com/GungeeSpla/ito.git
 cd ito
 npm ci
 npm run build
-NODE_ENV=production PORT=3040 pm2 start src/server/index.ts --name ito
+NODE_ENV=production PORT=3040 pm2 start src/server/index.ts --name ito --interpreter node   # .ts なので node を明示する
 pm2 save
 ```
 

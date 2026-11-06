@@ -1,33 +1,39 @@
 // 実際のサーバーとブラウザで、ルームの作成からゲームの成功までを通すテスト。
 // 事前に npm run build が必要。部屋は使い捨ての DATA_DIR に作る。
+// E2E_ORIGIN を指定すると、起動済みのサーバー (本番など) に対して流す。部屋は 24 時間で自動的に消える
 import assert from 'node:assert/strict';
-import { spawn } from 'node:child_process';
+import { spawn, type ChildProcess } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { chromium, type Browser, type Page } from 'playwright';
 
 const PORT = 3941;
-const ORIGIN = `http://127.0.0.1:${PORT}`;
+const REMOTE = process.env.E2E_ORIGIN;
+const ORIGIN = REMOTE ?? `http://127.0.0.1:${PORT}`;
 const SHOTS = 'tools/e2e/shots';
 mkdirSync(SHOTS, { recursive: true });
 
 const dataDir = mkdtempSync(join(tmpdir(), 'ito-e2e-'));
-const server = spawn(process.execPath, ['src/server/index.ts'], {
-  env: { ...process.env, PORT: String(PORT), DATA_DIR: dataDir, HOST_GRACE_MS: '60000' },
-  stdio: ['ignore', 'pipe', 'inherit'],
-});
-await new Promise<void>((resolve, reject) => {
-  server.stdout!.on('data', (chunk) => String(chunk).includes('ito:') && resolve());
-  server.on('exit', () => reject(new Error('サーバーが起動しません')));
-});
+let server: ChildProcess | null = null;
+if (!REMOTE) {
+  const child = spawn(process.execPath, ['src/server/index.ts'], {
+    env: { ...process.env, PORT: String(PORT), DATA_DIR: dataDir, HOST_GRACE_MS: '60000' },
+    stdio: ['ignore', 'pipe', 'inherit'],
+  });
+  server = child;
+  await new Promise<void>((resolve, reject) => {
+    child.stdout!.on('data', (chunk) => String(chunk).includes('ito:') && resolve());
+    child.on('exit', () => reject(new Error('サーバーが起動しません')));
+  });
+}
 
 const errors: string[] = [];
 let browser: Browser;
 try {
   browser = await chromium.launch();
 } catch (error) {
-  server.kill();
+  server?.kill();
   throw error;
 }
 
@@ -167,7 +173,7 @@ try {
   if (errors.length) console.error('ブラウザのエラー:', errors);
 } finally {
   await browser.close();
-  server.kill();
+  server?.kill();
   rmSync(dataDir, { recursive: true, force: true });
 }
 process.exit(exitCode);
