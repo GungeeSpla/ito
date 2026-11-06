@@ -102,7 +102,7 @@ const PlaceCardsPhase: React.FC<Props> = ({ room, send }) => {
       <div className="absolute z-10 responsive-text left-1/2 top-1/2 -translate-x-1/2 translate-y-[7em] flex flex-col items-center text-center w-[90vw] max-w-md">
         {round.myHand.length > 0 && (
           <p className="text-sm text-shadow-sm mb-2 font-bold">
-            {active === null ? '手札のカードを選んでから、出す場所を選んでください。' : '「ここに出す」で出す場所を選んでください。'}
+            {active === null ? '手札のカードを選んでから、出す場所を選んでください。' : '出す場所を選んでください。'}
           </p>
         )}
         {round.allPlaced ? (
@@ -112,7 +112,7 @@ const PlaceCardsPhase: React.FC<Props> = ({ room, send }) => {
               めくりフェーズへ！
             </WoodyButton>
           ) : (
-            <p className="text-sm text-shadow-sm">全員のカードが出ました。ホストがめくりフェーズへ進めます。</p>
+            <p className="text-sm text-shadow-sm">全員のカードが出ました。ホストの操作を待っています…</p>
           )
         ) : (
           <p className="text-sm text-shadow-sm flex flex-wrap justify-center gap-x-3 gap-y-1" data-testid="waiting-for">
@@ -140,7 +140,7 @@ const PlaceCardsPhase: React.FC<Props> = ({ room, send }) => {
       <ConfirmDialog
         open={!!removingPlayer}
         title={`${removingPlayer?.nickname ?? ''} をゲームから外しますか？`}
-        description="手札と場のカードを取り除き、残りの人でゲームを続けます。戻ってきたら次のゲームから参加できます。"
+        description="戻ってきたら次のゲームから参加できます。"
         confirmLabel="外す"
         onConfirm={() => removingPlayer && send({ type: 'kick', playerId: removingPlayer.id, ban: false })}
         onOpenChange={(open) => !open && setRemoving(null)}

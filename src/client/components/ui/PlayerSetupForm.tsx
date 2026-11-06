@@ -40,7 +40,7 @@ const PlayerSetupForm: React.FC<Props> = ({ form, submitLabel, onSubmit }) => {
         <input
           ref={inputRef}
           type="text"
-          placeholder="ここにニックネームを入力"
+          aria-label="ニックネーム"
           value={nickname}
           maxLength={LIMITS.nicknameMax}
           onChange={(e) => setNickname(e.target.value)}
@@ -51,14 +51,14 @@ const PlayerSetupForm: React.FC<Props> = ({ form, submitLabel, onSubmit }) => {
 
       {/* 詳細設定切り替え */}
       <button type="button" onClick={() => setShowOptions(!showOptions)} className="text-sm text-blue-300 focus:outline-none">
-        {showOptions ? '▲ 詳細設定を閉じる' : '▼ 詳細設定を開く（任意）'}
+        {showOptions ? '▲ 詳細設定を閉じる' : '▼ 詳細設定を開く'}
       </button>
 
       {/* 詳細設定エリア */}
       {showOptions && (
         <div className="animate-fade-in-down transition-opacity duration-300 opacity-100">
           {/* ---プレイヤーカラー--- */}
-          <SectionTitle>プレイヤーカラー（任意）</SectionTitle>
+          <SectionTitle>プレイヤーカラー</SectionTitle>
           <div className="flex flex-wrap gap-2">
             {PRESET_COLORS.map((c) => (
               <button
@@ -97,7 +97,7 @@ const PlayerSetupForm: React.FC<Props> = ({ form, submitLabel, onSubmit }) => {
 
           {/* ---アバター画像--- */}
           <div>
-            <SectionTitle>プレイヤー画像（任意）</SectionTitle>
+            <SectionTitle>プレイヤー画像</SectionTitle>
             <input
               ref={fileRef}
               type="file"

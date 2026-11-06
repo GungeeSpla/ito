@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { CheckCircle2, Home, PlusCircle, RefreshCw } from 'lucide-react';
 import type { RoomView, Tiebreak, Topic } from '@shared/engine.ts';
-import ClickOrTouch from '@/components/common/others/ClickOrTouch';
 import ProposalModal from '@/components/ui/ProposalModal';
 import WoodyButton from '@/components/ui/WoodyButton';
 import type { Send } from '@/hooks/useRoom.ts';
@@ -61,9 +60,7 @@ const ChooseTopicPhase: React.FC<Props> = ({ room, send, chosenTitle }) => {
         <motion.p className="text-center text-white text-shadow-md my-6" {...fade} transition={{ delay: decided ? 0 : 0.2 }}>
           {me.participant ? (
             <>
-              遊びたいお題カードを
-              <ClickOrTouch />
-              して投票してください。
+              遊びたいお題に投票してください。
               <br />
               （ホストの一存で決めることもできます）
             </>

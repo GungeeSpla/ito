@@ -52,7 +52,7 @@ const shot = (page: Page, name: string) => page.screenshot({ path: join(SHOTS, `
 const button = (page: Page, name: string) => page.getByRole('button', { name, exact: true });
 
 async function fillProfile(page: Page, nickname: string) {
-  await page.getByPlaceholder('ここにニックネームを入力').fill(nickname);
+  await page.getByLabel('ニックネーム', { exact: true }).fill(nickname);
 }
 
 /** 手札の数字 */
@@ -77,7 +77,7 @@ try {
   await button(host, 'ルームを作成').click();
   await host.waitForURL(/\/room\/[a-z]+-[a-z]+-[a-z]+-[a-z0-9]{4}$/);
   const roomUrl = host.url();
-  await host.getByText('2人以上になったらゲームを開始できます。').waitFor();
+  await host.getByText('2人以上で開始できます。').waitFor();
 
   // ---- ゲスト 2 人が参加する (1 人はスマホ) ----
   const guest = await open('guest', roomUrl, { width: 390, height: 844 });
@@ -170,10 +170,10 @@ try {
   await guest.getByText('参加を締め切っています').waitFor();
   const stranger = await open('stranger', roomUrl, { width: 390, height: 844 });
   await stranger.getByText('このルームは参加を締め切っています。').waitFor();
-  assert.equal(await stranger.getByPlaceholder('ここにニックネームを入力').count(), 0);
+  assert.equal(await stranger.getByLabel('ニックネーム', { exact: true }).count(), 0);
   await shot(stranger, '07-locked-stranger');
   await button(host, '受付を再開する').click();
-  await stranger.getByPlaceholder('ここにニックネームを入力').waitFor();
+  await stranger.getByLabel('ニックネーム', { exact: true }).waitFor();
 
   assert.deepEqual(errors, []);
   console.log('e2e: ok');
