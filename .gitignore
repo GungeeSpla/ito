@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# サーバーのデータ (部屋とアバター画像)
+data
+# E2E テストのスクリーンショット
+tools/e2e/shots

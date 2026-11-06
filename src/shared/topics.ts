@@ -1,6 +1,6 @@
-import { Topic } from "@/types/Topic";
+import type { Topic } from "./engine.ts";
 
-export const topics: Topic[] = [
+export const TOPICS: readonly Topic[] = [
   {
     title: "コンビニの商品の人気",
     min: "人気ない",
