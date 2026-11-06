@@ -28,7 +28,7 @@ export default function Home() {
       <ItoAnimation />
 
       <div className="relative w-full text-center px-4 overflow-hidden">
-        <h2 className={headingClass}>数字の大きさを言葉でたとえて価値観を比べるゲーム</h2>
+        <h2 className={headingClass}>数字の大きさを感覚でたとえて言葉にするゲーム</h2>
         <p className="text-center text-white text-shadow-md my-6">ニックネームを入力して、ルームを作成してください。</p>
 
         <div className="bg-black/70 backdrop-blur-sm text-black p-6 my-6 rounded-md shadow-md w-full max-w-md animate-fade-in relative mx-auto">

@@ -53,13 +53,11 @@ const Card: React.FC<CardProps> = ({
   label,
   misplaced = false,
 }) => {
-  // 特定の名前の人のカードに絵柄を出す遊び (index.css の .player-*)
-  const playerClass = name ? `player-${name}` : '';
   const ownFieldCard = location === 'field' && mode === 'place' && isMine;
 
   return (
     <div
-      className={`${styles.card} ${playerClass} ${className} ${isActive ? styles.active : ''}
+      className={`${styles.card} ${className} ${isActive ? styles.active : ''}
         ${mode === 'place' ? styles.placeCard : styles.revealCard}
         ${location === 'hand' ? styles.handCard : ''}`}
       onClick={onClick}
@@ -95,7 +93,7 @@ const Card: React.FC<CardProps> = ({
 
         {/*--- カードの裏面 ---*/}
         <div
-          className={`${styles.cardBack} ito-card-back absolute w-full h-full rounded text-black flex flex-col justify-center items-center`}
+          className={`${styles.cardBack} absolute w-full h-full rounded text-black flex flex-col justify-center items-center`}
           style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)', backgroundColor: color || FALLBACK_COLOR }}
           title={isMine && typeof value === 'number' ? `${value}` : ''}
         >

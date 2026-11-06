@@ -94,7 +94,7 @@ const WaitingPhase: React.FC<Props> = ({ room, send }) => {
       </PhaseHeader>
 
       <div className="relative w-full text-center px-4">
-        <h2 className={headingClass}>数字の大きさを言葉でたとえて価値観を比べるゲーム</h2>
+        <h2 className={headingClass}>数字の大きさを感覚でたとえて言葉にするゲーム</h2>
         <p className="text-center text-white text-shadow-md my-6">
           {!me.joined ? (
             'ニックネームを入力して、ルームに参加してください。'

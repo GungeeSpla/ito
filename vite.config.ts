@@ -19,7 +19,7 @@ export default defineConfig({
         globIgnores: ['**/ogp.png', '**/images/ogp.png'],
       },
       manifest: {
-        name: '数字の大きさを言葉でたとえて価値観を比べるゲーム',
+        name: '数字の大きさを感覚でたとえて言葉にするゲーム',
         short_name: '価値観比較ゲーム',
         description:
           'itoレインボーと同じルールのゲームがオンラインで遊べる非公式サイトです。数字の大きさを言葉でたとえて価値観を比べよう！あなたの「大きい」は、わたしの「小さい」かも？',
